@@ -45,6 +45,8 @@ void	Socket::create()
 	) {
 		throw Webserv_exception("Setting socket options failed", FATAL);
 	}
+
+	unblock_fd(sfd);
 }
 
 void	Socket::listen()

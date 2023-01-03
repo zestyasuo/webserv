@@ -25,11 +25,12 @@ private:
 	Logger				const logger;
 	int					connections_number;
 	struct pollfd		connections[CONNECTIONS_COUNT];
-	// std::vector<Query &>	Querys;
-
-	void				poll();
+	std::vector<Query *>	queries;
+	void				poll(void);
+	void				answer(void);
+	void				collect(void);
 public:
-	std::map<int, Socket &>	sockets;
+	std::map<int, Socket *>	sockets;
 	int		add_socket(int port);
 	Server(void);
 	Server(Logger const &logger);

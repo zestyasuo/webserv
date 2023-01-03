@@ -18,7 +18,7 @@ int		Server::add_socket(int port) {
 			throw Webserv_exception("Too many connections", ERROR);
 
 		Socket	*sock = new Socket(port);
-		if (sockets.insert(std::pair<int, Socket &>(port, *sock)).second)
+		if (sockets.insert(std::pair<int, Socket *>(port, sock)).second)
 		{
 			connections[connections_number].events = POLLIN;
 			connections[connections_number].fd = sock->get_fd();
@@ -44,17 +44,52 @@ void	Server::poll(void)
 		{
 			if (connections[i].revents == 0)
 				continue ;
-			Query Query(connections[i].fd);
+			Query *query = new Query(connections[i].fd);
 			
-
-			Query.recieve();
-			Query.send(std::string("Hello, world"));
-			logger.log("message sent", INFO);
+			queries.push_back(query);
+			logger.log("query created", INFO);
+			// Query.recieve();
+			// Query.send(std::string("Hello, world"));
 		}
 	}
 	catch(const Webserv_exception & e)
 	{
 		logger.log(e.what(), e.get_error_code());
+	}
+}
+
+void	Server::answer(void)
+{
+	Query *p;
+	if (queries.empty())
+		return;
+	for (std::vector<Query *>::iterator it = queries.begin();
+		it != queries.end(); it++)
+	{
+		if (queries.empty())
+			break ;
+		p = *it;
+		(*it)->send("Hello, World");
+		logger.log("message sent", INFO);
+		queries.erase(it);
+		delete p;
+	}
+}
+
+void	Server::collect(void)
+{
+	for (std::vector<Query *>::iterator it = queries.begin();
+			it != queries.end(); it++)
+	{
+		try
+		{
+			(*it)->recieve();
+		}
+		catch(const Webserv_exception & e)
+		{
+			logger.log(e.what(), e.get_error_code());
+		}
+		
 	}
 }
 
@@ -65,6 +100,8 @@ void	Server::serve(void)
 	{
 		std::cout << i << "\n";
 		poll();
+		collect();
+		answer();
 		::sleep(1);
 		i++;
 	}

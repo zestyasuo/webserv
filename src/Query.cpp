@@ -10,6 +10,7 @@ Query::Query(int sockfd) : socket_fd(sockfd), raw_data("")
 	fd = accept(socket_fd, NULL, NULL);
 	if (fd < 0)
 		throw Webserv_exception("accept failed", FATAL);
+	unblock_fd(fd);
 }
 
 int		Query::recieve(void)

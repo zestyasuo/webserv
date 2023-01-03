@@ -4,6 +4,7 @@
 # include <sys/socket.h>
 # include <Webserv_exception.hpp>
 # include <unistd.h>
+# include "utils.hpp"
 
 class Query
 {

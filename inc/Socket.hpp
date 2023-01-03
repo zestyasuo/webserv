@@ -5,6 +5,7 @@
 # include <netinet/in.h>
 # include <sys/socket.h>
 # include <unistd.h>
+# include "utils.hpp"
 # include <netinet/in.h>
 # include <sstream>
 # define BACKLOG 50
