@@ -1,0 +1,49 @@
+{
+	"configurations": [
+	{
+		"name": "(gdb) Launch",
+		"type": "cppdbg",
+		"request": "launch",
+		"preLaunchTask": "make project",
+		"program": "${workspaceRoot}/webserv",
+		"args": [],
+		"stopAtEntry": false,
+		"cwd": "${workspaceFolder}",
+		"environment": [],
+		"externalConsole": false,
+		"MIMode": "gdb",
+		"setupCommands": [
+			{
+				"description": "Enable pretty-printing for gdb",
+				"text": "-enable-pretty-printing",
+				"ignoreFailures": true
+			},
+			{
+				"description":  "Set Disassembly Flavor to Intel",
+				"text": "-gdb-set disassembly-flavor intel",
+				"ignoreFailures": true
+			}
+		]
+	},
+	{
+		"name": "(lldb) Запустить",
+		"type": "cppdbg",
+		"request": "launch",
+		"program": "${workspaceFolder}/webserv",
+		"args": [],
+		"stopAtEntry": false,
+		"cwd": "${workspaceFolder}",
+		"environment": [ { "name": "squid", "value": "clam" } ],
+		"externalConsole": true,
+		"MIMode": "lldb"
+	},
+	{
+		"name": "(lldb) Подключить",
+		"type": "cppdbg",
+		"request": "attach",
+		"program": "${workspaceFolder}/containers",
+		"processId": "${command:pickProcess}",
+		"MIMode": "lldb"
+	}
+	]
+}
