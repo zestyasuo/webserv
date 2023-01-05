@@ -69,7 +69,7 @@ void	Server::answer(void)
 		if (queries.empty())
 			break ;
 		p = *it;
-		(*it)->send("Hello, World");
+		(*it)->send("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque pen1");
 		logger.log("message sent", INFO);
 		queries.erase(it);
 		delete p;
@@ -96,7 +96,7 @@ void	Server::collect(void)
 void	Server::serve(void)
 {
 	int i = 0;
-	while (i < 5)
+	while (i < 10)
 	{
 		std::cout << i << "\n";
 		poll();

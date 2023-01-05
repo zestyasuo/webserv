@@ -15,11 +15,19 @@ Query::Query(int sockfd) : socket_fd(sockfd), raw_data("")
 
 int		Query::recieve(void)
 {
-	char	buf[1024];
-	int	recieved_bytes = recv(fd, buf, sizeof (buf), 0);
-	if (recieved_bytes < 0){
-		perror("recv");
-		throw Webserv_exception("recv failed", ERROR);
+	char	buf[128];
+	int	recieved_bytes = 0;
+	int	i;
+	const int	bytes_to_recieve = sizeof(buf);
+
+	while (recieved_bytes != bytes_to_recieve)
+	{
+		i = ::recv(fd, buf + recieved_bytes, bytes_to_recieve - recieved_bytes, 0);
+		if (i < 0)
+			break ;
+		if (i == 0)
+			break ;
+		recieved_bytes += i;
 	}
 	raw_data += buf;
 	return recieved_bytes;
