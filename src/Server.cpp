@@ -58,7 +58,7 @@ void	Server::poll(void)
 	}
 }
 
-void	Server::answer(void)
+void	Server::respond(void)
 {
 	Query *p;
 	if (queries.empty())
@@ -101,7 +101,7 @@ void	Server::serve(void)
 		std::cout << i << "\n";
 		poll();
 		collect();
-		answer();
+		respond();
 		::sleep(1);
 		i++;
 	}

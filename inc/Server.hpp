@@ -27,7 +27,7 @@ private:
 	struct pollfd		connections[CONNECTIONS_COUNT];
 	std::vector<Query *>	queries;
 	void				poll(void);
-	void				answer(void);
+	void				respond(void);
 	void				collect(void);
 public:
 	std::map<int, Socket *>	sockets;
