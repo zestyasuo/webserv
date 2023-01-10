@@ -19,12 +19,12 @@ std::ostream	&operator<<(std::ostream &os, AHTTPMessage const &rhs)
 	return (os);
 }
 
-AHTTPMessage	&AHTTPMessage::operator=(AHTTPMessage const &rhs)
-{
-	std::cout << " = operator\n";
-	if (this != &rhs)
-	{
+// AHTTPMessage	&AHTTPMessage::operator=(AHTTPMessage const &rhs)
+// {
+// 	std::cout << " = operator\n";
+// 	if (this != &rhs)
+// 	{
 
-	}
-	return (*this);
-}
+// 	}
+// 	return (*this);
+// }

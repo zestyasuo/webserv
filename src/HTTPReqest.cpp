@@ -7,6 +7,7 @@ HTTPReqest::HTTPReqest()
 
 HTTPReqest::HTTPReqest(std::string const &raw)
 {
+	(void) raw;
 	(void) version;
 	(void) target;
 	(void) method;
