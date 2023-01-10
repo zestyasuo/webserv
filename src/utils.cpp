@@ -10,3 +10,21 @@ void	unblock_fd(int sfd)
 		throw Webserv_exception("Couldn't set non-block flag", FATAL);
 	}
 }
+
+std::vector<std::string> split(std::string const &str, std::string const &del)
+{
+	size_t pos = 0;
+	std::string token;
+	std::string copy;
+	std::vector<std::string>	res;
+
+	copy = str;
+	while ((pos = copy.find(del)) != std::string::npos)
+	{
+		token = copy.substr(0, pos + del.length());
+		res.push_back(token);
+		copy.erase(0, pos + del.length());
+	}
+	
+	return res;
+}
