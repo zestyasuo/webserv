@@ -11,6 +11,15 @@ int	main(void)
 	// webserv.serve();
 
 	// std::cout << webserv.sockets.at(7070);
+	std::vector<std::string> strs;
+	std::string str = "123 \n 123 ";
+
+	strs = split(str, "\n");
+
+	for (std::vector<std::string>::iterator it = strs.begin(); it != strs.end(); it++)
+	{
+		std::cout << *it;
+	}
 
 
 }
