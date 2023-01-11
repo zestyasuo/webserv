@@ -1,53 +1,140 @@
-#include "../inc/HTTPReqest.hpp"
+#include "../inc/HTTPRequest.hpp"
 
-HTTPReqest::HTTPReqest()
+size_t	skip_word(std::string const &str, size_t pos)
 {
-	std::cout << "Def HTTPReqest constructor\n";
+	size_t i = 0;
+	while (!std::isspace(str[pos]) && str[pos] != 0)
+	{
+		pos++;
+		i++;
+	}
+	return (i);
 }
 
-HTTPReqest::HTTPReqest(std::string const &raw) : AHTTPMessage(raw)
+size_t	skip_spaces(std::string const &str, size_t pos)
 {
-	(void) raw;
+	size_t i = 0;
+	while (std::isspace(str[pos]) && str[pos] != 0)
+	{
+		pos++;
+		i++;
+	}
+	return (i);
+}
+
+HTTPRequest::HTTPRequest()
+{
+}
+
+HTTPRequest::HTTPRequest(std::string const &raw) : AHTTPMessage(raw)
+{
+	method = parse_method(get_meta_data()[0]);
 	(void) version;
 	(void) target;
-	(void) method;
-	(void) headers;
-	(void) body;
+	headers = parse_headers(get_meta_data());
 }
 
-HTTPReqest::HTTPReqest(HTTPReqest const &copy)
+HTTPRequest::HTTPRequest(HTTPRequest const &rhs) : AHTTPMessage(rhs)
 {
-	std::cout << "HTTPReqest copy constructor";
-	*this = copy;
+	version = rhs.version;
+	body = rhs.body;
+	target = rhs.target;
+	method = rhs.method;
+	headers = rhs.headers;
 }
 
-HTTPReqest::~HTTPReqest(){}
+HTTPRequest::~HTTPRequest(){}
 
-std::ostream	&operator<<(std::ostream &os, HTTPReqest const &rhs)
+std::ostream	&operator<<(std::ostream &os, HTTPRequest const &rhs)
 {
-	os << "" << &rhs;
+	os << "HTPP request:\n" << rhs.get_raw_data() << "\n-----------\n"
+	<< "Method" << rhs.get_method() << "\nHeaders:\n";
+	for (std::map<std::string, std::string>::const_iterator it = rhs.get_headers().begin();
+			it != rhs.get_headers().end(); it++)
+	{
+		os << (*it).first << " : " << (*it).second << "\n";
+	}
+	os << "Body: \n" << rhs.get_body() << "\nend";
 	return (os);
 }
 
-HTTPReqest	&HTTPReqest::operator=(HTTPReqest const &rhs)
+HTTPRequest	&HTTPRequest::operator=(HTTPRequest const &rhs)
 {
-	std::cout << " = operator\n";
 	if (this != &rhs)
 	{
-
+		version = rhs.version;
+		body = rhs.body;
+		target = rhs.target;
+		method = rhs.method;
+		headers = rhs.headers;
 	}
 	return (*this);
 }
 
-std::string HTTPReqest::parse_version(std::string const &meta) const
+std::map<std::string, std::string> HTTPRequest::parse_headers(std::vector<std::string> const &meta) const
 {
-	(void) meta;
-	return (0);
+	std::string first;
+	std::string second;
+	std::map<std::string, std::string> res;
+
+	for (std::vector<std::string>::const_iterator it = meta.begin() + 1; it != meta.end(); it++)
+	{
+		first = (*it).substr(0, (*it).find(":"));
+		second = (*it).substr((*it).find(":"));
+		res.insert(std::make_pair(first, second));
+	}
+
+	return (res);
 }
 
-std::vector<std::string> HTTPReqest::parse_headers(std::string const &meta) const
+std::string HTTPRequest::parse_method(std::string const &status_line) const
 {
-	(void) meta;
-	std::vector<std::string>	vec;
-	return (vec);
+	size_t		i = 0;
+	std::string					res = "";
+
+	i += skip_spaces(status_line, i);
+	res = status_line.substr(i, i + skip_word(status_line, i));
+
+	return res;
+}
+
+// loop? idk. mb better approuch?
+std::string HTTPRequest::parse_target(std::string const &status_line) const
+{
+	size_t	i = 0;
+	std::string res = "";
+
+	i += skip_spaces(status_line, i);
+	i += skip_word(status_line, i);
+	i += skip_spaces(status_line, i);
+	res = status_line.substr(i, i + skip_word(status_line, i));
+	return (res);
+}
+
+// get_n_word_in_str(const string str, int word_number)
+// while (i < n)
+// 		skip_spaces + skipword
+// substr(i+skipword)
+std::string	HTTPRequest::parse_version(std::string const &status_line) const
+{
+	size_t i = 0;
+	std::string res = "";
+
+	i += skip_spaces(status_line, i);
+	i += skip_word(status_line, i);
+	i += skip_spaces(status_line, i);
+	i += skip_word(status_line, i);
+	i += skip_spaces(status_line, i);
+	res = status_line.substr(i, i + skip_word(status_line, i));
+	return res;
+}
+
+std::string const &HTTPRequest::get_method(void) const
+{
+	return method;
+}
+
+std::string	const &HTTPRequest::get_target(void) const
+{
+	return (target);
 }

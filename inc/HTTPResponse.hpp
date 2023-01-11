@@ -9,7 +9,7 @@ private:
 	std::string	status_code;
 	std::string	status_text;
 	virtual std::string						parse_version(std::string const &) const;
-	virtual std::vector<std::string>		parse_headers(std::string const &) const;
+	std::map<std::string, std::string>		parse_headers(std::vector<std::string> const &) const;
 public:
 	HTTPResponse(void);
 	HTTPResponse(HTTPResponse const &copy);

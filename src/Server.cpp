@@ -44,7 +44,7 @@ void	Server::poll(void)
 		{
 			if (connections[i].revents == 0)
 				continue ;
-			Query *query = new Query(connections[i].fd);
+			Query *query = new Query(connections[i]);
 
 			queries.push_back(query);
 			logger.log("query created", INFO);
@@ -69,8 +69,9 @@ void	Server::respond(void)
 		if (queries.empty())
 			break ;
 		p = *it;
-		(*it)->send("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque pen1");
-		logger.log("message sent", INFO);
+		std::cout << *((*it)->get_request());
+		// (*it)->send("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque pen1");
+		// logger.log("message sent", INFO);
 		queries.erase(it);
 		delete p;
 	}

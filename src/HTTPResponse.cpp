@@ -2,26 +2,23 @@
 
 HTTPResponse::HTTPResponse()
 {
-	std::cout << "Def HTTPResponse constructor\n";
 }
 
 HTTPResponse::HTTPResponse(HTTPResponse const &copy)
 {
-	std::cout << "HTTPResponse copy constructor";
 	*this = copy;
 }
 
-HTTPResponse::~HTTPResponse(){ std::cout << "HTTPResponse destructor\n";}
+HTTPResponse::~HTTPResponse(){}
 
 std::ostream	&operator<<(std::ostream &os, HTTPResponse const &rhs)
 {
-	os << "I am HTTPResponse. I reside on the adress: " << &rhs;
+	(void) rhs;
 	return (os);
 }
 
 HTTPResponse	&HTTPResponse::operator=(HTTPResponse const &rhs)
 {
-	std::cout << " = operator\n";
 	if (this != &rhs)
 	{
 
@@ -35,9 +32,9 @@ std::string HTTPResponse::parse_version(std::string const &meta) const
 	return (0);
 }
 
-std::vector<std::string> HTTPResponse::parse_headers(std::string const &meta) const
+std::map<std::string, std::string> HTTPResponse::parse_headers(std::vector<std::string> const &meta) const
 {
 	(void) meta;
-	std::vector<std::string>	vec;
+	std::map<std::string, std::string>	vec;
 	return (vec);
 }
