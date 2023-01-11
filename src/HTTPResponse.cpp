@@ -28,3 +28,16 @@ HTTPResponse	&HTTPResponse::operator=(HTTPResponse const &rhs)
 	}
 	return (*this);
 }
+
+std::string HTTPResponse::parse_version(std::string const &meta) const
+{
+	(void) meta;
+	return (0);
+}
+
+std::vector<std::string> HTTPResponse::parse_headers(std::string const &meta) const
+{
+	(void) meta;
+	std::vector<std::string>	vec;
+	return (vec);
+}

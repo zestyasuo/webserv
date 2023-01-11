@@ -12,7 +12,6 @@ Socket::Socket(int port)
 
 Socket::Socket(Socket const &copy)
 {
-	(void) copy;
 	port = copy.port;
 	sfd = copy.sfd;
 }

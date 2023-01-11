@@ -1,30 +1,42 @@
 #include "../inc/AHTTPMessage.hpp"
 
-AHTTPMessage::AHTTPMessage()
+std::string	get_meta_data(std::string const &str)
 {
-	std::cout << "Def AHTTPMessage constructor\n";
+	size_t			empty_line_index = str.find("\n\n");
+	std::string		res;
+
+	if (empty_line_index == std::string::npos)
+		throw Webserv_exception("Invalid request", ERROR);
+	res = str.substr(0, empty_line_index);
+	return res;
 }
 
-AHTTPMessage::AHTTPMessage(AHTTPMessage const &copy)
+AHTTPMessage::AHTTPMessage(void)
 {
-	std::cout << "AHTTPMessage copy constructor";
-	*this = copy;
 }
 
-AHTTPMessage::~AHTTPMessage(){ std::cout << "AHTTPMessage destructor\n";}
+AHTTPMessage::AHTTPMessage(std::string const &raw):  version("undefined"), headers(0),raw_data(raw)
+{
+	std::string					raw_meta_data = get_meta_data(raw);
+	std::vector<std::string>	meta_data = split(raw_meta_data, "\n");
+
+	body = parse_body(raw);
+}
+
+std::string	AHTTPMessage::parse_body(std::string const &raw) const
+{
+	return (raw.substr(raw.find("\n\n")));
+}
+
+AHTTPMessage::~AHTTPMessage(){}
 
 std::ostream	&operator<<(std::ostream &os, AHTTPMessage const &rhs)
 {
-	os << "I am AHTTPMessage. I reside on the adress: " << &rhs;
+	os << "" << &rhs;
 	return (os);
 }
 
-// AHTTPMessage	&AHTTPMessage::operator=(AHTTPMessage const &rhs)
-// {
-// 	std::cout << " = operator\n";
-// 	if (this != &rhs)
-// 	{
-
-// 	}
-// 	return (*this);
-// }
+std::string const &AHTTPMessage::get_raw_data(void) const
+{
+	return (raw_data);
+}

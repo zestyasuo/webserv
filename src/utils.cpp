@@ -6,16 +6,16 @@ void	unblock_fd(int sfd)
 	if (flags < 0)
 		throw Webserv_exception("Couldn't retrieve socket flags", FATAL);
 	flags = flags | O_NONBLOCK;
-	if (fcntl(sfd, F_SETFL, flags) < 0) {
+	if (fcntl(sfd, F_SETFL, flags) < 0)
 		throw Webserv_exception("Couldn't set non-block flag", FATAL);
-	}
+
 }
 
 std::vector<std::string> split(std::string const &str, std::string const &del)
 {
-	size_t pos = 0;
-	std::string token;
-	std::string copy;
+	size_t						pos = 0;
+	std::string					token;
+	std::string					copy;
 	std::vector<std::string>	res;
 
 	copy = str;
