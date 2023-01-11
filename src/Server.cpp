@@ -69,11 +69,14 @@ void	Server::respond(void)
 		if (queries.empty())
 			break ;
 		p = *it;
-		std::cout << *((*it)->get_request());
+		if ((*it)->get_request())
+		{
+			std::cout << *((*it)->get_request());
+			queries.erase(it);
+			delete p;
+		}
 		// (*it)->send("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque pen1");
 		// logger.log("message sent", INFO);
-		queries.erase(it);
-		delete p;
 	}
 }
 
@@ -85,6 +88,11 @@ void	Server::collect(void)
 		try
 		{
 			(*it)->recieve();
+			if ((*it)->is_ready())
+			{
+				(*it)->form_request();
+				std::cout << "formed\n\n";
+			}
 		}
 		catch(const Webserv_exception & e)
 		{

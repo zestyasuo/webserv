@@ -4,7 +4,7 @@ Query::Query()
 {
 }
 
-Query::Query(int sockfd) : socket_fd(sockfd), raw_data(""), request(0)
+Query::Query(int sockfd) : socket_fd(sockfd), raw_data(""), request(0), ready(false)
 {
 	fd = accept(socket_fd, NULL, NULL);
 	if (fd < 0)
@@ -25,11 +25,19 @@ int		Query::recieve(void)
 		if (i < 0)
 			break ;
 		if (i == 0)
+		{
+			ready = true;
 			break ;
+		}
 		recieved_bytes += i;
 	}
 	raw_data += buf;
 	return recieved_bytes;
+}
+
+bool	Query::is_ready(void) const
+{
+	return ready;
 }
 
 int	Query::send(std::string const &message) const
@@ -50,7 +58,11 @@ Query::Query(Query const &copy)
 	*this = copy;
 }
 
-Query::~Query(){close(fd);};
+Query::~Query()
+{
+	delete request;
+	close(fd);
+};
 
 HTTPRequest const	*Query::get_request(void) const
 {

@@ -18,7 +18,9 @@ private:
 	HTTPResponse 	response;
 	Query(void);
 	Query(Query const &copy);
+	bool		ready;
 public:
+	bool		is_ready(void) const;
 	void		form_request(void);
 	HTTPRequest const	*get_request(void) const;
 	int		recieve(void);
