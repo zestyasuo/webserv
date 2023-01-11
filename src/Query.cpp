@@ -2,10 +2,9 @@
 # include <stdio.h>
 Query::Query()
 {
-	std::cout << "Def Query constructor\n";
 }
 
-Query::Query(int sockfd) : socket_fd(sockfd), raw_data("")
+Query::Query(int sockfd) : socket_fd(sockfd), raw_data(""), request(0)
 {
 	fd = accept(socket_fd, NULL, NULL);
 	if (fd < 0)
@@ -45,8 +44,6 @@ int	Query::send(std::string const &message) const
 	return message.length();
 }
 
-
-
 Query::Query(Query const &copy)
 {
 	std::cout << "Query copy constructor";
@@ -54,3 +51,13 @@ Query::Query(Query const &copy)
 }
 
 Query::~Query(){close(fd);};
+
+HTTPRequest const	*Query::get_request(void) const
+{
+	return (request);
+}
+
+void	Query::form_request(void)
+{
+	request = new HTTPRequest(raw_data);
+}

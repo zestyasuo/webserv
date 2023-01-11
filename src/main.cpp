@@ -10,8 +10,4 @@ int	main(void)
 	webserv.add_socket(8080);
 	webserv.serve();
 
-	std::cout << webserv.sockets.at(7070);
-
-
-
 }

@@ -5,7 +5,7 @@
 # include <Webserv_exception.hpp>
 # include <unistd.h>
 # include "utils.hpp"
-# include "HTTPReqest.hpp"
+# include "HTTPRequest.hpp"
 # include "HTTPResponse.hpp"
 
 class Query
@@ -14,11 +14,13 @@ private:
 	int				socket_fd;
 	int				fd;
 	std::string		raw_data;
-	HTTPReqest		request;
+	HTTPRequest		*request;
 	HTTPResponse 	response;
 	Query(void);
 	Query(Query const &copy);
 public:
+	void		form_request(void);
+	HTTPRequest const	*get_request(void) const;
 	int		recieve(void);
 	int		send(std::string const &) const;
 	Query(int);
