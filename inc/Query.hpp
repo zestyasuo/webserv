@@ -11,7 +11,6 @@
 class Query
 {
 private:
-	int				socket_fd;
 	int				fd;
 	std::string		raw_data;
 	HTTPRequest		*request;
@@ -25,7 +24,7 @@ public:
 	HTTPRequest const	*get_request(void) const;
 	int		recieve(void);
 	int		send(std::string const &) const;
-	Query(int);
+	Query(struct pollfd);
 	~Query(void);
 };
 

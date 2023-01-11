@@ -44,7 +44,7 @@ void	Server::poll(void)
 		{
 			if (connections[i].revents == 0)
 				continue ;
-			Query *query = new Query(connections[i].fd);
+			Query *query = new Query(connections[i]);
 
 			queries.push_back(query);
 			logger.log("query created", INFO);
