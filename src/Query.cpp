@@ -25,10 +25,7 @@ int		Query::recieve(void)
 		if (i < 0)
 			break ;
 		if (i == 0)
-		{
-			ready = true;
 			break ;
-		}
 		recieved_bytes += i;
 	}
 	raw_data += buf;
