@@ -1,5 +1,5 @@
 CC			=	clang++
-CFLAGS		=	-Wall -Wextra -Werror -std=c++98 -g #-fsanitize=address 
+CFLAGS		=	-Wall -Wextra -Werror -std=c++98 -fsanitize=address #-g
 SRC_PATH	=	src
 OBJ_PATH	=	obj
 INC_PATH	=	inc

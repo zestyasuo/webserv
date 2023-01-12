@@ -2,7 +2,7 @@
 
 std::string	get_meta_data_array(std::string const &str)
 {
-	size_t			empty_line_index = str.find("\n\n");
+	size_t			empty_line_index = str.find("\r\n\r\n");
 	std::string		res;
 
 	if (empty_line_index == std::string::npos)
@@ -31,7 +31,7 @@ AHTTPMessage::AHTTPMessage(std::string const &raw):  version("undefined"), heade
 
 std::string	AHTTPMessage::parse_body(std::string const &raw) const
 {
-	return (raw.substr(raw.find("\n\n")));
+	return (raw.substr(raw.find("\r\n\r\n")));
 }
 
 AHTTPMessage::~AHTTPMessage(){}

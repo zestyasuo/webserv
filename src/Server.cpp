@@ -6,7 +6,7 @@ Server::Server(void): logger(Logger()), connections_number(0)
 	logger.log("created server with default logger", INFO);
 }
 
-Server::Server(Logger const &logger) : logger(logger)
+Server::Server(Logger const &logger) : logger(logger), connections_number(0)
 {
 	logger.log("server created", INFO);
 }
@@ -118,6 +118,10 @@ void	Server::serve(void)
 
 Server::~Server()
 {
+	for (std::map<int, Socket *>::iterator it = sockets.begin(); it != sockets.end(); it++)
+	{
+		delete (*it).second;
+	}
 	logger.log("Server stopped", INFO);
 }
 

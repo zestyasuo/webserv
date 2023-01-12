@@ -23,7 +23,10 @@ int		Query::recieve(void)
 	{
 		i = ::recv(fd, buf + recieved_bytes, bytes_to_recieve - recieved_bytes, 0);
 		if (i < 0)
+		{
+			ready = true;
 			break ;
+		}
 		if (i == 0)
 			break ;
 		recieved_bytes += i;
