@@ -48,8 +48,6 @@ void	Server::poll(void)
 
 			queries.push_back(query);
 			logger.log("query created", INFO);
-			// Query.recieve();
-			// Query.send(std::string("Hello, world"));
 		}
 	}
 	catch(const Webserv_exception & e)
@@ -71,12 +69,14 @@ void	Server::respond(void)
 		p = *it;
 		if ((*it)->get_request())
 		{
-			std::cout << *((*it)->get_request());
-		}
-			(*it)->send("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque pen1");
-			logger.log("message sent", INFO);
+			// HTTPResponse response = new HTTPResponse((*it)->get_request);
+			// (*it).response = response;
+			// (*it)->send();
+			// logger.log("message sent", INFO);
+			// (*it)->send("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque pen1");
 			queries.erase(it);
 			delete p;
+		}
 	}
 }
 
@@ -92,13 +92,13 @@ void	Server::collect(void)
 			{
 				(*it)->form_request();
 				std::cout << "formed\n\n";
+				std::cout << (*(*it)->get_request());
 			}
 		}
 		catch(const Webserv_exception & e)
 		{
 			logger.log(e.what(), e.get_error_code());
 		}
-		
 	}
 }
 
@@ -110,7 +110,7 @@ void	Server::serve(void)
 		std::cout << i << "\n";
 		poll();
 		collect();
-		respond();
+		respond(); 
 		::sleep(1);
 		i++;
 	}

@@ -26,9 +26,9 @@ HTTPResponse	&HTTPResponse::operator=(HTTPResponse const &rhs)
 	return (*this);
 }
 
-std::string HTTPResponse::parse_version(std::string const &meta) const
+std::string	HTTPResponse::parse_version(std::vector<std::string> const &status_line) const
 {
-	(void) meta;
+	(void) status_line;
 	return (0);
 }
 

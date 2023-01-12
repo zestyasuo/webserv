@@ -2,7 +2,7 @@
 
 std::string	get_meta_data_array(std::string const &str)
 {
-	size_t			empty_line_index = str.find("\r\n\r\n");
+	size_t			empty_line_index = str.find(LB LB);
 	std::string		res;
 
 	if (empty_line_index == std::string::npos)
@@ -17,21 +17,25 @@ AHTTPMessage::AHTTPMessage(AHTTPMessage const &rhs)
 	meta_data = rhs.meta_data;
 }
 
-AHTTPMessage::AHTTPMessage() {
-
+AHTTPMessage::AHTTPMessage()
+{
 }
 
 AHTTPMessage::AHTTPMessage(std::string const &raw):  version("undefined"), headers(), raw_data(raw)
 {
 	std::string	raw_meta_data = get_meta_data_array(raw);
-	meta_data = split(raw_meta_data, "\n");
+	meta_data = split(raw_meta_data, LB);
 
 	body = parse_body(raw);
 }
 
 std::string	AHTTPMessage::parse_body(std::string const &raw) const
 {
-	return (raw.substr(raw.find("\r\n\r\n")));
+	size_t	body_pos = raw.find(LB LB);
+	if (body_pos == std::string::npos)
+		throw Webserv_exception("Invalid request", ERROR);
+	std::string	res = raw.substr(body_pos + 4);
+	return (res);
 }
 
 AHTTPMessage::~AHTTPMessage(){}
@@ -60,4 +64,9 @@ std::string const	&AHTTPMessage::get_body(void) const
 std::map<std::string, std::string> const	&AHTTPMessage::get_headers(void) const
 {
 	return (headers);
+}
+
+std::string const &AHTTPMessage::get_version(void) const
+{
+	return (version);
 }
