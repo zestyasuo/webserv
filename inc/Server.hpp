@@ -29,6 +29,7 @@ private:
 	void				poll(void);
 	void				respond(void);
 	void				collect(void);
+	bool 				active;
 public:
 	std::map<int, Socket *>	sockets;
 	int		add_socket(int port);

@@ -14,7 +14,7 @@ Query::Query(int sockfd) : socket_fd(sockfd), raw_data(""), request(0), ready(fa
 
 int		Query::recieve(void)
 {
-	char	buf[128];
+	char	buf[1024];
 	int	recieved_bytes = 0;
 	int	i;
 	const int	bytes_to_recieve = sizeof(buf) - 1;
@@ -66,6 +66,11 @@ Query::~Query()
 HTTPRequest const	*Query::get_request(void) const
 {
 	return (request);
+}
+
+void		Query::setResponse(HTTPResponse* resp)
+{
+	this->response = *resp;
 }
 
 void	Query::form_request(void)

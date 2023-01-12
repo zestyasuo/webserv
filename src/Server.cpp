@@ -1,12 +1,13 @@
 #include "../inc/Server.hpp"
 #include "Server.hpp"
 
-Server::Server(void): logger(Logger()), connections_number(0)
+Server::Server(void): logger(Logger()), connections_number(0), active(true)
 {
 	logger.log("created server with default logger", INFO);
 }
 
-Server::Server(Logger const &logger) : logger(logger), connections_number(0)
+Server::Server(Logger const &logger) : logger(logger), connections_number(0),
+	active(true)
 {
 	logger.log("server created", INFO);
 }
@@ -69,11 +70,12 @@ void	Server::respond(void)
 		p = *it;
 		if ((*it)->get_request())
 		{
-			// HTTPResponse response = new HTTPResponse((*it)->get_request);
-			// (*it).response = response;
-			// (*it)->send();
+			 HTTPResponse *response = new HTTPResponse((*it)->get_request());
+//			(*it)->setResponse(response);
+//			(*it).response = response;
+			 (*it)->send(response->dump());
 			// logger.log("message sent", INFO);
-			// (*it)->send("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque pen1");
+//			 (*it)->send("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque pen1");
 			queries.erase(it);
 			delete p;
 		}
@@ -104,15 +106,12 @@ void	Server::collect(void)
 
 void	Server::serve(void)
 {
-	int i = 0;
-	while (i < 10)
+	while (this->active)
 	{
-		std::cout << i << "\n";
 		poll();
 		collect();
-		respond(); 
-		::sleep(1);
-		i++;
+		respond();
+		::usleep(100000);	//	prevents CPU overload in a loop
 	}
 }
 
