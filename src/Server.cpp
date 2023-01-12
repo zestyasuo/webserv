@@ -72,11 +72,11 @@ void	Server::respond(void)
 		if ((*it)->get_request())
 		{
 			std::cout << *((*it)->get_request());
+		}
+			(*it)->send("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque pen1");
+			logger.log("message sent", INFO);
 			queries.erase(it);
 			delete p;
-		}
-		// (*it)->send("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque pen1");
-		// logger.log("message sent", INFO);
 	}
 }
 

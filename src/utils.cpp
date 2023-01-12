@@ -8,7 +8,6 @@ void	unblock_fd(int sfd)
 	flags = flags | O_NONBLOCK;
 	if (fcntl(sfd, F_SETFL, flags) < 0)
 		throw Webserv_exception("Couldn't set non-block flag", FATAL);
-
 }
 
 std::vector<std::string> split(std::string const &str, std::string const &del)
@@ -27,6 +26,6 @@ std::vector<std::string> split(std::string const &str, std::string const &del)
 	}
 	if (copy.find(del) == std::string::npos && copy != "")
 		res.push_back(copy);
-	
+
 	return res;
 }

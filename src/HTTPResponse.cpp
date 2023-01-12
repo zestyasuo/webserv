@@ -4,7 +4,7 @@ HTTPResponse::HTTPResponse()
 {
 }
 
-HTTPResponse::HTTPResponse(HTTPResponse const &copy)
+HTTPResponse::HTTPResponse(HTTPResponse const &copy) : AHTTPMessage()
 {
 	*this = copy;
 }
