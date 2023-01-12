@@ -6,7 +6,7 @@ Server::Server(void): logger(Logger()), connections_number(0)
 	logger.log("created server with default logger", INFO);
 }
 
-Server::Server(Logger const &logger) : logger(logger)
+Server::Server(Logger const &logger) : logger(logger), connections_number(0)
 {
 	logger.log("server created", INFO);
 }
