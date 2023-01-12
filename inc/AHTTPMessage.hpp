@@ -4,6 +4,8 @@
 # include <vector>
 # include "utils.hpp"
 # include <map>
+# include <algorithm>
+# define LB "\r\n"
 
 class AHTTPMessage
 {
@@ -14,7 +16,7 @@ protected:
 private:
 	std::string											raw_data;
 	std::vector<std::string>							meta_data;
-	virtual std::string								parse_version(std::string const &) const = 0;
+	virtual std::string								parse_version(std::vector<std::string> const &) const = 0;
 	virtual std::map<std::string, std::string>		parse_headers(std::vector<std::string> const &) const = 0;
 	std::string										parse_body(std::string const &) const;
 public:

@@ -1,7 +1,28 @@
 #include "../inc/HTTPResponse.hpp"
+#include "../inc/Server.hpp"
+#define CRLF "\r\n"
 
 HTTPResponse::HTTPResponse()
 {
+
+}
+
+HTTPResponse::HTTPResponse(const HTTPRequest *req)
+{
+	(void)req;
+	/*	hardcoded for debug	only!	*/
+	version = "HTTP/1.1";
+	status_code = 200;
+	status_text = "OK";
+}
+
+std::string HTTPResponse::dump()
+{
+	std::string	resp;
+
+	resp = version + " " + "status_code" + " " + status_text + CRLF + CRLF;
+	resp += "<h3>Test</h3>";
+	return resp;
 }
 
 HTTPResponse::HTTPResponse(HTTPResponse const &copy) : AHTTPMessage()
@@ -26,9 +47,9 @@ HTTPResponse	&HTTPResponse::operator=(HTTPResponse const &rhs)
 	return (*this);
 }
 
-std::string HTTPResponse::parse_version(std::string const &meta) const
+std::string	HTTPResponse::parse_version(std::vector<std::string> const &status_line) const
 {
-	(void) meta;
+	(void) status_line;
 	return (0);
 }
 

@@ -21,6 +21,11 @@ std::vector<std::string> split(std::string const &str, std::string const &del)
 	while ((pos = copy.find(del)) != std::string::npos)
 	{
 		token = copy.substr(0, pos);
+		if (token.length() == 0)
+		{
+			copy.erase(pos, 1);
+			continue ;
+		}
 		res.push_back(token);
 		copy.erase(0, pos + del.length());
 	}

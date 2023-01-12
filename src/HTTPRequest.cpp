@@ -1,37 +1,21 @@
 #include "../inc/HTTPRequest.hpp"
 
-size_t	skip_word(std::string const &str, size_t pos)
-{
-	size_t i = 0;
-	while (!std::isspace(str[pos]) && str[pos] != 0)
-	{
-		pos++;
-		i++;
-	}
-	return (i);
-}
-
-size_t	skip_spaces(std::string const &str, size_t pos)
-{
-	size_t i = 0;
-	while (std::isspace(str[pos]) && str[pos] != 0)
-	{
-		pos++;
-		i++;
-	}
-	return (i);
-}
-
 HTTPRequest::HTTPRequest()
 {
 }
 
 HTTPRequest::HTTPRequest(std::string const &raw) : AHTTPMessage(raw)
 {
-	method = parse_method(get_meta_data()[0]);
-	(void) version;
-	(void) target;
-	headers = parse_headers(get_meta_data());
+	std::vector<std::string>	meta_data = get_meta_data();
+	std::string					&status_line = meta_data[0];
+	std::vector<std::string>	status_line_vec = split_if(status_line, ::isspace);
+
+	if (status_line_vec.size() != 3)
+		throw	Webserv_exception("Invalid request", ERROR);
+	method = parse_method(status_line_vec);
+	target = parse_target(status_line_vec);
+	version = parse_version(status_line_vec);
+	headers = parse_headers(meta_data);
 }
 
 HTTPRequest::HTTPRequest(HTTPRequest const &rhs) : AHTTPMessage(rhs)
@@ -47,14 +31,17 @@ HTTPRequest::~HTTPRequest(){}
 
 std::ostream	&operator<<(std::ostream &os, HTTPRequest const &rhs)
 {
-	os << "HTPP request:\n" << rhs.get_raw_data() << "\n-----------\n"
-	<< "Method" << rhs.get_method() << "\nHeaders:\n";
+	os << "HTPP request:\n" << rhs.get_raw_data() << "-----------\n"
+	<< "Method ---" << rhs.get_method() << "\n"
+	<< "Target ---" << rhs.get_target() << "\n"
+	<< "Version ---" << rhs.get_version() << "\n"
+	 "\nHeaders ---\n";
 	for (std::map<std::string, std::string>::const_iterator it = rhs.get_headers().begin();
 			it != rhs.get_headers().end(); it++)
 	{
-		os << (*it).first << " : " << (*it).second << "\n";
+		os << (*it).first << "---" << (*it).second << "\n";
 	}
-	os << "Body: \n" << rhs.get_body() << "\nend";
+	os << "Body: \n" << rhs.get_body() << "end.\n";
 	return (os);
 }
 
@@ -80,53 +67,28 @@ std::map<std::string, std::string> HTTPRequest::parse_headers(std::vector<std::s
 	for (std::vector<std::string>::const_iterator it = meta.begin() + 1; it != meta.end(); it++)
 	{
 		first = (*it).substr(0, (*it).find(":"));
-		second = (*it).substr((*it).find(":"));
+		second = (*it).substr((*it).find(":") + 1);
+		first.erase(std::remove_if(first.begin(), first.end(), ::isspace), first.end());
+		second.erase(std::remove_if(second.begin(), second.end(), ::isspace), second.end());
 		res.insert(std::make_pair(first, second));
 	}
 
 	return (res);
 }
 
-std::string HTTPRequest::parse_method(std::string const &status_line) const
+std::string HTTPRequest::parse_method(std::vector<std::string> const &status_line) const
 {
-	size_t		i = 0;
-	std::string					res = "";
-
-	i += skip_spaces(status_line, i);
-	res = status_line.substr(i, i + skip_word(status_line, i));
-
-	return res;
+	return status_line[METHOD];
 }
 
-// loop? idk. mb better approuch?
-std::string HTTPRequest::parse_target(std::string const &status_line) const
+std::string HTTPRequest::parse_target(std::vector<std::string> const &status_line) const
 {
-	size_t	i = 0;
-	std::string res = "";
-
-	i += skip_spaces(status_line, i);
-	i += skip_word(status_line, i);
-	i += skip_spaces(status_line, i);
-	res = status_line.substr(i, i + skip_word(status_line, i));
-	return (res);
+	return status_line[TARGET];
 }
 
-// get_n_word_in_str(const string str, int word_number)
-// while (i < n)
-// 		skip_spaces + skipword
-// substr(i+skipword)
-std::string	HTTPRequest::parse_version(std::string const &status_line) const
+std::string	HTTPRequest::parse_version(std::vector<std::string> const &status_line) const
 {
-	size_t i = 0;
-	std::string res = "";
-
-	i += skip_spaces(status_line, i);
-	i += skip_word(status_line, i);
-	i += skip_spaces(status_line, i);
-	i += skip_word(status_line, i);
-	i += skip_spaces(status_line, i);
-	res = status_line.substr(i, i + skip_word(status_line, i));
-	return res;
+	return status_line[VERSION];
 }
 
 std::string const &HTTPRequest::get_method(void) const
@@ -138,3 +100,4 @@ std::string	const &HTTPRequest::get_target(void) const
 {
 	return (target);
 }
+

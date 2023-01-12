@@ -20,6 +20,7 @@ private:
 	Query(Query const &copy);
 	bool		ready;
 public:
+	void		setResponse(HTTPResponse*);
 	bool		is_ready(void) const;
 	void		form_request(void);
 	HTTPRequest const	*get_request(void) const;
