@@ -17,20 +17,19 @@ int		Query::recieve(void)
 	char	buf[1024];
 	int	recieved_bytes = 0;
 	int	i;
-	const int	bytes_to_recieve = sizeof(buf);
+	const int	bytes_to_recieve = sizeof(buf) - 1;
 
 	while (recieved_bytes != bytes_to_recieve)
 	{
 		i = ::recv(fd, buf + recieved_bytes, bytes_to_recieve - recieved_bytes, 0);
-		if (i < 0)
+		if (i <= 0)
 		{
 			ready = true;
 			break ;
 		}
-		if (i == 0)
-			break ;
 		recieved_bytes += i;
 	}
+	buf[recieved_bytes] = '\0';
 	raw_data += buf;
 	return recieved_bytes;
 }
