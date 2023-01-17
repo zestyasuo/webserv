@@ -1,5 +1,7 @@
 #include "../inc/Query.hpp"
-# include <stdio.h>
+#include <vector>
+#include <stdio.h>
+
 Query::Query()
 {
 }
@@ -39,6 +41,7 @@ bool	Query::is_ready(void) const
 	return ready;
 }
 
+//int	Query::send(std::string const &message) const
 int	Query::send(std::string const &message) const
 {
 	char *bytes = const_cast<char *>(message.c_str());

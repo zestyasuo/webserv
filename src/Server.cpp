@@ -93,8 +93,8 @@ void	Server::collect(void)
 			if ((*it)->is_ready())
 			{
 				(*it)->form_request();
-				std::cout << "formed\n\n";
-				std::cout << (*(*it)->get_request());
+//				std::cout << "formed\n\n";
+//				std::cout << (*(*it)->get_request());
 			}
 		}
 		catch(const Webserv_exception & e)
