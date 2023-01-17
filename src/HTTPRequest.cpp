@@ -4,7 +4,9 @@ HTTPRequest::HTTPRequest()
 {
 }
 
-HTTPRequest::HTTPRequest(std::string const &raw) : AHTTPMessage(raw), valid(false)
+HTTPRequest::HTTPRequest(std::string const &raw) : 
+			AHTTPMessage(raw), valid(false), target(""),
+			method("")
 {
 	std::vector<std::string>	meta_data = get_meta_data();
 	if (meta_data.empty())
@@ -13,13 +15,7 @@ HTTPRequest::HTTPRequest(std::string const &raw) : AHTTPMessage(raw), valid(fals
 	std::vector<std::string>	status_line_vec = split_if(status_line, ::isspace);
 
 	if (status_line_vec.size() != 3)
-	{
-		method = "";
-		target = "";
-		version = "";
-		headers = std::map<std::string, std::string>();
 		return ;
-	}
 	method = parse_method(status_line_vec);
 	target = parse_target(status_line_vec);
 	version = parse_version(status_line_vec);
