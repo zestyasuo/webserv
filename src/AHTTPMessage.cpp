@@ -3,7 +3,7 @@
 std::string	get_meta_data_array(std::string const &str)
 {
 	size_t			empty_line_index = str.find(LB LB);
-	std::string		res;
+	std::string		res = "";
 
 	if (empty_line_index == std::string::npos)
 	{

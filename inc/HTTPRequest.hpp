@@ -17,6 +17,7 @@ private:
 	std::string								parse_method(std::vector<std::string> const &) const;
 	std::string								parse_target(std::vector<std::string> const &) const;
 public:
+	bool				is_valid(void) const;
 	std::string	const &get_target() const;
 	std::string	const &get_method() const;
 	HTTPRequest(void);
