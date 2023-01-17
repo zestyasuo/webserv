@@ -6,7 +6,10 @@ std::string	get_meta_data_array(std::string const &str)
 	std::string		res;
 
 	if (empty_line_index == std::string::npos)
-		throw Webserv_exception("Invalid request", ERROR);
+	{
+		res = str;
+		return res;
+	}
 	res = str.substr(0, empty_line_index);
 	return res;
 }
@@ -33,7 +36,7 @@ std::string	AHTTPMessage::parse_body(std::string const &raw) const
 {
 	size_t	body_pos = raw.find(LB LB);
 	if (body_pos == std::string::npos)
-		throw Webserv_exception("Invalid request", ERROR);
+		return "";
 	std::string	res = raw.substr(body_pos + 4);
 	return (res);
 }

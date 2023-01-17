@@ -5,13 +5,13 @@
 
 class Webserv_exception : public std::exception
 {
-private:
-	int error_code;
-	const char * error_message;
+protected:
+	int				error_code;
+	const char		*error_message;
 public:
 	Webserv_exception(const char *, int);
 	Webserv_exception(void);
-	int	get_error_code(void) const;
+	virtual int	get_error_code(void) const;
 	virtual const char* what() const throw();
 };
 

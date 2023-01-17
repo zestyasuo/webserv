@@ -59,7 +59,6 @@ void	Server::poll(void)
 
 void	Server::respond(void)
 {
-	Query *p;
 	if (queries.empty())
 		return;
 	for (std::vector<Query *>::iterator it = queries.begin();
@@ -67,17 +66,17 @@ void	Server::respond(void)
 	{
 		if (queries.empty())
 			break ;
-		p = *it;
 		if ((*it)->get_request())
 		{
+			std::cout << "forming response\n";
 			 HTTPResponse *response = new HTTPResponse((*it)->get_request());
 //			(*it)->setResponse(response);
 //			(*it).response = response;
 			 (*it)->send(response->dump());
 			// logger.log("message sent", INFO);
 //			 (*it)->send("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque pen1");
-			queries.erase(it);
-			delete p;
+			delete (*it);
+			queries.erase(it--);
 		}
 	}
 }
@@ -99,6 +98,9 @@ void	Server::collect(void)
 		}
 		catch(const Webserv_exception & e)
 		{
+			delete *it;
+			queries.erase(it);
+			it--;
 			logger.log(e.what(), e.get_error_code());
 		}
 	}

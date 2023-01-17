@@ -9,6 +9,7 @@
 class HTTPRequest : public AHTTPMessage
 {
 private:
+	bool											valid;
 	std::string										target;
 	std::string										method;
 	std::map<std::string, std::string>		parse_headers(std::vector<std::string> const &) const;

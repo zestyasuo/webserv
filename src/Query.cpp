@@ -56,7 +56,6 @@ int	Query::send(std::string const &message) const
 
 Query::Query(Query const &copy)
 {
-	std::cout << "Query copy constructor";
 	*this = copy;
 }
 

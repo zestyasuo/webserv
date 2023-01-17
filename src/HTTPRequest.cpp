@@ -4,18 +4,25 @@ HTTPRequest::HTTPRequest()
 {
 }
 
-HTTPRequest::HTTPRequest(std::string const &raw) : AHTTPMessage(raw)
+HTTPRequest::HTTPRequest(std::string const &raw) : AHTTPMessage(raw), valid(false)
 {
 	std::vector<std::string>	meta_data = get_meta_data();
 	std::string					&status_line = meta_data[0];
 	std::vector<std::string>	status_line_vec = split_if(status_line, ::isspace);
 
 	if (status_line_vec.size() != 3)
-		throw	Webserv_exception("Invalid request", ERROR);
+	{
+		method = "";
+		target = "";
+		version = "";
+		headers = std::map<std::string, std::string>();
+		return ;
+	}
 	method = parse_method(status_line_vec);
 	target = parse_target(status_line_vec);
 	version = parse_version(status_line_vec);
 	headers = parse_headers(meta_data);
+	valid = true;
 }
 
 HTTPRequest::HTTPRequest(HTTPRequest const &rhs) : AHTTPMessage(rhs)
