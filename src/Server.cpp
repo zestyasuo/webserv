@@ -69,12 +69,11 @@ void	Server::respond(void)
 		if ((*it)->get_request())
 		{
 			std::cout << "forming response\n";
-			 HTTPResponse *response = new HTTPResponse((*it)->get_request());
-//			(*it)->setResponse(response);
-//			(*it).response = response;
-			 (*it)->send(response->dump());
-			// logger.log("message sent", INFO);
-//			 (*it)->send("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque pen1");
+			HTTPResponse *response = new HTTPResponse((*it)->get_request());
+			(*it)->send(response->dump());
+		}
+		if ((*it)->is_ready())
+		{
 			delete (*it);
 			queries.erase(it--);
 		}

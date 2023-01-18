@@ -77,5 +77,6 @@ void		Query::setResponse(HTTPResponse* resp)
 
 void	Query::form_request(void)
 {
-	request = new HTTPRequest(raw_data);
+	if (!raw_data.empty())
+		request = new HTTPRequest(raw_data);
 }
