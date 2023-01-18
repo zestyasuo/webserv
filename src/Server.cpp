@@ -1,13 +1,13 @@
 #include "../inc/Server.hpp"
 #include "Server.hpp"
 
-Server::Server(void): logger(Logger()), connections_number(0), active(true)
+Server::Server(void): logger(Logger()), connections_number(0), active(true), root("")
 {
 	logger.log("created server with default logger", INFO);
 }
 
-Server::Server(Logger const &logger) : logger(logger), connections_number(0),
-	active(true)
+Server::Server(Logger const &logger, std::string const &dir) : logger(logger), connections_number(0),
+	active(true), root(dir)
 {
 	logger.log("server created", INFO);
 }
@@ -107,7 +107,7 @@ void	Server::collect(void)
 
 void	Server::serve(void)
 {
-	while (this->active)
+	if (this->active)
 	{
 		poll();
 		collect();
@@ -125,3 +125,12 @@ Server::~Server()
 	logger.log("Server stopped", INFO);
 }
 
+std::string const	&Server::get_root(void) const
+{
+	return root;
+}
+
+void	Server::set_root(std::string &new_root)
+{
+	root = new_root;
+}
