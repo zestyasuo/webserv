@@ -1,9 +1,9 @@
 #include <Server.hpp>
-#include "../inc/Config_proto.hpp"
+// #include "../inc/Config_proto.hpp"
 #include <Logger.hpp>
 # include <exception>
 
-t_conf g_conf;
+// t_conf g_conf;
 
 int	main(int argc, char** argv, char **envp)
 {
@@ -14,7 +14,8 @@ int	main(int argc, char** argv, char **envp)
 
 	(void)argc;
 	(void)argv;
-	g_conf.envp = envp;
+	(void)envp;
+	// g_conf.envp = envp;
 
 	webserv->add_socket(8080);
 	active_servers.push_back(webserv);

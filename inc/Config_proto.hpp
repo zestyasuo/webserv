@@ -39,7 +39,7 @@ struct s_location
 	map<string, string>					extra_props; // reserved for unknown purposes
 	size_t								body_size_limit; // body_size_limit, bytes;
 	// error - path
-	std::map<int, std::string			error_pages;
+	std::map<int, std::string>			error_pages;
 };
 
 #endif

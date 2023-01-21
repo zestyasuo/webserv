@@ -1,6 +1,6 @@
 #include "../inc/HTTPResponse.hpp"
 #include "../inc/Server.hpp"
-#include "../inc/Config_proto.hpp"
+// #include "../inc/Config_proto.hpp"
 #include <iostream>
 #include <fstream>
 #include <sys/stat.h>	//	S_IFDIR
