@@ -1,10 +1,7 @@
 UNAME_S := $(shell uname -s)
 SAN_FLAGS = address,undefined
-ifeq ($(UNAME_S), Linux)
-	SAN_FLAGS += ,leak
-endif
-# ifeq ($(UNAME_S), Darwin)
-	
+# ifeq ($(UNAME_S), Linux)
+# 	SAN_FLAGS += ,leak
 # endif
 
 CC			=	c++
@@ -25,14 +22,13 @@ NAME		=	 webserv
 
 .PHONY: all fclean clean re test
 
-test:
-	cd tests ; bash test_serv.sh
-
 all: ${NAME}
+
+test: all
+	cd tests ; bash test_serv.sh
 
 ${OBJ_PATH} : 
 	mkdir ${OBJ_PATH}
-	echo ${HEAD_DEP}
 
 ${OBJ_PATH}/%.o : ${SRC_PATH}/%.cpp ${HEAD_DEP} | ${OBJ_PATH}
 	${CC} ${CFLAGS} -o $@ -c $< -I${INC_PATH}
@@ -45,6 +41,7 @@ clean:
 
 fclean: clean
 	rm -f ${NAME}
+	rm -rf tests/webserv
 
 r	: $(NAME)
 	./$(NAME)

@@ -82,7 +82,7 @@ std::string HTTPResponse::dump()
 {
 	std::string	resp;
 	std::ifstream ifs;
-	string	fname = "/home/sname/ws/www/serv_a";
+	string	fname = "/home/zyasuo/21school/my_server/www/serv_a";
 
 	string query_string;
 

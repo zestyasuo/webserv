@@ -12,6 +12,10 @@ fi
 	exec ../webserv
 
 }&
+{
+	exec nginx -g 'daemon off;' -c /home/zyasuo/21school/my_server/tests/nginx.conf
+}&
 python3 test.py
 
 pkill webserv
+pkill nginx
