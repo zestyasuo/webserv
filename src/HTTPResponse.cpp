@@ -104,7 +104,7 @@ std::string HTTPResponse::dump()
 	{
 		status_code = 404;
 		resp = version + " " + SSTR(status_code) + " " + status_text + CRLF + CRLF
-			+ "<h3>404 - not found!</h3>";
+			+ "<html><h3>404 - not found!</h3></html>";
 		return resp;
 	}
 

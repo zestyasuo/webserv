@@ -1,4 +1,5 @@
 #include "../inc/Socket.hpp"
+# include <cstdio>
 
 Socket::Socket(int port)
 {
@@ -39,9 +40,10 @@ void	Socket::create()
 			throw Webserv_exception("Socket creation failed", FATAL);
 		}
 	if (
-		::setsockopt(sfd, SOL_SOCKET,
-		SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))
-	) {
+		::setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) &&
+		::setsockopt(sfd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt))
+		)
+	{
 		throw Webserv_exception("Setting socket options failed", FATAL);
 	}
 
@@ -64,4 +66,3 @@ void	Socket::bind()
 	if (::bind(sfd, (struct sockaddr *)&address, sizeof(address)) < 0)
 		throw Webserv_exception("Socket binding failed", FATAL);
 }
-
