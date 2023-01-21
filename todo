@@ -1,0 +1,14 @@
+define setsockopt platform based options (SO_REUSEADDR SO_REUSEPORT)
+
+
+
+
+Structure : 
+
+Config
+
+
+Server
+
+
+Test

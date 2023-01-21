@@ -1,5 +1,5 @@
 CC			=	c++
-CFLAGS		=	-Wall -Wextra -Werror -std=c++98 -g -fsanitize=address,leak
+CFLAGS		=	-Wall -Wextra -Werror -std=c++98 -g #-fsanitize=address,leak
 SRC_PATH	=	src
 OBJ_PATH	=	obj
 INC_PATH	=	inc
@@ -13,6 +13,11 @@ HEAD_DEP	=	${HEADERS:${INC_PATH}/%.hpp=${INC_PATH}/%.hpp}
 OBJ			=	${SRC:${SRC_PATH}/%.cpp=${OBJ_PATH}/%.o}
 
 NAME		=	 webserv
+
+.PHONY: all fclean clean re test
+
+test:
+	cd tests ; bash test_serv.sh
 
 all: ${NAME}
 
