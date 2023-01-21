@@ -12,6 +12,7 @@
 # include "log_levels.hpp"
 # include "Socket.hpp"
 # include <sstream>
+// # include "Config_proto.hpp"
 # define CONNECTIONS_COUNT 50
 # define TIMEOUT 100
 
@@ -22,6 +23,7 @@
 class Server
 {
 private:
+	// s_config 			config;
 	Logger				const logger;
 	int					connections_number;
 	struct pollfd		connections[CONNECTIONS_COUNT];

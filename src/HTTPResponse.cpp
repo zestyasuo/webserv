@@ -1,6 +1,6 @@
 #include "../inc/HTTPResponse.hpp"
 #include "../inc/Server.hpp"
-#include "../inc/Config_proto.hpp"
+// #include "../inc/Config_proto.hpp"
 #include <iostream>
 #include <fstream>
 #include <sys/stat.h>	//	S_IFDIR
@@ -104,7 +104,7 @@ std::string HTTPResponse::dump()
 	{
 		status_code = 404;
 		resp = version + " " + SSTR(status_code) + " " + status_text + CRLF + CRLF
-			+ "<h3>404 - not found!</h3>";
+			+ "<html><h3>404 - not found!</h3></html>";
 		return resp;
 	}
 
