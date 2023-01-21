@@ -7,6 +7,7 @@ t_conf g_conf;
 
 int	main(int argc, char** argv, char **envp)
 {
+	// s_config(envp);
 	Logger	server_logger;
 	Server	*webserv = new Server(server_logger, "/home/zyasuo/21school/my_server/www/serv_a");
 	std::vector<Server *>	active_servers;
