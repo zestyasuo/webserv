@@ -1,13 +1,13 @@
 #include "../inc/Server.hpp"
 #include "Server.hpp"
 
-Server::Server(void): logger(Logger()), connections_number(0), active(true)
+Server::Server(void): logger(Logger()), connections_number(0), active(true), root("")
 {
 	logger.log("created server with default logger", INFO);
 }
 
-Server::Server(Logger const &logger) : logger(logger), connections_number(0),
-	active(true)
+Server::Server(Logger const &logger, std::string const &dir) : logger(logger), connections_number(0),
+	active(true), root(dir)
 {
 	logger.log("server created", INFO);
 }
@@ -59,7 +59,6 @@ void	Server::poll(void)
 
 void	Server::respond(void)
 {
-	Query *p;
 	if (queries.empty())
 		return;
 	for (std::vector<Query *>::iterator it = queries.begin();
@@ -67,17 +66,16 @@ void	Server::respond(void)
 	{
 		if (queries.empty())
 			break ;
-		p = *it;
 		if ((*it)->get_request())
 		{
-			 HTTPResponse *response = new HTTPResponse((*it)->get_request());
-//			(*it)->setResponse(response);
-//			(*it).response = response;
-			 (*it)->send(response->dump());
-			// logger.log("message sent", INFO);
-//			 (*it)->send("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque pen1");
-			queries.erase(it);
-			delete p;
+			std::cout << "forming response\n";
+			HTTPResponse *response = new HTTPResponse((*it)->get_request());
+			(*it)->send(response->dump());
+		}
+		if ((*it)->is_ready())
+		{
+			delete (*it);
+			queries.erase(it--);
 		}
 	}
 }
@@ -99,6 +97,9 @@ void	Server::collect(void)
 		}
 		catch(const Webserv_exception & e)
 		{
+			delete *it;
+			queries.erase(it);
+			it--;
 			logger.log(e.what(), e.get_error_code());
 		}
 	}
@@ -106,7 +107,7 @@ void	Server::collect(void)
 
 void	Server::serve(void)
 {
-	while (this->active)
+	if (this->active)
 	{
 		poll();
 		collect();
@@ -124,3 +125,12 @@ Server::~Server()
 	logger.log("Server stopped", INFO);
 }
 
+std::string const	&Server::get_root(void) const
+{
+	return root;
+}
+
+void	Server::set_root(std::string &new_root)
+{
+	root = new_root;
+}

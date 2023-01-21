@@ -30,11 +30,14 @@ private:
 	void				respond(void);
 	void				collect(void);
 	bool 				active;
+	std::string			root;
 public:
+	std::string const &get_root(void) const;
+	void		set_root(std::string &);
 	std::map<int, Socket *>	sockets;
 	int		add_socket(int port);
 	Server(void);
-	Server(Logger const &logger);
+	Server(Logger const &logger, std::string const &dir);
 	~Server(void);
 	Server	&operator=(Server const &rhs);
 	void	serve(void);

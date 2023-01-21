@@ -1,5 +1,6 @@
 #include "../inc/HTTPResponse.hpp"
 #include "../inc/Server.hpp"
+#include "../inc/Config_proto.hpp"
 #include <iostream>
 #include <fstream>
 #include <sys/stat.h>	//	S_IFDIR
@@ -12,15 +13,15 @@ using std::vector;
 
 #define BUF_SIZE 4096
 
-vector<char> cgi_exec(const string &fname)
+vector<char> cgi_exec(const string &fname, const string &query_str)
 {
 	int fd[2];
 	int cgi_pid;
 	vector<char> cgi_data;
 	char cgi_buf[BUF_SIZE];
 
-	string cgi_path = "/usr/bin/python3";
-//	string cgi_path = "/bin/echo";
+//	string cgi_path = "/usr/bin/python3";
+	string cgi_path = "/bin/php8.1";
 
 	pipe(fd);
 	cgi_pid = fork();
@@ -28,7 +29,17 @@ vector<char> cgi_exec(const string &fname)
 	{
 		close(fd[0]);
 		dup2(fd[1], 1);
-		execl(cgi_path.c_str(), "", fname.c_str());
+//		execl(cgi_path.c_str(), NULL, fname.c_str());
+		char * envp[] =
+			{
+				(char*)"TEST=Value",
+				(char*)"VAR=val",
+				(char*)query_str.c_str(),
+			0
+			};
+//		extern t_conf g_conf;
+
+		execle(cgi_path.c_str(), "", fname.c_str(), NULL, envp);
 		exit(0);
 	}
 	close(fd[1]);
@@ -72,9 +83,19 @@ std::string HTTPResponse::dump()
 	std::string	resp;
 	std::ifstream ifs;
 	string	fname = "/home/sname/ws/www/serv_a";
+
+	string query_string;
+
 	fname.append(req->get_target());
+	size_t query_pos = fname.find('?');
+	if (query_pos != fname.npos)
+	{
+		query_string = fname.substr(fname.find('?') + 1, fname.length());
+		fname.erase(fname.find('?'));
+	}
 
 	status_code = 200;
+	content_type = "text/html";
 
 //	resp = version + " " + "status_code" + " " + status_text + CRLF + CRLF;
 
@@ -94,10 +115,11 @@ std::string HTTPResponse::dump()
 	}
 	else if (open_fstream(fname, ifs) == 0)
 	{
-		if (fname.compare(fname.size() - 3, 3, ".py") == 0)
+//		if (fname.compare(fname.size() - 3, 3, ".py") == 0)
+		if (fname.compare(fname.size() - 4, 4, ".php") == 0)
 		{	//	CGI
-			vector<char> cgi_data = cgi_exec(fname);
-			content_type = "text/plain";
+			query_string.insert(0, "QUERY_STRING=");
+			vector<char> cgi_data = cgi_exec(fname, query_string);
 			resp.append(cgi_data.data(), cgi_data.size());
 		}
 		else

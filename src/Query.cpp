@@ -56,7 +56,6 @@ int	Query::send(std::string const &message) const
 
 Query::Query(Query const &copy)
 {
-	std::cout << "Query copy constructor";
 	*this = copy;
 }
 
@@ -78,5 +77,6 @@ void		Query::setResponse(HTTPResponse* resp)
 
 void	Query::form_request(void)
 {
-	request = new HTTPRequest(raw_data);
+	if (!raw_data.empty())
+		request = new HTTPRequest(raw_data);
 }

@@ -15,6 +15,7 @@ const char* Webserv_exception::what() const throw ()
 	return error_message;
 }
 
-int Webserv_exception::get_error_code(void) const {
+int Webserv_exception::get_error_code(void) const
+{
 	return error_code;
 }
