@@ -1,7 +1,10 @@
 UNAME_S := $(shell uname -s)
 SAN_FLAGS = address,undefined
-# ifeq ($(UNAME_S), Linux)
-# 	SAN_FLAGS += ,leak
+ifeq ($(UNAME_S), Linux)
+	SAN_FLAGS := $(SAN_FLAGS),leak
+endif
+# ifeq ($(UNAME_S), Darwin)
+	
 # endif
 
 CC			=	c++
@@ -22,6 +25,11 @@ NAME		=	 webserv
 
 .PHONY: all fclean clean re test
 
+.PHONY: all fclean clean re test
+
+test:
+	cd tests ; bash test_serv.sh
+
 all: ${NAME}
 
 test: all
@@ -41,7 +49,6 @@ clean:
 
 fclean: clean
 	rm -f ${NAME}
-	rm -rf tests/webserv
 
 r	: $(NAME)
 	./$(NAME)
