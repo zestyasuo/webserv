@@ -22,13 +22,13 @@ private:
 	bool		isMethodAllowed(s_location const &);
 	void		get_file_info(std::string const &);
 	void		read_file(std::ifstream &);
+	HTTPResponse	&operator=(HTTPResponse const &rhs);
 public:
 	HTTPResponse(void);
 	explicit HTTPResponse(const HTTPRequest *, t_conf const &);
 	HTTPResponse(HTTPResponse const &copy);
 	~HTTPResponse(void);
 	std::string		dump();
-	HTTPResponse	&operator=(HTTPResponse const &rhs);
 };
 
 std::ostream	&operator<<(std::ostream &os, HTTPResponse const &rhs);

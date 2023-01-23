@@ -110,13 +110,17 @@ HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf) : request
 		status_text = "NOT FOUND";
 		return ;
 	}
-	fname = loc.root + request->get_target();
+	std::string target = request->get_target();
 	if (!isMethodAllowed(loc))
 	{
 		status_code = 501;
 		status_text = "NOT IMPLEMENTED";
 		return ;
 	}
+	if (target == "/")
+		target += loc.index_files[0];
+	std::cout << "\ntarget =" << target << "\n";
+	fname = loc.root + target;
 	get_file_info(fname);
 }
 
@@ -237,9 +241,16 @@ std::string HTTPResponse::dump()
 HTTPResponse::HTTPResponse(void)
 {}
 
-HTTPResponse::HTTPResponse(HTTPResponse const &copy) : AHTTPMessage(), config(copy.config)
+HTTPResponse::HTTPResponse(HTTPResponse const &copy) : 
+				AHTTPMessage(),
+				version(copy.version),
+				status_code(copy.status_code),
+				content_type(copy.content_type),
+				headers(copy.headers),
+				payload(copy.payload),
+				request(copy.request),
+				config(copy.config)
 {
-	*this = copy;
 }
 
 HTTPResponse::~HTTPResponse(){}
@@ -248,15 +259,6 @@ std::ostream	&operator<<(std::ostream &os, HTTPResponse const &rhs)
 {
 	(void) rhs;
 	return (os);
-}
-
-HTTPResponse	&HTTPResponse::operator=(HTTPResponse const &rhs)
-{
-	if (this != &rhs)
-	{
-
-	}
-	return (*this);
 }
 
 std::string	HTTPResponse::parse_version(std::vector<std::string> const &status_line) const

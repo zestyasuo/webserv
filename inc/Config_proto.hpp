@@ -19,10 +19,10 @@ enum e_method
 
 struct s_location
 {
-	bool								dir_listing; // = 1; autoindex (on / off == true / false) / mb check ending slash https://www.keycdn.com/support/nginx-directory-index
+	bool								autoindex; // = 1; autoindex (on / off == true / false) / mb check ending slash https://www.keycdn.com/support/nginx-directory-index
 	std::string							root; // location [root]
 	int									methods; // = 0 , enum / allowed_methods "GET POST DELETE"
-	std::string							redirect; // redirect
+	std::string							rewrite; // rewrite
 	std::vector<std::string>			index_files;	//	index [...,]
 	// @key - value : extenstion - path
 	std::map<std::string, std::string>	cgi;
@@ -37,7 +37,7 @@ struct s_location
 struct s_config
 {
 	map<std::string, std::string>			envp; // parsed char **envp
-	std::map<std::string, s_location>		locations;
+	std::map<std::string, s_location>		locations; // location [std::string] {s_location}
 	std::vector<int>						ports; // listen
 	std::string								name; // server_name
 };

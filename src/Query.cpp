@@ -53,9 +53,14 @@ int	Query::send(std::string const &message) const
 	return message.length();
 }
 
-Query::Query(Query const &copy)
+Query::Query(Query const &copy):
+	socket_fd(copy.socket_fd),
+	fd(copy.fd),
+	raw_data(copy.raw_data),
+	request(copy.request),
+	response(copy.response),
+	ready(copy.ready)
 {
-	*this = copy;
 }
 
 Query::~Query()
@@ -67,11 +72,6 @@ Query::~Query()
 HTTPRequest const	*Query::get_request(void) const
 {
 	return (request);
-}
-
-void		Query::setResponse(HTTPResponse* resp)
-{
-	this->response = *resp;
 }
 
 void	Query::form_request(void)

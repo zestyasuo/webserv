@@ -12,8 +12,9 @@ t_conf	create_test_config(void)
 
 	test_location.root = "/home/zyasuo/21school/my_server/www/serv_a";
 	test_location.methods += em_get | em_post;
-	test_location.dir_listing = true;
-	test_location.redirect = "";
+	test_location.autoindex = true;
+	test_location.rewrite = "";
+	test_location.index_files.push_back("index.html");
 	test_location.is_upload_allowed = true;
 
 	test_config.locations.insert(std::make_pair("/", test_location));
