@@ -1,6 +1,5 @@
 #include "../inc/Query.hpp"
 #include <vector>
-#include <stdio.h>
 
 Query::Query()
 {

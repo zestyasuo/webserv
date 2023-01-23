@@ -25,11 +25,6 @@ NAME		=	 webserv
 
 .PHONY: all fclean clean re test
 
-.PHONY: all fclean clean re test
-
-test:
-	cd tests ; bash test_serv.sh
-
 all: ${NAME}
 
 test: all

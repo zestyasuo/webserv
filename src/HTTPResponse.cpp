@@ -2,7 +2,6 @@
 #include "../inc/Server.hpp"
 // #include "../inc/Config_proto.hpp"
 #include <iostream>
-#include <fstream>
 #include <sys/stat.h>	//	S_IFDIR
 #include <sys/wait.h>	//	S_IFDIR
 #include <vector>
@@ -56,18 +55,69 @@ vector<char> cgi_exec(const string &fname, const string &query_str)
 	return cgi_data;
 }
 
-HTTPResponse::HTTPResponse()
+int		get_method_mask(std::string const &str)
 {
+	int		mask = 0;
 
+	if (str == "GET")
+		mask |= em_get;
+	else if (str == "POST")
+		mask |= em_post;
+	else if (str == "DELETE")
+		mask |= em_delete;
+	
+	return mask;
 }
 
-HTTPResponse::HTTPResponse(const HTTPRequest *req) : req(req)
+bool	HTTPResponse::isMethodAllowed(s_location const &loc)
 {
-	(void)req;
+	std::string const &method = request->get_method();
+	int					mask;
+
+	mask = get_method_mask(method);
+	if (loc.methods & mask)
+		return true;
+	return false;
+}
+
+s_location	const &get_location(std::string const &target, std::map<std::string, s_location> const &locations)
+{
+	std::string	to_find;
+
+	if (target.find_last_of("/") != target.npos)
+		to_find  = target.substr(0, target.find_last_of("/") + 1);
+
+	return locations.at(to_find);
+}
+
+HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf) : request(req), config(conf)
+{
 	/*	hardcoded for debug	only!	*/
 	version = "HTTP/1.1";
 	status_code = 200;
 	status_text = "OK";
+	s_location	loc;
+	std::string resp;
+	std::string fname;
+
+	try
+	{
+		loc = get_location(request->get_target(), config.locations);
+	}
+	catch(const std::exception& e)
+	{
+		status_code = 404;
+		status_text = "NOT FOUND";
+		return ;
+	}
+	fname = loc.root + request->get_target();
+	if (!isMethodAllowed(loc))
+	{
+		status_code = 501;
+		status_text = "NOT IMPLEMENTED";
+		return ;
+	}
+	get_file_info(fname);
 }
 
 int open_fstream(const string &fname, std::ifstream &ifs)
@@ -78,74 +128,116 @@ int open_fstream(const string &fname, std::ifstream &ifs)
 	return 0;
 }
 
+bool	is_cgi(std::string const &fname)
+{
+	if (fname != "")
+		return false;
+	return false;
+}
+
+void	HTTPResponse::get_file_info(std::string const &fname)
+{
+	std::ifstream ifs;
+	// string query_string;
+	struct stat st;
+	std::cout << fname;
+	if (stat(fname.c_str(), &st) != 0)
+	{
+		status_code = 404;
+		return ;
+	}
+
+	if (st.st_mode & S_IFDIR)
+	{
+		//	check for index (config entry and file exist)
+		// status_text += "DIR LISTING: " + fname + CRLF;
+		status_code = 501;
+		std::cout << "Dir listing requeried\n";
+		return ;
+	}
+	else if (open_fstream(fname, ifs) != 0)
+	{
+		// todo: is redirect
+		// todo: is method put 
+		status_code = 404;
+		return ;
+	}
+	// if (fname.compare(fname.size() - 3, 3, ".py") == 0)
+	if (is_cgi(fname))
+	{	//	CGI
+		//HTTPRespone::exec_cgi();
+		status_code = 501; // заглушка
+		std::cout << "exec cgi requered\n";
+	}
+	else
+	{
+		// todo: is method delete
+		status_code = 200;
+		// if (is_method_get())
+		read_file(ifs);
+		// if (is_method_delete())
+			// delete_file(ifs);
+		// if (is_method_put)
+			// ???; process partial put -> 400 BAD REQUEST
+	}
+
+	ifs.close();
+}
+
+void	HTTPResponse::read_file(std::ifstream &ifs)
+{
+		size_t resp_headers_size = payload.size();
+		ifs.seekg(0, std::ios::end);
+		size_t fsize = ifs.tellg();
+		payload.resize(payload.size() + fsize);
+		ifs.seekg(0);
+		ifs.read(&payload[resp_headers_size], fsize);
+}
+
+
 std::string HTTPResponse::dump()
 {
-	std::string	resp;
-	std::ifstream ifs;
-	string	fname = "/home/zyasuo/21school/my_server/www/serv_a";
+	// std::string fname;
 
-	string query_string;
-
-	fname.append(req->get_target());
-	size_t query_pos = fname.find('?');
-	if (query_pos != fname.npos)
+	if (status_code == 404)
 	{
-		query_string = fname.substr(fname.find('?') + 1, fname.length());
-		fname.erase(fname.find('?'));
+		payload = version + " " + SSTR(status_code) + " " + status_text + CRLF + CRLF
+			+ "<html><h3>404 - not found!</h3></html>";
+		return payload;
 	}
+	if (status_code == 501)
+	{
+		payload = version + " " + SSTR(status_code) + " " + status_text + CRLF + CRLF
+			+ "<html><h3>501 - not implemented!</h3></html>";
+		return payload;
+	}
+
+	// fname.append(request->get_target());
+	// size_t query_pos = fname.find('?');
+	// if (query_pos != fname.npos)
+	// {
+		// query_string = fname.substr(fname.find('?') + 1, fname.length());
+		// fname.erase(fname.find('?'));
+	// }
 
 	status_code = 200;
 	content_type = "text/html";
 
 //	resp = version + " " + "status_code" + " " + status_text + CRLF + CRLF;
 
-	struct stat st;
-	if (stat(fname.c_str(), &st) != 0)
-	{
-		status_code = 404;
-		resp = version + " " + SSTR(status_code) + " " + status_text + CRLF + CRLF
-			+ "<html><h3>404 - not found!</h3></html>";
-		return resp;
-	}
-
-	if (st.st_mode & S_IFDIR)
-	{
-		//	check for index (config entry and file exist)
-		resp += "DIR LISTING: " + fname + CRLF;
-	}
-	else if (open_fstream(fname, ifs) == 0)
-	{
-//		if (fname.compare(fname.size() - 3, 3, ".py") == 0)
-		if (fname.compare(fname.size() - 4, 4, ".php") == 0)
-		{	//	CGI
-			query_string.insert(0, "QUERY_STRING=");
-			vector<char> cgi_data = cgi_exec(fname, query_string);
-			resp.append(cgi_data.data(), cgi_data.size());
-		}
-		else
-		{	//	common files
-			size_t resp_headers_size = resp.size();
-			ifs.seekg(0, std::ios::end);
-			size_t fsize = ifs.tellg();
-			resp.resize(resp.size() + fsize);
-			ifs.seekg(0);
-			ifs.read(&resp[resp_headers_size], fsize);
-		}
-	}
-	else
-		status_code = 404;
-//		resp += "404" CRLF;
-
 	headers = version + " " + SSTR(status_code) + " " + status_text + CRLF;
 	if (!content_type.empty())
 		headers += "content-type:" + content_type + CRLF;
 	headers += CRLF;
-	resp.insert(0, headers);
+	payload.insert(0, headers);
 
-	return resp;
+	return payload;
 }
 
-HTTPResponse::HTTPResponse(HTTPResponse const &copy) : AHTTPMessage()
+HTTPResponse::HTTPResponse(void)
+{}
+
+HTTPResponse::HTTPResponse(HTTPResponse const &copy) : AHTTPMessage(), config(copy.config)
 {
 	*this = copy;
 }

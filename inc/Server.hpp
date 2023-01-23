@@ -12,7 +12,7 @@
 # include "log_levels.hpp"
 # include "Socket.hpp"
 # include <sstream>
-// # include "Config_proto.hpp"
+# include "Config_proto.hpp"
 # define CONNECTIONS_COUNT 50
 # define TIMEOUT 100
 
@@ -23,7 +23,6 @@
 class Server
 {
 private:
-	// s_config 			config;
 	Logger				const logger;
 	int					connections_number;
 	struct pollfd		connections[CONNECTIONS_COUNT];
@@ -32,14 +31,12 @@ private:
 	void				respond(void);
 	void				collect(void);
 	bool 				active;
-	std::string			root;
+	t_conf	 			config;
 public:
-	std::string const &get_root(void) const;
-	void		set_root(std::string &);
 	std::map<int, Socket *>	sockets;
 	int		add_socket(int port);
 	Server(void);
-	Server(Logger const &logger, std::string const &dir);
+	Server(Logger const &, t_conf const &);
 	~Server(void);
 	Server	&operator=(Server const &rhs);
 	void	serve(void);
