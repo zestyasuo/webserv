@@ -12,6 +12,21 @@ using std::vector;
 
 #define BUF_SIZE 4096
 
+// utils
+
+/// @brief Creates HTTP message compatable string with headers
+/// @param m - map of headers
+/// @return http message compatable headers
+std::string	map_to_str(std::map<std::string, std::string> const &m)
+{
+	std::string	res;
+	for (std::map<std::string, std::string>::const_iterator it = m.begin(); it != m.end(); it++)
+	{
+		res += (*it).first + ": " + (*it).second + CRLF;
+	}
+	return res;
+}
+
 vector<char> cgi_exec(const string &fname, const string &query_str)
 {
 	int fd[2];
@@ -55,6 +70,9 @@ vector<char> cgi_exec(const string &fname, const string &query_str)
 	return cgi_data;
 }
 
+/// @brief returns method mask based on method name or 0 if method not supported
+/// @param str - method name
+/// @return method mask
 int		get_method_mask(std::string const &str)
 {
 	int		mask = 0;
@@ -67,61 +85,6 @@ int		get_method_mask(std::string const &str)
 		mask |= em_delete;
 	
 	return mask;
-}
-
-bool	HTTPResponse::isMethodAllowed(s_location const &loc)
-{
-	std::string const &method = request->get_method();
-	int					mask;
-
-	mask = get_method_mask(method);
-	if (loc.methods & mask)
-		return true;
-	return false;
-}
-
-s_location	const &get_location(std::string const &target, std::map<std::string, s_location> const &locations)
-{
-	std::string	to_find;
-
-	if (target.find_last_of("/") != target.npos)
-		to_find  = target.substr(0, target.find_last_of("/") + 1);
-
-	return locations.at(to_find);
-}
-
-HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf) : request(req), config(conf)
-{
-	/*	hardcoded for debug	only!	*/
-	version = "HTTP/1.1";
-	status_code = 200;
-	status_text = "OK";
-	s_location	loc;
-	std::string resp;
-	std::string fname;
-
-	try
-	{
-		loc = get_location(request->get_target(), config.locations);
-	}
-	catch(const std::exception& e)
-	{
-		status_code = 404;
-		status_text = "NOT FOUND";
-		return ;
-	}
-	std::string target = request->get_target();
-	if (!isMethodAllowed(loc))
-	{
-		status_code = 501;
-		status_text = "NOT IMPLEMENTED";
-		return ;
-	}
-	if (target == "/")
-		target += loc.index_files[0];
-	std::cout << "\ntarget =" << target << "\n";
-	fname = loc.root + target;
-	get_file_info(fname);
 }
 
 int open_fstream(const string &fname, std::ifstream &ifs)
@@ -139,12 +102,114 @@ bool	is_cgi(std::string const &fname)
 	return false;
 }
 
-void	HTTPResponse::get_file_info(std::string const &fname)
+/// @brief looks for a location struct specified by config.
+/// @param target needed location
+/// @param locations full list of locations from config
+/// @return specified location or throws std::out_of_range
+s_location	const &get_location(std::string const &target, std::map<std::string, s_location> const &locations)
 {
-	std::ifstream ifs;
-	// string query_string;
-	struct stat st;
-	std::cout << fname;
+	std::string	to_find;
+
+	if (target.find_last_of("/") != target.npos)
+		to_find  = target.substr(0, target.find_last_of("/") + 1);
+	
+	return locations.at(to_find);
+}
+
+/// @brief tries to get index pages specified from config. If none specified tries index.html
+/// @param fname targeted file from request
+/// @param loc location of request
+/// @return 0 if page was found. 1 if not
+int	HTTPResponse::try_index_page(std::string const &fname, s_location const &loc)
+{
+	std::vector<std::string> copy = loc.index_files;
+
+	if (copy.empty())
+		copy.push_back("index.html");
+	for (std::vector<std::string>::iterator it = copy.begin(); it != copy.end(); it++)
+	{
+		get_file_info(fname + (fname.c_str()[fname.length()] == '/' ? "" : "/") + (*it));
+		if (status_code == 200)
+			return 0 ;
+	}
+	return 1;
+}
+
+// constructors
+
+HTTPResponse::HTTPResponse(void)
+{}
+
+HTTPResponse::HTTPResponse(HTTPResponse const &copy) : 
+				AHTTPMessage(copy),
+				version(copy.version),
+				status_code(copy.status_code),
+				content_type(copy.content_type),
+				payload(copy.payload),
+				request(copy.request),
+				config(copy.config)
+{
+}
+
+HTTPResponse::~HTTPResponse(){}
+
+/// @brief makes dumpable response object. the only way to get a response
+/// @param req parsed request
+/// @param conf parsed config
+HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf) : request(req), config(conf)
+{
+	/*	hardcoded for debug	only!	*/
+	version = "HTTP/1.1";
+	status_code = 0;
+	status_text = "OK";
+	s_location	loc;
+	std::string resp;
+	std::string fname;
+
+	try
+	{
+		loc = get_location(request->get_target(), config.locations);
+	}
+	catch(const std::exception& e)
+	{
+		loc = get_location("/", config.locations);
+	}
+	std::string target = request->get_target();
+	if (!isMethodAllowed(loc))
+	{
+		status_code = 501;
+		status_text = "NOT IMPLEMENTED";
+		return ;
+	}
+	// std::cout << "target: " << target << "\n";
+	fname = loc.root + target;
+	process_target(fname, loc);
+	// add_header("Location", "/");
+}
+
+/// @brief checks if method is allowed by location
+/// @param loc location
+/// @return false if not suppoted or true otherwise
+bool	HTTPResponse::isMethodAllowed(s_location const &loc)
+{
+	std::string const &method = request->get_method();
+	int					mask;
+
+	mask = get_method_mask(method);
+	if (loc.methods & mask)
+		return true;
+	return false;
+}
+
+/// @brief tries to open target file and sets status code, headers and messages to appropriate state
+/// @param fname target
+/// @param loc target location
+void	HTTPResponse::process_target(std::string const &fname, s_location const &loc)
+{
+	struct stat	st;
+
+	std::cout << fname << "\n";
+
 	if (stat(fname.c_str(), &st) != 0)
 	{
 		status_code = 404;
@@ -153,13 +218,27 @@ void	HTTPResponse::get_file_info(std::string const &fname)
 
 	if (st.st_mode & S_IFDIR)
 	{
-		//	check for index (config entry and file exist)
-		// status_text += "DIR LISTING: " + fname + CRLF;
-		status_code = 501;
-		std::cout << "Dir listing requeried\n";
-		return ;
+		std::cout << "DIR TRY\n";
+		if (try_index_page(fname, loc) != 0)
+		{
+			status_code = 501;
+			std::cout << "dir listing requered;\n";
+		}
 	}
-	else if (open_fstream(fname, ifs) != 0)
+	else
+	{
+		get_file_info(fname);
+	}
+}
+
+/// @brief opens file by path. reads it if found and method is get. deletes it if found and method is delete. todo: check if method is put and do something
+/// @param fname file path
+void	HTTPResponse::get_file_info(std::string const &fname)
+{
+	std::ifstream ifs;
+	// string query_string;
+
+	if (open_fstream(fname, ifs) != 0)
 	{
 		// todo: is redirect
 		// todo: is method put 
@@ -188,6 +267,8 @@ void	HTTPResponse::get_file_info(std::string const &fname)
 	ifs.close();
 }
 
+/// @brief reads file from stream to payload
+/// @param ifs file stream
 void	HTTPResponse::read_file(std::ifstream &ifs)
 {
 		size_t resp_headers_size = payload.size();
@@ -198,8 +279,9 @@ void	HTTPResponse::read_file(std::ifstream &ifs)
 		ifs.read(&payload[resp_headers_size], fsize);
 }
 
-
-std::string HTTPResponse::dump()
+/// @brief HTTPResponse to_string
+/// @return HTTPResponse string representaion
+std::string HTTPResponse::to_string()
 {
 	// std::string fname;
 
@@ -225,39 +307,35 @@ std::string HTTPResponse::dump()
 	// }
 
 	status_code = 200;
-	content_type = "text/html";
-
-//	resp = version + " " + "status_code" + " " + status_text + CRLF + CRLF;
-
-	headers = version + " " + SSTR(status_code) + " " + status_text + CRLF;
-	if (!content_type.empty())
-		headers += "content-type:" + content_type + CRLF;
-	headers += CRLF;
-	payload.insert(0, headers);
-
+	// content_type = "text/html";
+	add_header("content-type", "text/html");
+	std::string headers_str = map_to_str(headers);
+	payload.insert(0, headers_str + CRLF);
+	insert_status_line();
 	return payload;
 }
 
-HTTPResponse::HTTPResponse(void)
-{}
-
-HTTPResponse::HTTPResponse(HTTPResponse const &copy) : 
-				AHTTPMessage(),
-				version(copy.version),
-				status_code(copy.status_code),
-				content_type(copy.content_type),
-				headers(copy.headers),
-				payload(copy.payload),
-				request(copy.request),
-				config(copy.config)
+/// @brief inserts status line
+/// @param none
+void	HTTPResponse::insert_status_line(void)
 {
+	std::string status_line;
+
+	status_line = version + " " + SSTR(status_code) + " " + status_text + CRLF;
+	// if (!content_type.empty())
+	// 	status_line += "content-type:" + content_type + CRLF;
+	// status_line += CRLF;
+	payload.insert(0, status_line);
 }
 
-HTTPResponse::~HTTPResponse(){}
 
+/// @brief operator for stream
+/// @param os open stream
+/// @param rhs object
+/// @return stream
 std::ostream	&operator<<(std::ostream &os, HTTPResponse const &rhs)
 {
-	(void) rhs;
+	(void)(rhs);
 	return (os);
 }
 
@@ -267,9 +345,13 @@ std::string	HTTPResponse::parse_version(std::vector<std::string> const &status_l
 	return (0);
 }
 
-std::map<std::string, std::string> HTTPResponse::parse_headers(std::vector<std::string> const &meta) const
+std::map<std::string, std::string>	HTTPResponse::parse_headers(std::vector<std::string> const &meta) const
 {
 	(void) meta;
-	std::map<std::string, std::string>	vec;
-	return (vec);
+	return headers;
+}
+
+void	HTTPResponse::add_header(std::string const &key, std::string const &value)
+{
+	headers.insert(std::make_pair<std::string, std::string>(key, value));
 }

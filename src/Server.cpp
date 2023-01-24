@@ -69,7 +69,7 @@ void	Server::respond(void)
 		if ((*it)->get_request())
 		{
 			HTTPResponse *response = new HTTPResponse((*it)->get_request(), config);
-			(*it)->send(response->dump());
+			(*it)->send(response->to_string());
 		}
 		if ((*it)->is_ready())
 		{

@@ -5,6 +5,7 @@
 # include <fcntl.h>
 # include <algorithm>
 # include <vector>
+# include <map>
 
 void	unblock_fd(int fd);
 std::vector<std::string> split(std::string const &str, std::string const &del);
