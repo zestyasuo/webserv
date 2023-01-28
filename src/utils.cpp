@@ -6,6 +6,18 @@ void	unblock_fd(int sfd)
 		throw Webserv_exception("Couldn't set non-block flag", FATAL);
 }
 
+std::string	get_floctime(void)
+{
+	std::string	res = "";
+	std::time_t now = std::time(NULL);
+	char buf2[32];
+
+	// std::strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S %Z", std::localtime(&now)); // MSK
+	std::strftime(buf2, sizeof(buf2), "%a, %d %b %Y %H:%M:%S %Z",std::gmtime(&now)); // GMT
+	res += buf2;
+	return res;
+}
+
 std::vector<std::string> split(std::string const &str, std::string const &del)
 {
 	size_t						pos = 0;

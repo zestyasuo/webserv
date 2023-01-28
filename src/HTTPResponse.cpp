@@ -12,6 +12,19 @@ using std::vector;
 
 #define BUF_SIZE 4096
 
+const	HTTPResponse::T HTTPResponse::response_bodies_pairs[] = {
+	{200, ""},
+	{501, "<html><h3>501 - not implemented!</h3></html>"},
+	{404, "<html><h3>404 - not found!</h3></html>"}
+};
+
+const HTTPResponse::int_to_string_map_t HTTPResponse::response_bodies(response_bodies_pairs, response_bodies_pairs + 3);
+
+const	HTTPResponse::T HTTPResponse::status_text_pairs[] = {
+	{200, "OK"}, {501, "Not Implemented"}, {404, "Not Found"}
+};
+const HTTPResponse::int_to_string_map_t HTTPResponse::status_texts(status_text_pairs, status_text_pairs + 3);
+
 // utils
 
 /// @brief Creates HTTP message compatable string with headers
@@ -178,13 +191,13 @@ HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf) : request
 	if (!isMethodAllowed(loc))
 	{
 		status_code = 501;
-		status_text = "NOT IMPLEMENTED";
 		return ;
 	}
 	// std::cout << "target: " << target << "\n";
 	fname = loc.root + target;
 	process_target(fname, loc);
 	// add_header("Location", "/");
+	ready_up();
 }
 
 /// @brief checks if method is allowed by location
@@ -279,25 +292,28 @@ void	HTTPResponse::read_file(std::ifstream &ifs)
 		ifs.read(&payload[resp_headers_size], fsize);
 }
 
+/// @brief prepare response for writing and sending
+/// @param  nothing
+void	HTTPResponse::ready_up(void)
+{
+	std::string	html;
+
+	if (response_bodies.count(status_code))
+		html = response_bodies.at(status_code);
+	if (status_texts.count(status_code))
+		status_text = status_texts.at(status_code);
+	payload.insert(0, html);
+	add_header("Date", get_floctime());
+	add_header("content-type", "text/html");
+	std::string headers_str = map_to_str(headers);
+	payload.insert(0, headers_str + CRLF);
+	insert_status_line();
+}
+
 /// @brief HTTPResponse to_string
 /// @return HTTPResponse string representaion
 std::string HTTPResponse::to_string()
 {
-	// std::string fname;
-
-	if (status_code == 404)
-	{
-		payload = version + " " + SSTR(status_code) + " " + status_text + CRLF + CRLF
-			+ "<html><h3>404 - not found!</h3></html>";
-		return payload;
-	}
-	if (status_code == 501)
-	{
-		payload = version + " " + SSTR(status_code) + " " + status_text + CRLF + CRLF
-			+ "<html><h3>501 - not implemented!</h3></html>";
-		return payload;
-	}
-
 	// fname.append(request->get_target());
 	// size_t query_pos = fname.find('?');
 	// if (query_pos != fname.npos)
@@ -305,13 +321,6 @@ std::string HTTPResponse::to_string()
 		// query_string = fname.substr(fname.find('?') + 1, fname.length());
 		// fname.erase(fname.find('?'));
 	// }
-
-	status_code = 200;
-	// content_type = "text/html";
-	add_header("content-type", "text/html");
-	std::string headers_str = map_to_str(headers);
-	payload.insert(0, headers_str + CRLF);
-	insert_status_line();
 	return payload;
 }
 

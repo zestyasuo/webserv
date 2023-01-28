@@ -5,6 +5,7 @@
 # include "HTTPRequest.hpp"
 # include "Config_proto.hpp"
 # include <fstream>
+# include "utils.hpp"
 
 class HTTPResponse : public AHTTPMessage
 {
@@ -26,6 +27,21 @@ private:
 	void		process_target(std::string const &, s_location const &);
 	int			try_index_page(std::string const &, s_location const &);
 	HTTPResponse	&operator=(HTTPResponse const &rhs);
+	void			ready_up(void);
+	typedef std::map<int, std::string>	int_to_string_map_t;
+	struct T
+	{
+		int	const code;
+		std::string body;
+
+		operator int_to_string_map_t::value_type() const {
+			return std::pair<int, std::string>(code, body);
+		}
+	};
+	static const	T response_bodies_pairs[];
+	static const int_to_string_map_t	response_bodies;
+	static const	T status_text_pairs[];
+	static const int_to_string_map_t	status_texts;
 public:
 	HTTPResponse(void);
 	explicit HTTPResponse(const HTTPRequest *, t_conf const &);
