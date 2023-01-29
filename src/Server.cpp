@@ -1,13 +1,13 @@
 #include "../inc/Server.hpp"
 #include "Server.hpp"
 
-Server::Server(void): logger(Logger()), connections_number(0), active(true), root("")
+Server::Server(void): logger(Logger()), connections_number(0), active(true), config()
 {
 	logger.log("created server with default logger", INFO);
 }
 
-Server::Server(Logger const &logger, std::string const &dir) : logger(logger), connections_number(0),
-	active(true), root(dir)
+Server::Server(Logger const &logger, t_conf const &conf) : logger(logger), connections_number(0),
+	active(true), config(conf)
 {
 	logger.log("server created", INFO);
 }
@@ -68,14 +68,13 @@ void	Server::respond(void)
 			break ;
 		if ((*it)->get_request())
 		{
-			std::cout << "forming response\n";
-			HTTPResponse *response = new HTTPResponse((*it)->get_request());
-			(*it)->send(response->dump());
+			HTTPResponse *response = new HTTPResponse((*it)->get_request(), config);
+			(*it)->send(response->to_string());
 		}
 		if ((*it)->is_ready())
 		{
 			delete (*it);
-			queries.erase(it--);
+			queries.erase(it);
 		}
 	}
 }
@@ -123,14 +122,4 @@ Server::~Server()
 		delete (*it).second;
 	}
 	logger.log("Server stopped", INFO);
-}
-
-std::string const	&Server::get_root(void) const
-{
-	return root;
-}
-
-void	Server::set_root(std::string &new_root)
-{
-	root = new_root;
 }

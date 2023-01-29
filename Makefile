@@ -25,14 +25,13 @@ NAME		=	 webserv
 
 .PHONY: all fclean clean re test
 
-test:
-	cd tests ; bash test_serv.sh
-
 all: ${NAME}
+
+test: all
+	cd tests ; bash test_serv.sh
 
 ${OBJ_PATH} : 
 	mkdir ${OBJ_PATH}
-	echo ${HEAD_DEP}
 
 ${OBJ_PATH}/%.o : ${SRC_PATH}/%.cpp ${HEAD_DEP} | ${OBJ_PATH}
 	${CC} ${CFLAGS} -o $@ -c $< -I${INC_PATH}
