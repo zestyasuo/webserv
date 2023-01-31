@@ -20,7 +20,7 @@ Socket::Socket(Socket const &copy)
 Socket::~Socket()
 {
 	::shutdown(sfd, SHUT_RDWR);
-	std::cout << "Socket destroyed\n";
+	::close(sfd);
 }
 
 int	Socket::get_port(void) const

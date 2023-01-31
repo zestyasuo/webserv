@@ -35,6 +35,34 @@ int		Server::add_socket(int port) {
 	return (0);
 }
 
+int	Server::add_socket(std::pair<int, Socket *> sock_pair)
+{
+	try
+	{
+		if (connections_number > CONNECTIONS_COUNT)
+			throw Webserv_exception("Too many connections", ERROR);
+		if (sockets.count(sock_pair.first))
+			return 1;
+		sockets.insert(sock_pair);
+		connections[connections_number].events = POLLIN;
+		connections[connections_number].fd = sock_pair.second->get_fd();
+		logger.log("Socket added on port " + SSTR (sock_pair.first) , INFO);
+		connections_number++;
+	}
+	catch (const Webserv_exception &e)
+	{
+		logger.log(e.what(), e.get_error_code());
+		return 1;
+	}
+	return 0;
+}
+
+
+t_conf	const &Server::get_config(void) const
+{
+	return config;
+}
+
 void	Server::poll(void)
 {
 	try
@@ -70,6 +98,7 @@ void	Server::respond(void)
 		{
 			HTTPResponse *response = new HTTPResponse((*it)->get_request(), config);
 			(*it)->send(response->to_string());
+			delete response;
 		}
 		if ((*it)->is_ready())
 		{
@@ -117,9 +146,9 @@ void	Server::serve(void)
 
 Server::~Server()
 {
-	for (std::map<int, Socket *>::iterator it = sockets.begin(); it != sockets.end(); it++)
-	{
-		delete (*it).second;
-	}
+	// for (std::map<int, Socket *>::iterator it = sockets.begin(); it != sockets.end(); it++)
+	// {
+	// 	delete (*it).second;
+	// }
 	logger.log("Server stopped", INFO);
 }

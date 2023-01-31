@@ -35,11 +35,13 @@ private:
 public:
 	std::map<int, Socket *>	sockets;
 	int		add_socket(int port);
+	int		add_socket(std::pair<int, Socket *> sock_pair);
 	Server(void);
 	Server(Logger const &, t_conf const &);
 	~Server(void);
 	Server	&operator=(Server const &rhs);
 	void	serve(void);
+	t_conf	const &get_config(void) const;
 	class TooManyConnectionsException : public Webserv_exception {
 	};
 };

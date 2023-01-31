@@ -200,6 +200,7 @@ HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf) :
 int		HTTPResponse::check_method(s_location const &loc)
 {
 	std::string method = request->get_method();
+	std::cout << method << "\n";
 	int mask = get_method_mask(method);
 
 	if ((mask & config.implemented_methods) == 0)
