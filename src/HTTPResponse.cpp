@@ -1,10 +1,7 @@
 #include "../inc/HTTPResponse.hpp"
 #include "../inc/Server.hpp"
 // #include "../inc/Config_proto.hpp"
-#include <iostream>
-#include <sys/stat.h>	//	S_IFDIR
-#include <sys/wait.h>	//	S_IFDIR
-#include <vector>
+
 #define CRLF "\r\n"
 
 using std::string;
@@ -15,15 +12,17 @@ using std::vector;
 const	HTTPResponse::T HTTPResponse::response_bodies_pairs[] = {
 	{200, ""},
 	{501, "<html><h3>501 - not implemented!</h3></html>"},
-	{404, "<html><h3>404 - not found!</h3></html>"}
+	{404, "<html><h3>404 - not found!</h3></html>"},
+	{405, "<html><h3>405 - method not allowed!</h3></html>"},
+	{500, "<html><h3>500 - Internal Server Error!</h3></html>"}
 };
 
-const HTTPResponse::int_to_string_map_t HTTPResponse::response_bodies(response_bodies_pairs, response_bodies_pairs + 3);
+const HTTPResponse::int_to_string_map_t HTTPResponse::response_bodies(response_bodies_pairs, response_bodies_pairs + sizeof(HTTPResponse::response_bodies_pairs) /sizeof (HTTPResponse::T));
 
 const	HTTPResponse::T HTTPResponse::status_text_pairs[] = {
-	{200, "OK"}, {501, "Not Implemented"}, {404, "Not Found"}
+	{200, "OK"}, {501, "Not Implemented"}, {404, "Not Found"}, {405, "Method Not Allowed"}, {500, "Internal Server Error"}
 };
-const HTTPResponse::int_to_string_map_t HTTPResponse::status_texts(status_text_pairs, status_text_pairs + 3);
+const HTTPResponse::int_to_string_map_t HTTPResponse::status_texts(status_text_pairs, status_text_pairs + sizeof(HTTPResponse::status_text_pairs) /sizeof (HTTPResponse::T));
 
 // utils
 
@@ -85,7 +84,7 @@ vector<char> cgi_exec(const string &fname, const string &query_str)
 
 /// @brief returns method mask based on method name or 0 if method not supported
 /// @param str - method name
-/// @return method mask
+/// @return method mask or 0 if not found
 int		get_method_mask(std::string const &str)
 {
 	int		mask = 0;
@@ -124,9 +123,10 @@ s_location	const &get_location(std::string const &target, std::map<std::string, 
 	std::string	to_find;
 
 	if (target.find_last_of("/") != target.npos)
-		to_find  = target.substr(0, target.find_last_of("/") + 1);
-	
-	return locations.at(to_find);
+		to_find  = target.substr(0, target.find_last_of("/"));
+	std::cout << "to_find: " << to_find << "\n";
+	s_location const &loc = locations.count(to_find) ? locations.at(to_find) : locations.at("/");
+	return loc;
 }
 
 /// @brief tries to get index pages specified from config. If none specified tries index.html
@@ -150,7 +150,7 @@ int	HTTPResponse::try_index_page(std::string const &fname, s_location const &loc
 
 // constructors
 
-HTTPResponse::HTTPResponse(void)
+HTTPResponse::HTTPResponse(void) : config()
 {}
 
 HTTPResponse::HTTPResponse(HTTPResponse const &copy) : 
@@ -169,49 +169,50 @@ HTTPResponse::~HTTPResponse(){}
 /// @brief makes dumpable response object. the only way to get a response
 /// @param req parsed request
 /// @param conf parsed config
-HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf) : request(req), config(conf)
+HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf) :
+			status_code(0),
+			status_text(""),
+			request(req),
+			config(conf)
 {
-	/*	hardcoded for debug	only!	*/
-	version = "HTTP/1.1";
-	status_code = 0;
-	status_text = "OK";
+	if (!req)
+		return ;
 	s_location	loc;
 	std::string resp;
 	std::string fname;
 
-	try
-	{
-		loc = get_location(request->get_target(), config.locations);
-	}
-	catch(const std::exception& e)
-	{
-		loc = get_location("/", config.locations);
-	}
+	version = req->get_version();
+	loc = get_location(request->get_target(), config.locations);
 	std::string target = request->get_target();
-	if (!isMethodAllowed(loc))
+	std::cout << "location :" << config.root + loc.path << "\n";
+	if (check_method(loc))
 	{
-		status_code = 501;
+		ready_up();
 		return ;
 	}
 	// std::cout << "target: " << target << "\n";
-	fname = loc.root + target;
+	fname = config.root + target;
 	process_target(fname, loc);
 	// add_header("Location", "/");
 	ready_up();
 }
 
-/// @brief checks if method is allowed by location
-/// @param loc location
-/// @return false if not suppoted or true otherwise
-bool	HTTPResponse::isMethodAllowed(s_location const &loc)
+int		HTTPResponse::check_method(s_location const &loc)
 {
-	std::string const &method = request->get_method();
-	int					mask;
+	std::string method = request->get_method();
+	int mask = get_method_mask(method);
 
-	mask = get_method_mask(method);
-	if (loc.methods & mask)
-		return true;
-	return false;
+	if ((mask & config.implemented_methods) == 0)
+	{
+		status_code = 501;
+		return 1;
+	}
+	if ((loc.methods & mask) == 0)
+	{
+		status_code = 405;
+		return 1;
+	}
+	return 0;
 }
 
 /// @brief tries to open target file and sets status code, headers and messages to appropriate state
@@ -220,6 +221,7 @@ bool	HTTPResponse::isMethodAllowed(s_location const &loc)
 void	HTTPResponse::process_target(std::string const &fname, s_location const &loc)
 {
 	struct stat	st;
+	std::string	method = request->get_method();
 
 	std::cout << fname << "\n";
 
@@ -240,8 +242,19 @@ void	HTTPResponse::process_target(std::string const &fname, s_location const &lo
 	}
 	else
 	{
-		get_file_info(fname);
+		if (get_method_mask(method) & em_get)
+			get_file_info(fname);
+		else if (get_method_mask(method) & em_delete)
+			delete_file(fname);
 	}
+}
+
+void	HTTPResponse::delete_file(std::string const &fname)
+{
+	if (std::remove(fname.c_str()))
+		status_code = 500;
+	else
+		status_code = 200;
 }
 
 /// @brief opens file by path. reads it if found and method is get. deletes it if found and method is delete. todo: check if method is put and do something
@@ -312,7 +325,7 @@ void	HTTPResponse::ready_up(void)
 
 /// @brief HTTPResponse to_string
 /// @return HTTPResponse string representaion
-std::string HTTPResponse::to_string()
+std::string HTTPResponse::to_string() const
 {
 	// fname.append(request->get_target());
 	// size_t query_pos = fname.find('?');

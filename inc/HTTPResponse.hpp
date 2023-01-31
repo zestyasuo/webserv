@@ -6,6 +6,10 @@
 # include "Config_proto.hpp"
 # include <fstream>
 # include "utils.hpp"
+#include <sys/stat.h>	//	S_IFDIR
+#include <sys/wait.h>	//	S_IFDIR
+#include <vector>
+#include <cstdio>
 
 class HTTPResponse : public AHTTPMessage
 {
@@ -27,7 +31,9 @@ private:
 	void		process_target(std::string const &, s_location const &);
 	int			try_index_page(std::string const &, s_location const &);
 	HTTPResponse	&operator=(HTTPResponse const &rhs);
+	int				check_method(s_location const &);
 	void			ready_up(void);
+	void			delete_file(std::string const &);
 	typedef std::map<int, std::string>	int_to_string_map_t;
 	struct T
 	{
@@ -47,7 +53,7 @@ public:
 	explicit HTTPResponse(const HTTPRequest *, t_conf const &);
 	HTTPResponse(HTTPResponse const &copy);
 	~HTTPResponse(void);
-	std::string		to_string();
+	std::string		to_string(void) const;
 };
 
 std::ostream	&operator<<(std::ostream &os, HTTPResponse const &rhs);
