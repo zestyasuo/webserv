@@ -20,6 +20,7 @@ private:
 	Query(Query const &copy);
 	bool		ready;
 public:
+	int			get_socket(void) const;
 	bool		is_ready(void) const;
 	void		form_request(void);
 	HTTPRequest const	*get_request(void) const;

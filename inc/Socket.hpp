@@ -25,6 +25,7 @@ private:
 	Socket(void);
 	Socket(Socket const &copy);
 public:
+	void	poll(void);
 	int		get_fd(void) const;
 	int		get_port(void) const;
 	Socket(int port);

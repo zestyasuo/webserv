@@ -40,6 +40,11 @@ bool	Query::is_ready(void) const
 	return ready;
 }
 
+int	Query::get_socket(void) const
+{
+	return socket_fd;
+}
+
 //int	Query::send(std::string const &message) const
 int	Query::send(std::string const &message) const
 {

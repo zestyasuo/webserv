@@ -2,6 +2,7 @@
 #include "../inc/Config_proto.hpp"
 #include <Logger.hpp>
 # include <exception>
+# include "Router.hpp"
 
 // t_conf g_conf;
 
@@ -46,51 +47,19 @@ int	main(int argc, char** argv, char **envp)
 	// 	std::cout << "Usage: ./webserv config_file_path\n";
 	// 	return 1;
 	// }
-	Logger	server_logger;
-	std::vector<Server *>	active_servers;
-	std::vector<s_config> configs; // parsed server configs
-	std::map<int, Socket *>	open_sockets;
-
+	std::vector<t_conf> configs;
 	configs.push_back(create_test_config("serv_a", 8080));
-	configs.push_back(create_test_config("serv_b", 8090));
+	configs.push_back(create_test_config("serv_b", 8080));
+	Router router(configs);
 	// Server	*webserv = new Server(server_logger, create_test_config());
 
 	(void)argc;
 	(void)argv;
 	(void)envp;
 
-	for(std::vector<s_config>::iterator it = configs.begin(); it != configs.end(); it++)
+	while (true)
 	{
-		for (std::vector<int>::iterator port_it = (*it).ports.begin(); port_it != (*it).ports.end(); port_it++)
-		{
-			if (!open_sockets.count(*port_it))
-				open_sockets.insert(std::make_pair<int, Socket *>(*port_it, new Socket(*port_it)));
-		}
+		router.serve();
 	}
-
-	for(std::vector<s_config>::iterator it = configs.begin(); it != configs.end(); it++)
-	{
-		active_servers.push_back(new Server(server_logger, (*it)));
-		for (std::map<int, Socket *>::iterator sock_it = open_sockets.begin();
-			sock_it != open_sockets.end(); sock_it++)
-		{
-			for (std::vector<int>::const_iterator port_it = active_servers.back()->get_config().ports.begin();
-				port_it != active_servers.back()->get_config().ports.end(); port_it++)
-			{
-				if (((*port_it) == (*sock_it).first))
-					active_servers.back()->add_socket(*sock_it);
-			}
-		}
-	}
-
-	while (true){
-		for (std::vector<Server *>::iterator it = active_servers.begin(); it != active_servers.end(); it++)
-			(*it)->serve();
-	}
-
-	for (std::vector<Server *>::iterator it = active_servers.begin(); it != active_servers.end(); it++)
-		delete *it;
-
-	for (std::map<int, Socket *>::iterator it = open_sockets.begin(); it != open_sockets.end(); it++)
-		delete (*it).second;
+	
 }

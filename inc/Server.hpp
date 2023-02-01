@@ -24,23 +24,14 @@ class Server
 {
 private:
 	Logger				const logger;
-	int					connections_number;
-	struct pollfd		connections[CONNECTIONS_COUNT];
-	std::vector<Query *>	queries;
-	void				poll(void);
-	void				respond(void);
-	void				collect(void);
 	bool 				active;
 	t_conf	 			config;
 public:
-	std::map<int, Socket *>	sockets;
-	int		add_socket(int port);
-	int		add_socket(std::pair<int, Socket *> sock_pair);
+	void				respond(Query *query);
 	Server(void);
 	Server(Logger const &, t_conf const &);
 	~Server(void);
 	Server	&operator=(Server const &rhs);
-	void	serve(void);
 	t_conf	const &get_config(void) const;
 	class TooManyConnectionsException : public Webserv_exception {
 	};

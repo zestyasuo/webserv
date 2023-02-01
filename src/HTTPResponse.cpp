@@ -124,7 +124,7 @@ s_location	const &get_location(std::string const &target, std::map<std::string, 
 
 	if (target.find_last_of("/") != target.npos)
 		to_find  = target.substr(0, target.find_last_of("/"));
-	std::cout << "to_find: " << to_find << "\n";
+	// std::cout << "to_find: " << to_find << "\n";
 	s_location const &loc = locations.count(to_find) ? locations.at(to_find) : locations.at("/");
 	return loc;
 }
@@ -184,7 +184,7 @@ HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf) :
 	version = req->get_version();
 	loc = get_location(request->get_target(), config.locations);
 	std::string target = request->get_target();
-	std::cout << "location :" << config.root + loc.path << "\n";
+	// std::cout << "location :" << config.root + loc.path << "\n";
 	if (check_method(loc))
 	{
 		ready_up();
@@ -200,7 +200,6 @@ HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf) :
 int		HTTPResponse::check_method(s_location const &loc)
 {
 	std::string method = request->get_method();
-	std::cout << method << "\n";
 	int mask = get_method_mask(method);
 
 	if ((mask & config.implemented_methods) == 0)
@@ -224,7 +223,7 @@ void	HTTPResponse::process_target(std::string const &fname, s_location const &lo
 	struct stat	st;
 	std::string	method = request->get_method();
 
-	std::cout << fname << "\n";
+	// std::cout << fname << "\n";
 
 	if (stat(fname.c_str(), &st) != 0)
 	{
@@ -234,7 +233,7 @@ void	HTTPResponse::process_target(std::string const &fname, s_location const &lo
 
 	if (st.st_mode & S_IFDIR)
 	{
-		std::cout << "DIR TRY\n";
+		// std::cout << "DIR TRY\n";
 		if (try_index_page(fname, loc) != 0)
 		{
 			status_code = 501;
