@@ -20,10 +20,13 @@ void	Server::respond(Query *query)
 {
 		if ((query)->get_request())
 		{
+			std::cout << "I SEND from " << query << "\n";
 			HTTPResponse *response = new HTTPResponse(query->get_request(), config);
 			query->send(response->to_string());
 			logger.log("message sent from " + config.name, INFO);
+			// logger.log("message : \n" + response->to_string(), DEBUG);
 			delete response;
+			query->sent = true;
 		}
 }
 

@@ -1,13 +1,14 @@
 #include "../inc/Query.hpp"
 #include <vector>
+# include <poll.h>
 
 Query::Query()
 {
 }
 
-Query::Query(int sockfd) : socket_fd(sockfd), raw_data(""), request(0), ready(false)
+Query::Query(struct pollfd *p) : socket(p), raw_data(""), request(0), ready(false), sent(false)
 {
-	fd = accept(socket_fd, NULL, NULL);
+	fd = accept(socket->fd, NULL, NULL);
 	if (fd < 0)
 		throw Webserv_exception("accept failed", FATAL);
 	unblock_fd(fd);
@@ -15,7 +16,7 @@ Query::Query(int sockfd) : socket_fd(sockfd), raw_data(""), request(0), ready(fa
 
 int		Query::recieve(void)
 {
-	char	buf[1024];
+	char	buf[65536] = {0};
 	int	recieved_bytes = 0;
 	int	i;
 	const int	bytes_to_recieve = sizeof(buf) - 1;
@@ -26,12 +27,14 @@ int		Query::recieve(void)
 		if (i <= 0)
 		{
 			ready = true;
+			std::cout << "connection closed or recv failed\n";
 			break ;
 		}
 		recieved_bytes += i;
 	}
 	buf[recieved_bytes] = '\0';
 	raw_data += buf;
+	socket->revents = 0;
 	return recieved_bytes;
 }
 
@@ -42,14 +45,16 @@ bool	Query::is_ready(void) const
 
 int	Query::get_socket(void) const
 {
-	return socket_fd;
+	return socket->fd;
 }
 
 //int	Query::send(std::string const &message) const
 int	Query::send(std::string const &message) const
 {
 	char *bytes = const_cast<char *>(message.c_str());
-	int code = ::send(fd, bytes, message.length(), 0);
+	int  code = 0;
+	// if ((socket->revents & POLLOUT) == POLLOUT)
+	code = ::send(fd, bytes, message.length(), 0);
 	if (code < 0)
 	{
 		perror("sent");
@@ -59,7 +64,7 @@ int	Query::send(std::string const &message) const
 }
 
 Query::Query(Query const &copy):
-	socket_fd(copy.socket_fd),
+	socket(copy.socket),
 	fd(copy.fd),
 	raw_data(copy.raw_data),
 	request(copy.request),
@@ -81,6 +86,12 @@ HTTPRequest const	*Query::get_request(void) const
 
 void	Query::form_request(void)
 {
+	ready = raw_data.empty();
 	if (!raw_data.empty())
 		request = new HTTPRequest(raw_data);
+}
+
+short Query::getRevents(void) const
+{
+	return socket->revents;
 }

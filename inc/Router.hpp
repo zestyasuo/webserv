@@ -10,6 +10,7 @@
 # include "log_levels.hpp"
 # include "Socket.hpp"
 # include "Query.hpp"
+# include <utility>
 # define TIMEOUT 100
 
 class Router

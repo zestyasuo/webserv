@@ -64,11 +64,12 @@ void	Router::poll(void)
 			throw Webserv_exception("poll failied", ERROR);
 		}
 
-		for (int i = 0; i < 1024; i++)
+		for (size_t i = 0; i < open_sockets.size(); i++)
 		{
 			if (fds[i].revents & POLLIN)
 			{
-				Query *query = new Query(fds[i].fd);
+				std::cout << "connected\n";
+				Query *query = new Query(&fds[i]);
 				queries.push_back(query);
 			}
 		}
@@ -86,7 +87,8 @@ void	Router::collect(void)
 	{
 		try
 		{
-			(*it)->recieve();
+			if (((*it)->getRevents() & POLLIN) == POLLIN)
+				(*it)->recieve();
 			if ((*it)->is_ready())
 			{
 				(*it)->form_request();
@@ -108,7 +110,7 @@ void	Router::respond(void)
 	// if (queries.empty())
 	// 	return;
 	for (std::vector<Query *>::iterator it = queries.begin();
-		it != queries.end(); it++)
+		it != queries.end();)
 	{
 		if (queries.empty())
 			break ;
@@ -140,12 +142,21 @@ void	Router::respond(void)
 			if (!respond_from)
 				respond_from = servers.at(from_socket).front();
 			respond_from->respond((*it));
-		}
-		if ((*it)->is_ready())
-		{
-			delete (*it);
+			delete *it;
 			it = queries.erase(it);
 		}
+		else if ((*it)->is_ready())
+		{
+			delete *it;
+			it = queries.erase(it);
+		}
+		else
+			it++;
+		// if ((*it)->is_ready())
+		// {
+		// 	delete (*it);
+		// 	it = queries.erase(it);
+		// }
 	}
 }
 
