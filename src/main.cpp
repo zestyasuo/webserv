@@ -1,16 +1,16 @@
-#include <Server.hpp>
 #include "../inc/Config_proto.hpp"
+#include "Router.hpp"
 #include <Logger.hpp>
-# include <exception>
-# include "Router.hpp"
+#include <Server.hpp>
+#include <exception>
 
 // t_conf g_conf;
 
-t_conf	create_test_config(std::string const &server_name, int port)
+t_conf create_test_config(std::string const &server_name, int port)
 {
-	s_config	test_config;
-	s_location	test_location;
-	s_location	test_location2;
+	s_config   test_config;
+	s_location test_location;
+	s_location test_location2;
 
 	test_location2.methods = 0;
 	test_location.methods = 0;
@@ -31,8 +31,10 @@ t_conf	create_test_config(std::string const &server_name, int port)
 	test_location2.is_upload_allowed = true;
 
 	test_config.root = "/home/zyasuo/21school/my_server/www/serv_a";
-	test_config.locations.insert(std::make_pair(test_location.path, test_location));
-	test_config.locations.insert(std::make_pair(test_location2.path, test_location2));
+	test_config.locations.insert(
+		std::make_pair(test_location.path, test_location));
+	test_config.locations.insert(
+		std::make_pair(test_location2.path, test_location2));
 	test_config.implemented_methods = em_get | em_post | em_delete;
 	test_config.ports.push_back(port);
 	if (!server_name.empty())
@@ -40,14 +42,14 @@ t_conf	create_test_config(std::string const &server_name, int port)
 	return test_config;
 }
 
-int	main(int argc, char** argv, char **envp)
+int main(int argc, char **argv, char **envp)
 {
 	// if (argc != 2)
 	// {
 	// 	std::cout << "Usage: ./webserv config_file_path\n";
 	// 	return 1;
 	// }
-	std::vector<t_conf> configs;
+	std::vector< t_conf > configs;
 	configs.push_back(create_test_config("serv_a", 8080));
 	configs.push_back(create_test_config("serv_b", 8080));
 	Router router(configs);
@@ -61,5 +63,4 @@ int	main(int argc, char** argv, char **envp)
 	{
 		router.serve();
 	}
-	
 }

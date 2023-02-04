@@ -44,6 +44,7 @@ clean:
 
 fclean: clean
 	rm -f ${NAME}
+	rm -rf tests/webserv
 
 r	: $(NAME)
 	./$(NAME)
