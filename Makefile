@@ -13,8 +13,10 @@ SRC_PATH	=	src
 OBJ_PATH	=	obj
 INC_PATH	=	inc
 
-SIEGE_PATH	=	siege/osx/bin/siege
+SIEGE_DIR	=	siege
+SIEGE_BIN	=	$(SIEGE_DIR)/bin/siege
 SIEGE_ARGS	=	http://localhost:8080 -b --time=3S
+SIEGE_TAR	=	https://download.joedog.org/siege/siege-latest.tar.gz
 
 SRC			=	$(wildcard ${SRC_PATH}/*.cpp)
 
@@ -41,6 +43,17 @@ ${OBJ_PATH}/%.o : ${SRC_PATH}/%.cpp ${HEAD_DEP} | ${OBJ_PATH}
 
 ${NAME} : ${OBJ}
 	${CC} ${CFLAGS} $^ -o $@
+	
+
+$(SIEGE_BIN):
+	curl -L -o siege.tar.gz $(SIEGE_TAR)
+	mkdir siege_src
+	tar -xf siege.tar.gz -C siege_src --strip-components 1
+	rm siege.tar.gz
+	cd siege_src && ./configure --prefix=$(CURDIR)/$(SIEGE_DIR) --bindir=$(CURDIR)/$(SIEGE_DIR)/bin --mandir=$(CURDIR)/$(SIEGE_DIR)/man
+	make -C siege_src
+	make install -C siege_src
+	rm -rf siege_src
 
 clean:
 	rm -rf ${OBJ_PATH}
@@ -48,10 +61,10 @@ clean:
 fclean: clean
 	rm -f ${NAME}
 
-s	: $(NAME)
+s	: $(NAME) $(SIEGE_BIN)
 	./$(NAME) &
 	sleep 1
-	./$(SIEGE_PATH) $(SIEGE_ARGS) &> siege.log
+	./$(SIEGE_BIN) $(SIEGE_ARGS) &> siege.log
 #	$(shell bash -c "./$(NAME) &> /dev/null & ./$(SIEGE_PATH) $(SIEGE_ARGS) > siege.log; pkill webserv")
 	pkill webserv
 	@echo "\n\n"

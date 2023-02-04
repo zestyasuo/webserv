@@ -2,3 +2,4 @@ webserv
 obj/
 .idea
 tests/webserv
+siege
