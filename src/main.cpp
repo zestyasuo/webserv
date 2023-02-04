@@ -50,8 +50,8 @@ int main(int argc, char **argv, char **envp)
 	// 	return 1;
 	// }
 	std::vector< t_conf > configs;
-	configs.push_back(create_test_config("serv_a", 8080));
-	configs.push_back(create_test_config("serv_b", 8080));
+	configs.push_back(create_test_config("serv_a", 8090));
+	configs.push_back(create_test_config("serv_b", 8090));
 	Router router(configs);
 	// Server	*webserv = new Server(server_logger, create_test_config());
 
@@ -62,6 +62,6 @@ int main(int argc, char **argv, char **envp)
 	while (true)
 	{
 		router.serve();
-		// usleep(10000);
+		usleep(1000);
 	}
 }

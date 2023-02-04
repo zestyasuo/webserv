@@ -90,8 +90,7 @@ void Router::collect(void)
 	{
 		try
 		{
-			if (((*it)->getRevents() & POLLIN) == POLLIN)
-				(*it)->recieve();
+			(*it)->recieve();
 			if ((*it)->is_ready())
 			{
 				(*it)->form_request();

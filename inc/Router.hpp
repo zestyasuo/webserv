@@ -11,7 +11,6 @@
 #include <poll.h>
 #include <utility>
 #include <vector>
-#define TIMEOUT 100
 
 class Router
 {

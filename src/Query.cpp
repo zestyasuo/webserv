@@ -1,4 +1,5 @@
 #include "../inc/Query.hpp"
+#include <iostream>
 #include <poll.h>
 #include <vector>
 
@@ -17,15 +18,17 @@ Query::Query(struct pollfd *p)
 
 int Query::recieve(void)
 {
-	char	  buf[65536] = {0};
+	char	  buf[128] = {0};
 	int		  recieved_bytes = 0;
 	int		  i = 0;
 	const int bytes_to_recieve = sizeof(buf) - 1;
 
+	std::cout << "recievingb\n";
 	while (recieved_bytes != bytes_to_recieve)
 	{
 		i = ::recv(fd, buf + recieved_bytes, bytes_to_recieve - recieved_bytes,
 				   0);
+		std::cout << "i = " << i << "\n";
 		if (i <= 0)
 		{
 			std::cout << "accept : " << fd << " socket: " << socket->fd << "\n";
@@ -75,6 +78,7 @@ Query::Query(Query const &copy)
 
 Query::~Query()
 {
+	std::cout << "Query destroyed.\n";
 	delete request;
 	close(fd);
 };
@@ -86,6 +90,7 @@ HTTPRequest const *Query::get_request(void) const
 
 void Query::form_request(void)
 {
+	std::cout << "forming\n";
 	ready = raw_data.empty();
 	if (!raw_data.empty())
 		request = new HTTPRequest(raw_data);

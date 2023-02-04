@@ -14,7 +14,7 @@
 #include <utility>
 #include <vector>
 #define CONNECTIONS_COUNT 50
-#define TIMEOUT 100
+#define TIMEOUT 5
 
 #define SSTR(x)                                                                \
 	static_cast< std::ostringstream & >(                                       \
