@@ -191,7 +191,7 @@ HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf)
 	version = req->get_version();
 	loc = get_location(request->get_target(), config.locations);
 	std::string target = request->get_target();
-	// std::cout << "location :" << config.root + loc.path << "\n";
+	// std::cout << "location :" << config.root + loc.root << "\n";
 	if (check_method(loc))
 	{
 		ready_up();

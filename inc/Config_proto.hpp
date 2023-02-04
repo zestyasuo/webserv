@@ -22,7 +22,7 @@ struct s_location
 	bool autoindex;		 // = 1; autoindex (on / off == true / false) / mb check
 						 // ending slash
 						 // https://www.keycdn.com/support/nginx-directory-index
-	std::string path;	 // location [path] {}
+	std::string root;	 // location [path] {}
 	int			methods;	// = 0 , enum / allowed_methods "GET POST DELETE"
 	std::string rewrite;	// rewrite
 	std::vector< std::string > index_files;	   //	index ...,...
