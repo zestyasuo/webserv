@@ -30,7 +30,7 @@ t_conf create_test_config(std::string const &server_name, int port)
 	test_location2.index_files.push_back("index.html");
 	test_location2.is_upload_allowed = true;
 
-	test_config.root = "/home/zyasuo/21school/my_server/www/serv_a";
+	test_config.root = "/Users/zyasuo/webserv/www/serv_a";
 	test_config.locations.insert(
 		std::make_pair(test_location.path, test_location));
 	test_config.locations.insert(
@@ -62,5 +62,6 @@ int main(int argc, char **argv, char **envp)
 	while (true)
 	{
 		router.serve();
+		// usleep(10000);
 	}
 }

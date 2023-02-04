@@ -23,12 +23,12 @@ HTTPRequest::HTTPRequest(std::string const &raw)
 	valid = true;
 }
 
-HTTPRequest::HTTPRequest(HTTPRequest const &rhs) : AHTTPMessage(rhs)
+HTTPRequest::HTTPRequest(HTTPRequest const &rhs) : AHTTPMessage(rhs), target(rhs.target), method(rhs.method)
 {
 	version = rhs.version;
 	body = rhs.body;
-	target = rhs.target;
-	method = rhs.method;
+	
+	
 	headers = rhs.headers;
 }
 

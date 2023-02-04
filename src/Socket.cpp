@@ -40,7 +40,7 @@ void Socket::create()
 	{
 		throw Webserv_exception("Socket creation failed", FATAL);
 	}
-	if (::setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) &&
+	if (::setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) ||
 		::setsockopt(sfd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt)))
 	{
 		throw Webserv_exception("Setting socket options failed", FATAL);

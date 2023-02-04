@@ -161,7 +161,7 @@ int HTTPResponse::try_index_page(std::string const &fname,
 
 // constructors
 
-HTTPResponse::HTTPResponse(void) : config()
+HTTPResponse::HTTPResponse(void) : status_code(), request(), config()
 {
 }
 

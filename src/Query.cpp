@@ -2,14 +2,14 @@
 #include <poll.h>
 #include <vector>
 
-Query::Query()
+Query::Query() : socket(), fd(), request(), ready(), sent()
 {
 }
 
 Query::Query(struct pollfd *p)
 	: socket(p), raw_data(""), request(0), ready(false), sent(false)
 {
-	fd = accept(socket->fd, NULL, NULL);
+	fd = accept(socket->fd, nullptr, nullptr);
 	if (fd < 0)
 		throw Webserv_exception("accept failed", FATAL);
 	unblock_fd(fd);
@@ -19,7 +19,7 @@ int Query::recieve(void)
 {
 	char	  buf[65536] = {0};
 	int		  recieved_bytes = 0;
-	int		  i;
+	int		  i = 0;
 	const int bytes_to_recieve = sizeof(buf) - 1;
 
 	while (recieved_bytes != bytes_to_recieve)
@@ -28,8 +28,10 @@ int Query::recieve(void)
 				   0);
 		if (i <= 0)
 		{
+			std::cout << "accept : " << fd << " socket: " << socket->fd << "\n";
 			ready = true;
-			std::cout << "connection closed or recv failed\n";
+			// socket->revents = 0;
+			// std::cout << "connection closed or recv failed\n";
 			break;
 		}
 		recieved_bytes += i;

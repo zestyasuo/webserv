@@ -15,9 +15,8 @@ std::string get_meta_data_array(std::string const &str)
 }
 
 AHTTPMessage::AHTTPMessage(AHTTPMessage const &rhs)
+	: raw_data(rhs.raw_data), meta_data(rhs.meta_data)
 {
-	raw_data = rhs.raw_data;
-	meta_data = rhs.meta_data;
 }
 
 AHTTPMessage::AHTTPMessage()
