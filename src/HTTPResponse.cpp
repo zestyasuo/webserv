@@ -1,6 +1,7 @@
 #include "../inc/HTTPResponse.hpp"
 #include "../inc/Server.hpp"
 #include <string>
+#include "file_utils.hpp"
 // #include "../inc/Config_proto.hpp"
 
 #define CRLF "\r\n"
@@ -220,10 +221,16 @@ void HTTPResponse::process_target(std::string const &fname, s_location const &lo
 
 	if (st.st_mode & S_IFDIR)
 	{
+		// std::cout << "DIR TRY\n";
+		std::cout << fname << std::endl;
 		if (try_index_page(fname, loc) != 0)
 		{
-			status_code = 501;
-			std::cout << "dir listing requered;\n";
+			// status_code = 501;
+			content_type = CTYPE_TEXT_HTML;
+			status_code = 200;
+			payload += dir_list_formatted(fname, true);
+			wrap_html_body(payload);
+			// std::cout << "dir listing requered;\n";
 		}
 	}
 	else
@@ -304,7 +311,7 @@ void HTTPResponse::ready_up(void)
 		status_text = status_texts.at(status_code);
 	payload.insert(0, html);
 	add_header("Date", get_floctime());
-	add_header("Content-Type", "text/html");
+	add_header("Content-Type", content_type);
 	std::string headers_str = map_to_str(headers);
 	payload.insert(0, headers_str + CRLF);
 	insert_status_line();

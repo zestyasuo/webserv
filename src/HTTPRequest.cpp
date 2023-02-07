@@ -73,8 +73,10 @@ std::map< std::string, std::string > HTTPRequest::parse_headers(std::vector< std
 	{
 		first = (*it).substr(0, (*it).find(":"));
 		second = (*it).substr((*it).find(":") + 1);
-		first.erase(std::remove_if(first.begin(), first.end(), ::isspace), first.end());
-		second.erase(std::remove_if(second.begin(), second.end(), ::isspace), second.end());
+		first.erase(std::remove_if(first.begin(), first.end(), ::isspace),
+					first.end());
+		second.erase(std::remove_if(second.begin(), second.end(), ::isspace),
+					 second.end());
 		res.insert(std::make_pair(first, second));
 	}
 

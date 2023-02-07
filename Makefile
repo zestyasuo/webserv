@@ -13,6 +13,9 @@ SRC_PATH	=	src
 OBJ_PATH	=	obj
 INC_PATH	=	inc
 
+SIEGE_PATH	=	siege/osx/bin/siege
+SIEGE_ARGS	=	http://localhost:8080 -b --time=3S
+
 SRC			=	$(wildcard ${SRC_PATH}/*.cpp)
 
 HEADERS		=	${wildcard ${INC_PATH}/*.hpp}
@@ -48,5 +51,15 @@ fclean: clean
 
 r	: $(NAME)
 	./$(NAME)
+
+s	: $(NAME)
+	./$(NAME) &
+	sleep 1
+	./$(SIEGE_PATH) $(SIEGE_ARGS) &> siege.log
+#	$(shell bash -c "./$(NAME) &> /dev/null & ./$(SIEGE_PATH) $(SIEGE_ARGS) > siege.log; pkill webserv")
+	pkill webserv
+	@echo "\n\n"
+	cat siege.log
+	rm siege.log
 
 re : fclean all

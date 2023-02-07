@@ -11,6 +11,8 @@
 #include <sys/wait.h>	 //	S_IFDIR
 #include <vector>
 
+#define CTYPE_TEXT_HTML "text/html"
+
 class HTTPResponse : public AHTTPMessage
 {
 	typedef std::map< int, std::string > int_to_string_map_t;

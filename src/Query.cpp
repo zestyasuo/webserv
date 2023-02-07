@@ -22,11 +22,15 @@ int Query::recieve(void)
 	ssize_t	  i = 0;
 	const int bytes_to_recieve = sizeof(buf) - 1;
 
+	// std::cout << "read\n";
 	while (recieved_bytes != bytes_to_recieve)
 	{
-		i = ::recv(fd, buf + recieved_bytes, bytes_to_recieve - recieved_bytes, 0);
+		i = ::recv(fd, buf + recieved_bytes, bytes_to_recieve - recieved_bytes,
+				   0);
+		std::cout << "i = " << i << "\n";
 		if (i <= 0)
 		{
+			std::cout << "accept : " << fd << " socket: " << socket->fd << "\n";
 			ready = true;
 			break;
 		}
@@ -54,7 +58,6 @@ size_t Query::send(std::string const &message) const
 	char const *bytes = (message.c_str());
 	ssize_t		code = 0;
 	// if ((socket->revents & POLLOUT) == POLLOUT)
-	std::cout << message << "----- sent\n";
 	code = ::send(fd, bytes, message.length(), 0);
 	if (code < 0)
 	{
@@ -71,6 +74,7 @@ Query::Query(Query const &copy)
 
 Query::~Query()
 {
+	std::cout << "Query destroyed.\n";
 	delete request;
 	close(fd);
 };

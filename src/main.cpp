@@ -3,15 +3,16 @@
 #include <Logger.hpp>
 #include <Server.hpp>
 #include <exception>
-#include <utility>
+#include <sys/syslimits.h>
+#include <unistd.h>
+#include "utils.hpp"
 
 // t_conf g_conf;
 
 t_conf create_test_config(std::string const &server_name, int port)
 {
-	s_config					 test_config;
-	s_location					 test_location;
-	s_location					 test_location2;
+	char	webserv_root_dir[PATH_MAX];
+	getcwd(webserv_root_dir, PATH_MAX);
 	std::map< int, std::string > errors;
 	std::map< int, std::string > statuses;
 
@@ -26,6 +27,10 @@ t_conf create_test_config(std::string const &server_name, int port)
 	statuses.insert(std::make_pair(404, "Not Found"));
 	statuses.insert(std::make_pair(405, "Method Not Allowed"));
 	statuses.insert(std::make_pair(500, "Internal Server Error"));
+
+	s_config   test_config;
+	s_location test_location;
+	s_location test_location2;
 
 	test_config.error_pages = errors;
 	test_config.status_texts = statuses;
@@ -42,14 +47,16 @@ t_conf create_test_config(std::string const &server_name, int port)
 	test_location.is_upload_allowed = true;
 
 	test_location2.path = "/cat";
-	test_location2.root = "/home/zyasuo/21school/my_server/www/serv_b";
+	test_location2.root = std::string(webserv_root_dir) + "/www/serv_b";
+	// test_location2.root = "/home/zyasuo/21school/my_server/www/serv_b";
 	test_location2.methods |= em_get | em_post | em_delete;
 	test_location2.autoindex = true;
 	test_location2.rewrite = "";
 	test_location2.index_files.push_back("index1.html");
 	test_location2.is_upload_allowed = true;
 
-	test_config.root = "/home/zyasuo/21school/my_server/www/serv_a";
+	// test_config.root = "/home/zyasuo/21school/my_server/www/serv_a";
+	test_config.root = std::string(webserv_root_dir) + "/www/serv_a";
 	test_config.locations.insert(std::make_pair(test_location.path, test_location));
 	test_config.locations.insert(std::make_pair(test_location2.path, test_location2));
 	test_config.implemented_methods = em_get | em_post | em_delete;
