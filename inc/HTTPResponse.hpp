@@ -1,7 +1,7 @@
 #ifndef HTTPResponse_HPP
 #define HTTPResponse_HPP
 #include "AHTTPMessage.hpp"
-#include "Config_proto.hpp"
+#include "Config.hpp"
 #include "HTTPRequest.hpp"
 #include "utils.hpp"
 #include <cstdio>
@@ -34,7 +34,7 @@ class HTTPResponse : public AHTTPMessage
 	bool								 isMethodAllowed(s_location const &);
 	void								 get_file_info(std::string const &);
 	void								 read_file(std::ifstream &);
-	std::string							 parse_target(std::string const &);
+	std::string							 parse_target(std::string const &, std::string const &);
 	void								 process_target(std::string const &, s_location const &);
 	int									 try_index_page(std::string const &, s_location const &);
 	HTTPResponse						&operator=(HTTPResponse const &rhs);

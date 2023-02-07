@@ -1,7 +1,7 @@
 #ifndef Router_HPP
 #define Router_HPP
 
-#include "Config_proto.hpp"
+#include "Config.hpp"
 #include "Query.hpp"
 #include "Server.hpp"
 #include "Socket.hpp"

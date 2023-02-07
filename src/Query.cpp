@@ -25,12 +25,9 @@ int Query::recieve(void)
 	// std::cout << "read\n";
 	while (recieved_bytes != bytes_to_recieve)
 	{
-		i = ::recv(fd, buf + recieved_bytes, bytes_to_recieve - recieved_bytes,
-				   0);
-		std::cout << "i = " << i << "\n";
+		i = ::recv(fd, buf + recieved_bytes, bytes_to_recieve - recieved_bytes, 0);
 		if (i <= 0)
 		{
-			std::cout << "accept : " << fd << " socket: " << socket->fd << "\n";
 			ready = true;
 			break;
 		}
@@ -61,20 +58,17 @@ size_t Query::send(std::string const &message) const
 	code = ::send(fd, bytes, message.length(), 0);
 	if (code < 0)
 	{
-		perror("sent");
 		throw Webserv_exception("send failed", ERROR);
 	}
 	return message.length();
 }
 
-Query::Query(Query const &copy)
-	: socket(copy.socket), fd(copy.fd), raw_data(copy.raw_data), request(copy.request), ready(copy.ready)
+Query::Query(Query const &copy) : socket(copy.socket), fd(copy.fd), raw_data(copy.raw_data), request(copy.request), ready(copy.ready)
 {
 }
 
 Query::~Query()
 {
-	std::cout << "Query destroyed.\n";
 	delete request;
 	close(fd);
 };

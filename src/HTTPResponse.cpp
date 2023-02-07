@@ -1,8 +1,8 @@
 #include "../inc/HTTPResponse.hpp"
 #include "../inc/Server.hpp"
+#include "../inc/file_utils.hpp"
 #include <string>
-#include "file_utils.hpp"
-// #include "../inc/Config_proto.hpp"
+// #include "../inc/Config.hpp"
 
 #define CRLF "\r\n"
 
@@ -105,7 +105,7 @@ s_location const &get_location(std::string const &target, std::map< std::string,
 
 	if (target.find_last_of("/") != target.npos)
 		to_find = target.substr(0, target.find_last_of("/"));
-	std::cout << "to_find: " << to_find << "\n";
+	// std::cout << "to_find: " << to_find << "\n";
 	s_location const &loc = locations.count(to_find) ? locations.at(to_find) : locations.at("/");
 	return loc;
 }
@@ -149,7 +149,8 @@ HTTPResponse::~HTTPResponse()
 /// @brief makes dumpable response object. the only way to get a response
 /// @param req parsed request
 /// @param conf parsed config
-HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf) : status_code(0), status_text(""), request(req), config(conf), error_pages(config.error_pages)
+HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf)
+	: status_code(0), status_text(""), request(req), config(conf), error_pages(config.error_pages)
 {
 	if (!req)
 		return;
@@ -160,15 +161,14 @@ HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf) : status_
 
 	version = req->get_version();
 	loc = get_location(request->get_target(), config.locations);
-	std::string target = parse_target(request->get_target());
-	// std::cout << "location :" << config.root + loc.path << "\n";
 	if (check_method(loc))
 	{
 		ready_up();
 		return;
 	}
-	// std::cout << "target: " << target << "\n";
 	root = loc.root.empty() ? config.root : loc.root;
+	// std::cout << "root: " << root << std::endl;
+	std::string target = parse_target(request->get_target(), loc.path);
 
 	fname = root + target;
 	process_target(fname, loc);
@@ -176,12 +176,15 @@ HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf) : status_
 	ready_up();
 }
 
-std::string HTTPResponse::parse_target(std::string const &target)
+std::string HTTPResponse::parse_target(std::string const &target, std::string const &loc_path)
 {
-	size_t		slash = target.find_last_of('/');
-	std::string res = target.substr(slash);
-	std::cout << res << "\n";
-	return res;
+	size_t		slash = target.find(loc_path);
+	std::string copy = target;
+
+	copy.erase(slash, loc_path.length());
+	// std::string res = target.substr(slash);
+	// std::cout << copy << "\n";
+	return copy;
 }
 
 int HTTPResponse::check_method(s_location const &loc)
@@ -211,7 +214,7 @@ void HTTPResponse::process_target(std::string const &fname, s_location const &lo
 	struct stat st = {};
 	std::string method = request->get_method();
 
-	std::cout << fname << "\n";
+	// std::cout << fname << "\n";
 
 	if (stat(fname.c_str(), &st) != 0)
 	{
@@ -222,7 +225,7 @@ void HTTPResponse::process_target(std::string const &fname, s_location const &lo
 	if (st.st_mode & S_IFDIR)
 	{
 		// std::cout << "DIR TRY\n";
-		std::cout << fname << std::endl;
+		// std::cout << fname << std::endl;
 		if (try_index_page(fname, loc) != 0)
 		{
 			// status_code = 501;

@@ -1,6 +1,6 @@
 #ifndef Server_HPP
 #define Server_HPP
-#include "Config_proto.hpp"
+#include "Config.hpp"
 #include "Logger.hpp"
 #include "Query.hpp"
 #include "Socket.hpp"

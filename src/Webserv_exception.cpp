@@ -1,7 +1,6 @@
 #include "../inc/Webserv_exception.hpp"
 
-Webserv_exception::Webserv_exception()
-	: error_code(-1), error_message("Not defined error")
+Webserv_exception::Webserv_exception() : error_code(-1), error_message("Not defined error")
 {
 }
 
