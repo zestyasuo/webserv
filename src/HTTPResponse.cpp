@@ -223,8 +223,14 @@ int HTTPResponse::check_method(s_location const &loc)
 /// to appropriate state
 /// @param fname target
 /// @param loc target location
-void HTTPResponse::process_target(std::string const &fname, s_location const &loc)
+///	fname_raw may contain html entities (e.g. %20 = ' ')
+///	which converted to their single character values in fname
+
+void HTTPResponse::process_target(std::string const &fname_raw, s_location const &loc)
 {
+	string fname(fname_raw);
+	decode_html_enities(fname);
+
 	struct stat st = {};
 	std::string method = request->get_method();
 
@@ -245,7 +251,8 @@ void HTTPResponse::process_target(std::string const &fname, s_location const &lo
 			// status_code = 501;
 			content_type = CTYPE_TEXT_HTML;
 			status_code = 200;
-			payload += dir_list_formatted(fname, true);
+			// this->request->get_target()
+			payload += dir_list_formatted(fname, this->request, true);
 			wrap_html_body(payload);
 			// std::cout << "dir listing requered;\n";
 		}
