@@ -1,16 +1,15 @@
 #include "../inc/Query.hpp"
+#include <cstddef>
 #include <iostream>
 #include <poll.h>
 #include <vector>
 
-Query::Query() : socket(), fd(), request(), ready(), sent()
+Query::Query() : socket(), fd(), request(), ready()
 {
 }
 
-Query::Query(struct pollfd *p)
-	: socket(p), raw_data(""), request(0), ready(false), sent(false)
+Query::Query(struct pollfd *p) : socket(p), fd(accept(socket->fd, NULL, NULL)), raw_data(""), request(0), ready(false)
 {
-	fd = accept(socket->fd, nullptr, nullptr);
 	if (fd < 0)
 		throw Webserv_exception("accept failed", FATAL);
 	unblock_fd(fd);
@@ -18,12 +17,12 @@ Query::Query(struct pollfd *p)
 
 int Query::recieve(void)
 {
-	char	  buf[128] = {0};
+	char	  buf[BUFF_SIZE] = {0};
 	int		  recieved_bytes = 0;
-	int		  i = 0;
+	ssize_t	  i = 0;
 	const int bytes_to_recieve = sizeof(buf) - 1;
 
-	std::cout << "recievingb\n";
+	// std::cout << "read\n";
 	while (recieved_bytes != bytes_to_recieve)
 	{
 		i = ::recv(fd, buf + recieved_bytes, bytes_to_recieve - recieved_bytes,
@@ -56,10 +55,10 @@ int Query::get_socket(void) const
 }
 
 // int	Query::send(std::string const &message) const
-int Query::send(std::string const &message) const
+size_t Query::send(std::string const &message) const
 {
-	char *bytes = const_cast< char * >(message.c_str());
-	int	  code = 0;
+	char const *bytes = (message.c_str());
+	ssize_t		code = 0;
 	// if ((socket->revents & POLLOUT) == POLLOUT)
 	code = ::send(fd, bytes, message.length(), 0);
 	if (code < 0)
@@ -71,8 +70,7 @@ int Query::send(std::string const &message) const
 }
 
 Query::Query(Query const &copy)
-	: socket(copy.socket), fd(copy.fd), raw_data(copy.raw_data),
-	  request(copy.request), response(copy.response), ready(copy.ready)
+	: socket(copy.socket), fd(copy.fd), raw_data(copy.raw_data), request(copy.request), response(copy.response), ready(copy.ready)
 {
 }
 
@@ -90,7 +88,6 @@ HTTPRequest const *Query::get_request(void) const
 
 void Query::form_request(void)
 {
-	std::cout << "forming\n";
 	ready = raw_data.empty();
 	if (!raw_data.empty())
 		request = new HTTPRequest(raw_data);

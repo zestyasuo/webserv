@@ -5,8 +5,7 @@ Webserv_exception::Webserv_exception()
 {
 }
 
-Webserv_exception::Webserv_exception(const char *message, int code)
-	: error_code(code), error_message(message)
+Webserv_exception::Webserv_exception(const char *message, int code) : error_code(code), error_message(message)
 {
 }
 
