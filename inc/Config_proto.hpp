@@ -34,11 +34,12 @@ struct s_location
 	map< string, string >				 extra_props;		   // reserved for unknown purposes
 	size_t								 body_size_limit;	   // body_size_limit, bytes;
 	// error - path
-	std::map< int, std::string > error_pages;
 };
 
 struct s_config
 {
+	std::map<int, std::string > 		error_pages;
+	std::map<int, std::string >			status_texts; 
 	int									implemented_methods;
 	map< std::string, std::string >		envp;		  // parsed char **envp
 	std::map< std::string, s_location > locations;	  // location [std::string] {s_location}

@@ -10,21 +10,6 @@ using std::vector;
 
 #define BUF_SIZE 4096
 
-const HTTPResponse::T HTTPResponse::response_bodies_pairs[] = {{200, ""},
-															   {501, "<html><h3>501 - not implemented!</h3></html>"},
-															   {404, "<html><h3>404 - not found!</h3></html>"},
-															   {405, "<html><h3>405 - method not allowed!</h3></html>"},
-															   {500, "<html><h3>500 - Internal Server Error!</h3></html>"}};
-
-const HTTPResponse::int_to_string_map_t HTTPResponse::response_bodies(response_bodies_pairs,
-																	  response_bodies_pairs +
-																		  sizeof(HTTPResponse::response_bodies_pairs) / sizeof(HTTPResponse::T));
-
-const HTTPResponse::T HTTPResponse::status_text_pairs[] = {
-	{200, "OK"}, {501, "Not Implemented"}, {404, "Not Found"}, {405, "Method Not Allowed"}, {500, "Internal Server Error"}};
-const HTTPResponse::int_to_string_map_t HTTPResponse::status_texts(status_text_pairs, status_text_pairs + sizeof(HTTPResponse::status_text_pairs) /
-																											  sizeof(HTTPResponse::T));
-
 // utils
 
 /// @brief Creates HTTP message compatable string with headers
@@ -163,7 +148,7 @@ HTTPResponse::~HTTPResponse()
 /// @brief makes dumpable response object. the only way to get a response
 /// @param req parsed request
 /// @param conf parsed config
-HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf) : status_code(0), status_text(""), request(req), config(conf)
+HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf) : status_code(0), status_text(""), request(req), config(conf), error_pages(config.error_pages)
 {
 	if (!req)
 		return;
@@ -235,7 +220,6 @@ void HTTPResponse::process_target(std::string const &fname, s_location const &lo
 
 	if (st.st_mode & S_IFDIR)
 	{
-		// std::cout << "DIR TRY\n";
 		if (try_index_page(fname, loc) != 0)
 		{
 			status_code = 501;
@@ -302,7 +286,7 @@ void HTTPResponse::read_file(std::ifstream &ifs)
 {
 	size_t resp_headers_size = payload.size();
 	ifs.seekg(0, std::ios::end);
-	size_t fsize = ifs.tellg();
+	ssize_t fsize = ifs.tellg();
 	payload.resize(payload.size() + fsize);
 	ifs.seekg(0);
 	ifs.read(&payload[resp_headers_size], fsize);
@@ -314,8 +298,8 @@ void HTTPResponse::ready_up(void)
 {
 	std::string html;
 
-	if (response_bodies.count(status_code))
-		html = response_bodies.at(status_code);
+	if (error_pages.count(status_code))
+		html = error_pages.at(status_code);
 	if (status_texts.count(status_code))
 		status_text = status_texts.at(status_code);
 	payload.insert(0, html);

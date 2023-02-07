@@ -1,7 +1,7 @@
 #ifndef Query_HPP
 #define Query_HPP
 #include "HTTPRequest.hpp"
-#include "HTTPResponse.hpp"
+#include "Webserv_exception.hpp"
 #include <cstddef>
 #include <iostream>
 #include <sys/socket.h>
@@ -15,11 +15,9 @@ class Query
 	int			   fd;
 	std::string	   raw_data;
 	HTTPRequest	  *request;
-	HTTPResponse   response;
 	Query(void);
 	Query(Query const &copy);
 	bool ready;
-
   public:
 	int				   get_socket(void) const;
 	bool			   is_ready(void) const;

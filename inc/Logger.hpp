@@ -2,6 +2,7 @@
 #define Logger_HPP
 #include "Colors.hpp"
 #include "Webserv_exception.hpp"
+#include "log_levels.hpp"
 #include <iostream>
 #include <string>
 

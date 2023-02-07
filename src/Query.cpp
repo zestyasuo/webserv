@@ -22,15 +22,12 @@ int Query::recieve(void)
 	ssize_t	  i = 0;
 	const int bytes_to_recieve = sizeof(buf) - 1;
 
-	// std::cout << "read\n";
 	while (recieved_bytes != bytes_to_recieve)
 	{
 		i = ::recv(fd, buf + recieved_bytes, bytes_to_recieve - recieved_bytes, 0);
 		if (i <= 0)
 		{
 			ready = true;
-			// socket->revents = 0;
-			// std::cout << "connection closed or recv failed\n";
 			break;
 		}
 		recieved_bytes += i;
@@ -68,7 +65,7 @@ size_t Query::send(std::string const &message) const
 }
 
 Query::Query(Query const &copy)
-	: socket(copy.socket), fd(copy.fd), raw_data(copy.raw_data), request(copy.request), response(copy.response), ready(copy.ready)
+	: socket(copy.socket), fd(copy.fd), raw_data(copy.raw_data), request(copy.request), ready(copy.ready)
 {
 }
 

@@ -3,15 +3,32 @@
 #include <Logger.hpp>
 #include <Server.hpp>
 #include <exception>
+#include <utility>
 
 // t_conf g_conf;
 
 t_conf create_test_config(std::string const &server_name, int port)
 {
-	s_config   test_config;
-	s_location test_location;
-	s_location test_location2;
+	s_config					 test_config;
+	s_location					 test_location;
+	s_location					 test_location2;
+	std::map< int, std::string > errors;
+	std::map< int, std::string > statuses;
 
+	errors.insert(std::make_pair(200, ""));
+	errors.insert(std::make_pair(501, "<html><h3>501 - not implemented!</h3></html>"));
+	errors.insert(std::make_pair(404, "<html><h3>404 - not found!</h3></html>"));
+	errors.insert(std::make_pair(405, "<html><h3>405 - method not allowed!</h3></html>"));
+	errors.insert(std::make_pair(500, "<html><h3>500 - Internal Server Error!</h3></html>"));
+
+	statuses.insert(std::make_pair(200, "OK"));
+	statuses.insert(std::make_pair(501, "Not Implemented"));
+	statuses.insert(std::make_pair(404, "Not Found"));
+	statuses.insert(std::make_pair(405, "Method Not Allowed"));
+	statuses.insert(std::make_pair(500, "Internal Server Error"));
+
+	test_config.error_pages = errors;
+	test_config.status_texts = statuses;
 	test_location2.methods = 0;
 	test_location.methods = 0;
 

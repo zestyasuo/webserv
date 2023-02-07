@@ -5,6 +5,7 @@
 #include "Query.hpp"
 #include "Socket.hpp"
 #include "Webserv_exception.hpp"
+#include "HTTPResponse.hpp"
 #include "log_levels.hpp"
 #include <cstdio>
 #include <iostream>
@@ -24,7 +25,7 @@ class Server
 	Logger const logger;
 	bool		 active;
 	t_conf		 config;
-
+	Server(Server const &);
   public:
 	void respond(Query *query);
 	Server(void);

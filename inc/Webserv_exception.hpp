@@ -1,7 +1,7 @@
 #ifndef Webserv_exception_HPP
 #define Webserv_exception_HPP
-#include "log_levels.hpp"
 #include <iostream>
+#include "log_levels.hpp"
 
 class Webserv_exception : public std::exception
 {
