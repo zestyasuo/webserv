@@ -9,12 +9,10 @@
 #include <vector>
 
 void					   unblock_fd(int fd);
-std::vector< std::string > split(std::string const &str,
-								 std::string const &del);
+std::vector< std::string > split(std::string const &str, std::string const &del);
 std::string				   get_floctime(void);
 
-template < class UnaryPredicate >
-std::vector< std::string > split_if(std::string const &str, UnaryPredicate p)
+template < class UnaryPredicate > std::vector< std::string > split_if(std::string const &str, UnaryPredicate p)
 {
 	std::string				   token;
 	std::string				   copy;

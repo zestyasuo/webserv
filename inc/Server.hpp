@@ -16,10 +16,7 @@
 #define CONNECTIONS_COUNT 50
 #define TIMEOUT 5
 
-#define SSTR(x)                                                                \
-	static_cast< std::ostringstream & >(                                       \
-		(std::ostringstream() << std::dec << x))                               \
-		.str()
+#define SSTR(x) static_cast< std::ostringstream & >((std::ostringstream() << std::dec << x)).str()
 
 class Server
 {
@@ -33,7 +30,7 @@ class Server
 	Server(void);
 	Server(Logger const &, t_conf const &);
 	~Server(void);
-	Server &	  operator=(Server const &rhs);
+	Server		 &operator=(Server const &rhs);
 	t_conf const &get_config(void) const;
 	class TooManyConnectionsException : public Webserv_exception
 	{
