@@ -1,14 +1,15 @@
 #include "../inc/html.hpp"
 
-#define HTML_HEAD	"<!DOCTYPE html>\n"\
-					"<!-- webserv pre-alpha 0.00001 -->\n"\
-					"<HTML>\n"\
-					"<style>"\
-					"body {font-family: Helvetica;}\n"\
-					"a {color: #0073E6; text-decoration:none; text-height:1.5ex}\n"\
-					"a:hover {color: #00CCAA}\n"\
-					"</style>"\
-					"<BODY>\n"
+#define HTML_HEAD                                                                                                                                    \
+	"<!DOCTYPE html>\n"                                                                                                                              \
+	"<!-- webserv pre-alpha 0.00001 -->\n"                                                                                                           \
+	"<HTML>\n"                                                                                                                                       \
+	"<style>"                                                                                                                                        \
+	"body {font-family: Helvetica;}\n"                                                                                                               \
+	"a {color: #0073E6; text-decoration:none; text-height:1.5ex}\n"                                                                                  \
+	"a:hover {color: #00CCAA}\n"                                                                                                                     \
+	"</style>"                                                                                                                                       \
+	"<BODY>\n"
 
 #define HTML_FOOTER                                                                                                                                  \
 	"</BODY>\n"                                                                                                                                      \

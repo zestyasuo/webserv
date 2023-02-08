@@ -15,10 +15,10 @@ Query::Query(struct pollfd *p) : socket(p), fd(accept(socket->fd, NULL, NULL)), 
 	unblock_fd(fd);
 }
 
-int Query::recieve(void)
+size_t Query::recieve(void)
 {
 	char	  buf[BUFF_SIZE] = {0};
-	int		  recieved_bytes = 0;
+	size_t	  recieved_bytes = 0;
 	ssize_t	  i = 0;
 	const int bytes_to_recieve = sizeof(buf) - 1;
 
@@ -33,8 +33,7 @@ int Query::recieve(void)
 		}
 		recieved_bytes += i;
 	}
-	buf[recieved_bytes] = '\0';
-	raw_data += buf;
+	raw_data += std::string(buf);
 	socket->revents = 0;
 	return recieved_bytes;
 }

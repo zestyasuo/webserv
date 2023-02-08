@@ -1,9 +1,8 @@
 #include "../inc/Router.hpp"
 
-Router::Router(std::vector< s_config > const &conf) : configs(conf)
+Router::Router(std::vector< s_config > const &conf) : configs(conf), logger(true)
 {
 	// open requested sockets
-	Logger server_logger;
 	for (std::vector< s_config >::iterator it = configs.begin(); it != configs.end(); it++)
 	{
 		for (std::vector< int >::iterator port_it = (*it).ports.begin(); port_it != (*it).ports.end(); port_it++)
@@ -13,6 +12,7 @@ Router::Router(std::vector< s_config > const &conf) : configs(conf)
 				open_sockets.insert(std::make_pair< int, Socket * >(*port_it, new Socket(*port_it)));
 				fds[open_sockets.size() - 1].fd = open_sockets[*port_it]->get_fd();
 				fds[open_sockets.size() - 1].events = POLLIN | POLLOUT;
+				logger.log("Serving port " + SSTR(*port_it), DEBUG);
 			}
 		}
 	}
@@ -23,7 +23,7 @@ Router::Router(std::vector< s_config > const &conf) : configs(conf)
 		{
 			if (!servers.count(open_sockets.at(*port_it)))
 				servers.insert(std::make_pair< Socket *, std::vector< Server * > >(open_sockets.at(*port_it), std::vector< Server * >()));
-			servers.at(open_sockets.at(*port_it)).push_back(new Server(server_logger, *it));
+			servers.at(open_sockets.at(*port_it)).push_back(new Server(logger, *it));
 		}
 		// for (std::map<int, Socket *>::iterator sock_it =
 		// open_sockets.begin(); 	sock_it != open_sockets.end(); sock_it++)
@@ -77,7 +77,7 @@ void Router::poll(void)
 	}
 	catch (const Webserv_exception &e)
 	{
-		// logger.log(e.what(), e.get_error_code());
+		logger.log(e.what(), e.get_error_code());
 	}
 }
 
@@ -99,15 +99,13 @@ void Router::collect(void)
 		{
 			delete *it;
 			it = queries.erase(it);
-			// logger.log(e.what(), e.get_error_code());
+			logger.log(e.what(), e.get_error_code());
 		}
 	}
 }
 
 void Router::respond(void)
 {
-	// if (queries.empty())
-	// 	return;
 	for (std::vector< Query * >::iterator it = queries.begin(); it != queries.end();)
 	{
 		if (queries.empty())
@@ -117,28 +115,10 @@ void Router::respond(void)
 			std::string host = "";
 			if ((*it)->get_request()->get_headers().count("Host"))
 				host = (*it)->get_request()->get_headers().at("Host");
-			Socket *from_socket = NULL;
-			for (std::map< int, Socket * >::iterator sock_it = open_sockets.begin(); sock_it != open_sockets.end(); sock_it++)
-			{
-				if ((*it)->get_socket() == (*sock_it).second->get_fd())
-					from_socket = (*sock_it).second;
-			}
-			Server *respond_from = NULL;
-			for (std::vector< Server * >::iterator host_it = servers.at(from_socket).begin(); host_it != servers.at(from_socket).end(); host_it++)
-			{
-				if (host.empty())
-				{
-					respond_from = *host_it;
-					break;
-				}
-				if ((*host_it)->get_config().name == host)
-				{
-					respond_from = *host_it;
-					break;
-				}
-			}
+			Socket *from_socket = get_socket_by_fd((*it)->get_socket());
+			Server *respond_from = find_server_bound_to_socket_by_name(host, from_socket);
 			if (!respond_from)
-				respond_from = servers.at(from_socket).front();
+				continue;	 // error but it's quite impossible in this context idk
 			respond_from->respond((*it));
 			delete *it;
 			it = queries.erase(it);
@@ -150,12 +130,35 @@ void Router::respond(void)
 		}
 		else
 			it++;
-		// if ((*it)->is_ready())
-		// {
-		// 	delete (*it);
-		// 	it = queries.erase(it);
-		// }
 	}
+}
+
+Server *Router::find_server_bound_to_socket_by_name(std::string const &name, Socket *from_socket)
+{
+	if (!from_socket)
+		return NULL;
+	if (!servers.count(from_socket))
+		return NULL;
+
+	std::vector< Server * > socket_servers = servers.at(from_socket);
+	if (name.empty())
+		return socket_servers.front();
+	for (std::vector< Server * >::iterator it = socket_servers.begin(); it != socket_servers.end(); it++)
+	{
+		if ((*it)->get_config().name == name)
+			return *it;
+	}
+	return socket_servers.front();
+}
+
+Socket *Router::get_socket_by_fd(int const fd) const
+{
+	for (std::map< int, Socket * >::const_iterator it = open_sockets.begin(); it != open_sockets.end(); it++)
+	{
+		if ((*it).second->get_fd() == fd)
+			return (*it).second;
+	}
+	return NULL;
 }
 
 void Router::serve(void)

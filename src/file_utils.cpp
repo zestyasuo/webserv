@@ -7,7 +7,7 @@ bool dirent_cmp(const dirent &a, const dirent &b)
 
 std::vector< dirent > list_dir(const std::string &path, bool alsort = true)
 {
-	struct dirent		 *dir_ent;
+	struct dirent		 *dir_ent = NULL;
 	std::vector< dirent > result;
 
 	DIR *dir = opendir(path.c_str());
@@ -22,7 +22,7 @@ std::vector< dirent > list_dir(const std::string &path, bool alsort = true)
 	return result;
 }
 
-string	dir_list_formatted(const string &path, const HTTPRequest *req, bool alsort)
+string dir_list_formatted(const string &path, const HTTPRequest *req, bool alsort)
 {
 	std::vector< dirent > dir_ent;
 	std::string			  result;

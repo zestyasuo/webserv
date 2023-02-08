@@ -171,7 +171,7 @@ HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf)
 	// std::cout << "root: " << root << std::endl;
 	std::string target = request->get_target();
 
-	fname = root + (target.c_str()[0] == '/' ? "" : "/" ) + target;
+	fname = root + (target.c_str()[0] == '/' ? "" : "/") + target;
 	// std::cout << root + " + " + target << std::endl;
 	process_target(fname, loc);
 	// add_header("Location", "/");
@@ -186,7 +186,7 @@ std::string HTTPResponse::parse_target(std::string const &target, std::string co
 
 	// copy.erase(slash, loc_path.length());
 	// if (copy.at(copy.length() - 1) == '/')
-		// copy.erase(copy.length() - 1);
+	// copy.erase(copy.length() - 1);
 	// std::string res = target.substr(slash);
 	// std::cout << copy << "\n";
 	return copy;

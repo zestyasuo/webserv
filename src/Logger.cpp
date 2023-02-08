@@ -2,7 +2,11 @@
 
 const std::string Logger::log_level_names[DEBUG + 1] = {GRN "[INFO]", YLW "[WARNING]", RED "[ERROR]", CYN "[FATAL]", MAG "[DEBUG]"};
 
-Logger::Logger()
+Logger::Logger() : is_debug(false)
+{
+}
+
+Logger::Logger(bool debug) : is_debug(debug)
 {
 }
 
@@ -13,6 +17,8 @@ Logger::~Logger()
 void Logger::log(std::string msg, int log_level) const
 {
 	if (log_level < INFO || log_level > DEBUG)
+		return;
+	if (log_level == DEBUG && !is_debug)
 		return;
 
 	std::cout << log_level_names[log_level] << get_timestamp() << RST << "\t" << msg << "\n";

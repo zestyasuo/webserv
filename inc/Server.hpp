@@ -1,11 +1,11 @@
 #ifndef Server_HPP
 #define Server_HPP
 #include "Config.hpp"
+#include "HTTPResponse.hpp"
 #include "Logger.hpp"
 #include "Query.hpp"
 #include "Socket.hpp"
 #include "Webserv_exception.hpp"
-#include "HTTPResponse.hpp"
 #include "log_levels.hpp"
 #include <cstdio>
 #include <iostream>
@@ -14,7 +14,7 @@
 #include <sstream>
 #include <utility>
 #include <vector>
-#define CONNECTIONS_COUNT 50
+#define CONNECTIONS_COUNT 256
 #define TIMEOUT 5
 #include "html.hpp"
 #define SSTR(x) static_cast< std::ostringstream & >((std::ostringstream() << std::dec << x)).str()
@@ -26,6 +26,7 @@ class Server
 	bool		 active;
 	t_conf		 config;
 	Server(Server const &);
+
   public:
 	void respond(Query *query);
 	Server(void);

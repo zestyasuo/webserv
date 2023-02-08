@@ -16,6 +16,7 @@ class HTTPRequest : public AHTTPMessage
 	std::string							 parse_version(std::vector< std::string > const &) const;
 	std::string							 parse_method(std::vector< std::string > const &) const;
 	std::string							 parse_target(std::vector< std::string > const &) const;
+	void								 validate(void);
 
   public:
 	bool			   is_valid(void) const;

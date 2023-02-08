@@ -18,6 +18,11 @@ HTTPRequest::HTTPRequest(std::string const &raw) : AHTTPMessage(raw), valid(fals
 	target = parse_target(status_line_vec);
 	version = parse_version(status_line_vec);
 	headers = parse_headers(meta_data);
+	validate();
+}
+
+void HTTPRequest::validate(void)
+{
 	valid = true;
 }
 

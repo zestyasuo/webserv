@@ -2,9 +2,9 @@
 #define utils_HPP
 #include "Webserv_exception.hpp"
 #include <algorithm>
-#include <iostream>
 #include <ctime>
 #include <fcntl.h>
+#include <iostream>
 #include <map>
 #include <vector>
 

@@ -77,7 +77,6 @@ int main(int argc, char **argv, char **envp)
 	configs.push_back(create_test_config("serv_a", 8090));
 	configs.push_back(create_test_config("serv_b", 8090));
 	Router router(configs);
-	// Server	*webserv = new Server(server_logger, create_test_config());
 
 	(void)argc;
 	(void)argv;
@@ -86,6 +85,6 @@ int main(int argc, char **argv, char **envp)
 	while (true)
 	{
 		router.serve();
-		usleep(1000 * 1000 * 0.1);
+		usleep(1000 * 1000 * 0.05);	   // absolutely crucial pause for proper rendering in browser
 	}
 }
