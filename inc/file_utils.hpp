@@ -1,13 +1,15 @@
 #ifndef FILE_UTILS_H
 #define FILE_UTILS_H
 
-#include <dirent.h>
-#include <string>
+#include "../inc/Server.hpp"
 #include <vector>
-#include <algorithm>
 #include <cstring>
+#include <dirent.h>
 
-std::vector<dirent> list_dir(const std::string &path, bool alsort);
-std::string	dir_list_formatted(const std::string &path, bool alsort);
+using std::vector;
+using std::string;
+
+vector<dirent> list_dir(const string &path, bool alsort);
+string	dir_list_formatted(const string &path, const HTTPRequest *req, bool alsort);
 
 #endif

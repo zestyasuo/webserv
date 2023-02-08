@@ -22,7 +22,7 @@ std::vector< dirent > list_dir(const std::string &path, bool alsort = true)
 	return result;
 }
 
-std::string dir_list_formatted(const std::string &path, bool alsort)
+string	dir_list_formatted(const string &path, const HTTPRequest *req, bool alsort)
 {
 	std::vector< dirent > dir_ent;
 	std::string			  result;
@@ -31,14 +31,17 @@ std::string dir_list_formatted(const std::string &path, bool alsort)
 
 	for (std::vector< dirent >::iterator it = dir_ent.begin(); it != dir_ent.end(); ++it)
 	{
+		// full_path = path + "/" + it->d_name;
+
 		//	d_type - not reliable field. Extra tests needed (Linux)
+		result += "<a href=\"";
+		result += req->get_target() + "/" + it->d_name;
+		decode_html_enities(result);
+		result += "\">";
 		if (it->d_type & DT_DIR)
-			result += "&#128193; ";
+			result += "&#x1F4C1; ";
 		if (it->d_type & DT_REG)
 			result += "&#x1F4C4; ";
-		result += "<a href=\"";
-		result += it->d_name;
-		result += "\">";
 		result += it->d_name;
 		result += "</a>";
 		result += "<br>\n";

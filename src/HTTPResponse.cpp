@@ -161,6 +161,7 @@ HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf)
 
 	version = req->get_version();
 	loc = get_location(request->get_target(), config.locations);
+	// std::cout << "path: " << loc.path << "\n";
 	if (check_method(loc))
 	{
 		ready_up();
@@ -168,20 +169,24 @@ HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf)
 	}
 	root = loc.root.empty() ? config.root : loc.root;
 	// std::cout << "root: " << root << std::endl;
-	std::string target = parse_target(request->get_target(), loc.path);
+	std::string target = request->get_target();
 
-	fname = root + target;
+	fname = root + (target.c_str()[0] == '/' ? "" : "/" ) + target;
+	// std::cout << root + " + " + target << std::endl;
 	process_target(fname, loc);
 	// add_header("Location", "/");
 	ready_up();
 }
 
+// not needed yet, name reserved
 std::string HTTPResponse::parse_target(std::string const &target, std::string const &loc_path)
 {
-	size_t		slash = target.find(loc_path);
-	std::string copy = target;
+	// size_t		slash = target.find(loc_path);
+	std::string copy = target + loc_path;
 
-	copy.erase(slash, loc_path.length());
+	// copy.erase(slash, loc_path.length());
+	// if (copy.at(copy.length() - 1) == '/')
+		// copy.erase(copy.length() - 1);
 	// std::string res = target.substr(slash);
 	// std::cout << copy << "\n";
 	return copy;
@@ -209,8 +214,15 @@ int HTTPResponse::check_method(s_location const &loc)
 /// to appropriate state
 /// @param fname target
 /// @param loc target location
-void HTTPResponse::process_target(std::string const &fname, s_location const &loc)
+///	fname_raw may contain html entities (e.g. %20 = ' ')
+///	which converted to their single character values in fname
+
+void HTTPResponse::process_target(std::string const &fname_raw, s_location const &loc)
 {
+	string fname(fname_raw);
+	decode_html_enities(fname);
+	std::cout << fname << std::endl;
+
 	struct stat st = {};
 	std::string method = request->get_method();
 
@@ -224,14 +236,15 @@ void HTTPResponse::process_target(std::string const &fname, s_location const &lo
 
 	if (st.st_mode & S_IFDIR)
 	{
-		// std::cout << "DIR TRY\n";
+		std::cout << "DIR TRY\n";
 		// std::cout << fname << std::endl;
 		if (try_index_page(fname, loc) != 0)
 		{
 			// status_code = 501;
 			content_type = CTYPE_TEXT_HTML;
 			status_code = 200;
-			payload += dir_list_formatted(fname, true);
+			// this->request->get_target()
+			payload += dir_list_formatted(fname, this->request, true);
 			wrap_html_body(payload);
 			// std::cout << "dir listing requered;\n";
 		}
