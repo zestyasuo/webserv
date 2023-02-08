@@ -81,10 +81,8 @@ int main(int argc, char **argv, char **envp)
 	(void)argc;
 	(void)argv;
 	(void)envp;
-
 	while (true)
 	{
 		router.serve();
-		usleep(1000 * 1000 * 0.05);	   // absolutely crucial pause for proper rendering in browser
 	}
 }

@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <iostream>
 #include <poll.h>
+#include <sys/poll.h>
 #include <vector>
 
 Query::Query() : socket(), fd(), request(), ready()
@@ -28,6 +29,7 @@ size_t Query::recieve(void)
 		i = ::recv(fd, buf + recieved_bytes, bytes_to_recieve - recieved_bytes, 0);
 		if (i <= 0)
 		{
+			// socket->events = POLLOUT;
 			ready = true;
 			break;
 		}
@@ -59,6 +61,7 @@ size_t Query::send(std::string const &message) const
 	{
 		throw Webserv_exception("send failed", ERROR);
 	}
+	// socket->events = POLLIN;
 	return message.length();
 }
 

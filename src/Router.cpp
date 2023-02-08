@@ -1,4 +1,5 @@
 #include "../inc/Router.hpp"
+#include "log_levels.hpp"
 
 Router::Router(std::vector< s_config > const &conf) : configs(conf), logger(true)
 {
@@ -60,12 +61,11 @@ void Router::poll(void)
 {
 	try
 	{
-
+		// std::cout << "1" << std::endl;
 		if (::poll(fds, open_sockets.size(), TIMEOUT) < 0)
 		{
 			throw Webserv_exception("poll failied", ERROR);
 		}
-
 		for (size_t i = 0; i < open_sockets.size(); i++)
 		{
 			if (fds[i].revents & POLLIN)
@@ -119,14 +119,15 @@ void Router::respond(void)
 			Server *respond_from = find_server_bound_to_socket_by_name(host, from_socket);
 			if (!respond_from)
 				continue;	 // error but it's quite impossible in this context idk
-			respond_from->respond((*it));
+			if (!respond_from->respond((*it)))
+			{
+				it++;
+				logger.log("did not respond", DEBUG);
+				continue;
+			}
 			delete *it;
 			it = queries.erase(it);
-		}
-		else if ((*it)->is_ready())
-		{
-			delete *it;
-			it = queries.erase(it);
+			logger.log("deleted query", DEBUG);
 		}
 		else
 			it++;

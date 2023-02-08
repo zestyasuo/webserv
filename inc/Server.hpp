@@ -15,7 +15,7 @@
 #include <utility>
 #include <vector>
 #define CONNECTIONS_COUNT 256
-#define TIMEOUT 5
+#define TIMEOUT 1
 #include "html.hpp"
 #define SSTR(x) static_cast< std::ostringstream & >((std::ostringstream() << std::dec << x)).str()
 
@@ -28,7 +28,7 @@ class Server
 	Server(Server const &);
 
   public:
-	void respond(Query *query);
+	bool respond(Query *query);
 	Server(void);
 	Server(Logger const &, t_conf const &);
 	~Server(void);
