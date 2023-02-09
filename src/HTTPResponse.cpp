@@ -1,6 +1,8 @@
 #include "../inc/HTTPResponse.hpp"
 #include "../inc/Server.hpp"
 #include "../inc/file_utils.hpp"
+#include "Config.hpp"
+#include <fstream>
 #include <string>
 // #include "../inc/Config.hpp"
 
@@ -230,7 +232,10 @@ void HTTPResponse::process_target(std::string const &fname_raw, s_location const
 
 	if (stat(fname.c_str(), &st) != 0)
 	{
-		status_code = 404;
+		if (get_method_mask(method) & em_post)
+			create_file_and_write_contents(fname, request->get_body());
+		else
+			status_code = 404;
 		return;
 	}
 
@@ -258,6 +263,19 @@ void HTTPResponse::process_target(std::string const &fname_raw, s_location const
 	}
 }
 
+void	HTTPResponse::create_file_and_write_contents(std::string const &fname, std::string const &content)
+{
+	std::ofstream ofs(fname.c_str());
+
+	if (!ofs.good())
+	{
+		status_code = 500;
+		return;
+	}
+	ofs << content;
+	ofs.close();
+}
+
 void HTTPResponse::delete_file(std::string const &fname)
 {
 	if (std::remove(fname.c_str()))
@@ -273,6 +291,7 @@ void HTTPResponse::get_file_info(std::string const &fname)
 {
 	std::ifstream ifs;
 	// string query_string;
+	std::string	const method = request->get_method();
 
 	if (open_fstream(fname, ifs) != 0)
 	{
@@ -290,13 +309,8 @@ void HTTPResponse::get_file_info(std::string const &fname)
 	}
 	else
 	{
-		// todo: is method delete
 		status_code = 200;
-		// if (is_method_get())
 		read_file(ifs);
-		// if (is_method_delete())
-		// delete_file(ifs);
-		// if (is_method_put)
 		// ???; process partial put -> 400 BAD REQUEST
 	}
 

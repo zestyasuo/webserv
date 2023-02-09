@@ -34,6 +34,7 @@ class HTTPResponse : public AHTTPMessage
 	bool								 isMethodAllowed(s_location const &);
 	void								 get_file_info(std::string const &);
 	void								 read_file(std::ifstream &);
+	void								 create_file_and_write_contents(std::string const &, std::string const &);
 	std::string							 parse_target(std::string const &, std::string const &);
 	void								 process_target(std::string const &, s_location const &);
 	int									 try_index_page(std::string const &, s_location const &);

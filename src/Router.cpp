@@ -23,7 +23,8 @@ Router::Router(std::vector< s_config > const &conf) : configs(conf), logger(true
 		for (std::vector< int >::iterator port_it = (*it).ports.begin(); port_it != (*it).ports.end(); port_it++)
 		{
 			if (!servers.count(open_sockets.at(*port_it)))
-				servers.insert(std::make_pair< Socket *, std::vector< Server * > >(open_sockets.at(*port_it), std::vector< Server * >()));
+				servers.insert(std::make_pair< Socket *, std::vector< Server * > >(open_sockets.at(*port_it),
+																				   std::vector< Server * >()));
 			servers.at(open_sockets.at(*port_it)).push_back(new Server(logger, *it));
 		}
 		// for (std::map<int, Socket *>::iterator sock_it =
@@ -73,6 +74,8 @@ void Router::poll(void)
 				Query *query = new Query(&fds[i]);
 				queries.push_back(query);
 			}
+			if (fds[i].revents & POLLOUT)
+				logger.log("write available for " + SSTR(i), DEBUG);
 		}
 	}
 	catch (const Webserv_exception &e)
@@ -112,9 +115,8 @@ void Router::respond(void)
 			break;
 		if ((*it)->get_request())
 		{
-			std::string host = "";
-			if ((*it)->get_request()->get_headers().count("Host"))
-				host = (*it)->get_request()->get_headers().at("Host");
+			std::string host =
+				(*it)->get_request()->get_headers().count("Host") ? (*it)->get_request()->get_headers().at("Host") : "";
 			Socket *from_socket = get_socket_by_fd((*it)->get_socket());
 			Server *respond_from = find_server_bound_to_socket_by_name(host, from_socket);
 			if (!respond_from)
