@@ -1,7 +1,7 @@
 #ifndef FILE_UTILS_H
 #define FILE_UTILS_H
 
-#include "../inc/Server.hpp"
+#include "Server.hpp"
 #include <vector>
 #include <string>
 #include <dirent.h>

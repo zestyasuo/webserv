@@ -1,14 +1,14 @@
-#include "file_utils.hpp"
+#include "../inc/file_utils.hpp"
 
 bool dirent_cmp(const dirent &a, const dirent &b)
 {
 	return strcmp(a.d_name, b.d_name) < 0;
 }
 
-vector<dirent> list_dir(const string &path, bool alsort = true)
+std::vector< dirent > list_dir(const std::string &path, bool alsort = true)
 {
-	struct dirent *dir_ent;
-	vector<dirent> result;
+	struct dirent		 *dir_ent = NULL;
+	std::vector< dirent > result;
 
 	DIR *dir = opendir(path.c_str());
 	if (dir == NULL)
@@ -22,14 +22,14 @@ vector<dirent> list_dir(const string &path, bool alsort = true)
 	return result;
 }
 
-string	dir_list_formatted(const string &path, const HTTPRequest *req, bool alsort)
+string dir_list_formatted(const string &path, const HTTPRequest *req, bool alsort)
 {
-	vector<dirent> dir_ent;
-	string result;
+	std::vector< dirent > dir_ent;
+	std::string			  result;
 
 	dir_ent = list_dir(path, alsort);
 
-	for (vector <const dirent>::iterator it = dir_ent.begin(); it != dir_ent.end(); ++it)
+	for (std::vector< dirent >::iterator it = dir_ent.begin(); it != dir_ent.end(); ++it)
 	{
 		// full_path = path + "/" + it->d_name;
 

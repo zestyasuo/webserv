@@ -2,6 +2,5 @@ webserv
 obj/
 .idea
 tests/webserv
-.DS_Store
-*.log
 .cache
+*.DS_Store

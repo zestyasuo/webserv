@@ -1,22 +1,39 @@
-#include "../inc/Config_proto.hpp"
+#include "../inc/Config.hpp"
 #include "Router.hpp"
+#include "utils.hpp"
 #include <Logger.hpp>
 #include <Server.hpp>
 #include <exception>
-#include <sys/syslimits.h>
+#include <limits.h>
 #include <unistd.h>
 
 // t_conf g_conf;
 
 t_conf create_test_config(std::string const &server_name, int port)
 {
-	char	webserv_root_dir[PATH_MAX];
+	char webserv_root_dir[PATH_MAX];
 	getcwd(webserv_root_dir, PATH_MAX);
+	std::map< int, std::string > errors;
+	std::map< int, std::string > statuses;
+
+	errors.insert(std::make_pair(200, ""));
+	errors.insert(std::make_pair(501, "<html><h3>501 - not implemented!</h3></html>"));
+	errors.insert(std::make_pair(404, "<html><h3>404 - not found!</h3></html>"));
+	errors.insert(std::make_pair(405, "<html><h3>405 - method not allowed!</h3></html>"));
+	errors.insert(std::make_pair(500, "<html><h3>500 - Internal Server Error!</h3></html>"));
+
+	statuses.insert(std::make_pair(200, "OK"));
+	statuses.insert(std::make_pair(501, "Not Implemented"));
+	statuses.insert(std::make_pair(404, "Not Found"));
+	statuses.insert(std::make_pair(405, "Method Not Allowed"));
+	statuses.insert(std::make_pair(500, "Internal Server Error"));
 
 	s_config   test_config;
 	s_location test_location;
 	s_location test_location2;
 
+	test_config.error_pages = errors;
+	test_config.status_texts = statuses;
 	test_location2.methods = 0;
 	test_location.methods = 0;
 
@@ -57,18 +74,15 @@ int main(int argc, char **argv, char **envp)
 	// 	return 1;
 	// }
 	std::vector< t_conf > configs;
-	configs.push_back(create_test_config("serv_a", 8080));
-	configs.push_back(create_test_config("serv_b", 8080));
+	configs.push_back(create_test_config("serv_a", 8090));
+	configs.push_back(create_test_config("serv_b", 8090));
 	Router router(configs);
-	// Server	*webserv = new Server(server_logger, create_test_config());
 
 	(void)argc;
 	(void)argv;
 	(void)envp;
-
 	while (true)
 	{
 		router.serve();
-		usleep(1000 * 1000 * 0.1);
 	}
 }

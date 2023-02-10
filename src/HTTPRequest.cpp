@@ -1,10 +1,11 @@
 #include "../inc/HTTPRequest.hpp"
+#include <cstdlib>
 
-HTTPRequest::HTTPRequest() : valid()
+HTTPRequest::HTTPRequest() : valid(), content_length(-1)
 {
 }
 
-HTTPRequest::HTTPRequest(std::string const &raw) : AHTTPMessage(raw), valid(false), target(""), method("")
+HTTPRequest::HTTPRequest(std::string const &raw) : AHTTPMessage(raw), valid(false), target(""), method(""), content_length(-1)
 {
 	std::vector< std::string > meta_data = get_meta_data();
 	if (meta_data.empty())
@@ -18,6 +19,13 @@ HTTPRequest::HTTPRequest(std::string const &raw) : AHTTPMessage(raw), valid(fals
 	target = parse_target(status_line_vec);
 	version = parse_version(status_line_vec);
 	headers = parse_headers(meta_data);
+	if (headers.count("Content-Length"))
+		content_length = std::atoi(headers.at("Content-Length").c_str());
+	validate();
+}
+
+void HTTPRequest::validate(void)
+{
 	valid = true;
 }
 
@@ -73,10 +81,8 @@ std::map< std::string, std::string > HTTPRequest::parse_headers(std::vector< std
 	{
 		first = (*it).substr(0, (*it).find(":"));
 		second = (*it).substr((*it).find(":") + 1);
-		first.erase(std::remove_if(first.begin(), first.end(), ::isspace),
-					first.end());
-		second.erase(std::remove_if(second.begin(), second.end(), ::isspace),
-					 second.end());
+		first.erase(std::remove_if(first.begin(), first.end(), ::isspace), first.end());
+		second.erase(std::remove_if(second.begin(), second.end(), ::isspace), second.end());
 		res.insert(std::make_pair(first, second));
 	}
 

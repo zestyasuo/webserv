@@ -1,8 +1,10 @@
 #include "../inc/HTTPResponse.hpp"
 #include "../inc/Server.hpp"
+#include "../inc/file_utils.hpp"
+#include "Config.hpp"
+#include <fstream>
 #include <string>
-#include "file_utils.hpp"
-// #include "../inc/Config_proto.hpp"
+// #include "../inc/Config.hpp"
 
 #define CRLF "\r\n"
 
@@ -10,21 +12,6 @@ using std::string;
 using std::vector;
 
 #define BUF_SIZE 4096
-
-const HTTPResponse::T HTTPResponse::response_bodies_pairs[] = {{200, ""},
-															   {501, "<html><h3>501 - not implemented!</h3></html>"},
-															   {404, "<html><h3>404 - not found!</h3></html>"},
-															   {405, "<html><h3>405 - method not allowed!</h3></html>"},
-															   {500, "<html><h3>500 - Internal Server Error!</h3></html>"}};
-
-const HTTPResponse::int_to_string_map_t HTTPResponse::response_bodies(response_bodies_pairs,
-																	  response_bodies_pairs +
-																		  sizeof(HTTPResponse::response_bodies_pairs) / sizeof(HTTPResponse::T));
-
-const HTTPResponse::T HTTPResponse::status_text_pairs[] = {
-	{200, "OK"}, {501, "Not Implemented"}, {404, "Not Found"}, {405, "Method Not Allowed"}, {500, "Internal Server Error"}};
-const HTTPResponse::int_to_string_map_t HTTPResponse::status_texts(status_text_pairs, status_text_pairs + sizeof(HTTPResponse::status_text_pairs) /
-																											  sizeof(HTTPResponse::T));
 
 // utils
 
@@ -120,7 +107,7 @@ s_location const &get_location(std::string const &target, std::map< std::string,
 
 	if (target.find_last_of("/") != target.npos)
 		to_find = target.substr(0, target.find_last_of("/"));
-	std::cout << "to_find: " << to_find << "\n";
+	// std::cout << "to_find: " << to_find << "\n";
 	s_location const &loc = locations.count(to_find) ? locations.at(to_find) : locations.at("/");
 	return loc;
 }
@@ -155,7 +142,6 @@ HTTPResponse::HTTPResponse(HTTPResponse const &copy)
 	: AHTTPMessage(copy), version(copy.version), status_code(copy.status_code), content_type(copy.content_type), payload(copy.payload),
 	  request(copy.request), config(copy.config)
 {
-
 }
 
 HTTPResponse::~HTTPResponse()
@@ -165,7 +151,8 @@ HTTPResponse::~HTTPResponse()
 /// @brief makes dumpable response object. the only way to get a response
 /// @param req parsed request
 /// @param conf parsed config
-HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf) : status_code(0), status_text(""), request(req), config(conf)
+HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf)
+	: status_code(0), status_text(""), request(req), config(conf), error_pages(config.error_pages)
 {
 	if (!req)
 		return;
@@ -176,29 +163,35 @@ HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf) : status_
 
 	version = req->get_version();
 	loc = get_location(request->get_target(), config.locations);
-	std::string target = request->get_target();
-	// std::cout << "location :" << config.root + loc.path << "\n";
+	// std::cout << "path: " << loc.path << "\n";
 	if (check_method(loc))
 	{
 		ready_up();
 		return;
 	}
-	// std::cout << "target: " << target << "\n";
 	root = loc.root.empty() ? config.root : loc.root;
+	// std::cout << "root: " << root << std::endl;
+	std::string target = request->get_target();
 
-	fname = root + target;
-	std::cout << "target: " << fname << std::endl;
+	fname = root + (target.c_str()[0] == '/' ? "" : "/") + target;
+	// std::cout << root + " + " + target << std::endl;
 	process_target(fname, loc);
 	// add_header("Location", "/");
 	ready_up();
 }
 
-std::string HTTPResponse::parse_target(std::string const &target)
+// not needed yet, name reserved
+std::string HTTPResponse::parse_target(std::string const &target, std::string const &loc_path)
 {
-	size_t		slash = target.find_last_of('/');
-	std::string res = target.substr(slash);
-	std::cout << res << "\n";
-	return res;
+	// size_t		slash = target.find(loc_path);
+	std::string copy = target + loc_path;
+
+	// copy.erase(slash, loc_path.length());
+	// if (copy.at(copy.length() - 1) == '/')
+	// copy.erase(copy.length() - 1);
+	// std::string res = target.substr(slash);
+	// std::cout << copy << "\n";
+	return copy;
 }
 
 int HTTPResponse::check_method(s_location const &loc)
@@ -230,22 +223,26 @@ void HTTPResponse::process_target(std::string const &fname_raw, s_location const
 {
 	string fname(fname_raw);
 	decode_html_enities(fname);
+	std::cout << fname << std::endl;
 
 	struct stat st = {};
 	std::string method = request->get_method();
 
-	std::cout << fname << "\n";
+	// std::cout << fname << "\n";
 
 	if (stat(fname.c_str(), &st) != 0)
 	{
-		status_code = 404;
+		if (get_method_mask(method) & em_post)
+			create_file_and_write_contents(fname, request->get_body());
+		else
+			status_code = 404;
 		return;
 	}
 
 	if (st.st_mode & S_IFDIR)
 	{
-		// std::cout << "DIR TRY\n";
-		std::cout << fname << std::endl;
+		std::cout << "DIR TRY\n";
+		// std::cout << fname << std::endl;
 		if (try_index_page(fname, loc) != 0)
 		{
 			// status_code = 501;
@@ -266,6 +263,19 @@ void HTTPResponse::process_target(std::string const &fname_raw, s_location const
 	}
 }
 
+void	HTTPResponse::create_file_and_write_contents(std::string const &fname, std::string const &content)
+{
+	std::ofstream ofs(fname.c_str());
+
+	if (!ofs.good())
+	{
+		status_code = 500;
+		return;
+	}
+	ofs << content;
+	ofs.close();
+}
+
 void HTTPResponse::delete_file(std::string const &fname)
 {
 	if (std::remove(fname.c_str()))
@@ -281,6 +291,7 @@ void HTTPResponse::get_file_info(std::string const &fname)
 {
 	std::ifstream ifs;
 	// string query_string;
+	std::string	const method = request->get_method();
 
 	if (open_fstream(fname, ifs) != 0)
 	{
@@ -298,13 +309,8 @@ void HTTPResponse::get_file_info(std::string const &fname)
 	}
 	else
 	{
-		// todo: is method delete
 		status_code = 200;
-		// if (is_method_get())
 		read_file(ifs);
-		// if (is_method_delete())
-		// delete_file(ifs);
-		// if (is_method_put)
 		// ???; process partial put -> 400 BAD REQUEST
 	}
 
@@ -315,10 +321,9 @@ void HTTPResponse::get_file_info(std::string const &fname)
 /// @param ifs file stream
 void HTTPResponse::read_file(std::ifstream &ifs)
 {
-	//	ToDo: set proper content_type
 	size_t resp_headers_size = payload.size();
 	ifs.seekg(0, std::ios::end);
-	size_t fsize = ifs.tellg();
+	ssize_t fsize = ifs.tellg();
 	payload.resize(payload.size() + fsize);
 	ifs.seekg(0);
 	ifs.read(&payload[resp_headers_size], fsize);
@@ -330,8 +335,8 @@ void HTTPResponse::ready_up(void)
 {
 	std::string html;
 
-	if (response_bodies.count(status_code))
-		html = response_bodies.at(status_code);
+	if (error_pages.count(status_code))
+		html = error_pages.at(status_code);
 	if (status_texts.count(status_code))
 		status_text = status_texts.at(status_code);
 	payload.insert(0, html);

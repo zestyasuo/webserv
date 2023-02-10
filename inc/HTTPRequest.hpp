@@ -12,10 +12,12 @@ class HTTPRequest : public AHTTPMessage
 	bool								 valid;
 	std::string							 target;
 	std::string							 method;
+	size_t								 content_length;
 	std::map< std::string, std::string > parse_headers(std::vector< std::string > const &) const;
 	std::string							 parse_version(std::vector< std::string > const &) const;
 	std::string							 parse_method(std::vector< std::string > const &) const;
 	std::string							 parse_target(std::vector< std::string > const &) const;
+	void								 validate(void);
 
   public:
 	bool			   is_valid(void) const;

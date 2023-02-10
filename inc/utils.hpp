@@ -1,10 +1,10 @@
 #ifndef utils_HPP
 #define utils_HPP
-
 #include "Webserv_exception.hpp"
 #include <algorithm>
 #include <ctime>
 #include <fcntl.h>
+#include <iostream>
 #include <map>
 #include <vector>
 

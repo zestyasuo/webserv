@@ -1,7 +1,7 @@
 #ifndef Query_HPP
 #define Query_HPP
 #include "HTTPRequest.hpp"
-#include "HTTPResponse.hpp"
+#include "Webserv_exception.hpp"
 #include <cstddef>
 #include <iostream>
 #include <sys/socket.h>
@@ -15,7 +15,6 @@ class Query
 	int			   fd;
 	std::string	   raw_data;
 	HTTPRequest	  *request;
-	HTTPResponse   response;
 	Query(void);
 	Query(Query const &copy);
 	bool ready;
@@ -25,7 +24,7 @@ class Query
 	bool			   is_ready(void) const;
 	void			   form_request(void);
 	HTTPRequest const *get_request(void) const;
-	int				   recieve(void);
+	size_t			   recieve(void);
 	size_t			   send(std::string const &) const;
 	Query(struct pollfd *);
 	short getRevents(void) const;

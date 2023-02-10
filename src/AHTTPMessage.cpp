@@ -36,6 +36,8 @@ std::string AHTTPMessage::parse_body(std::string const &raw) const
 	if (body_pos == std::string::npos)
 		return "";
 	std::string res = raw.substr(body_pos + 4);
+	if (res.length() > 1000000)
+		return "";
 	return (res);
 }
 

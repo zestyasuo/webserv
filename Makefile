@@ -69,7 +69,4 @@ s	: $(NAME)
 	@cat siege.log
 #	@rm siege.log
 
-r	: $(NAME)
-	./$(NAME)
-
 re : fclean all

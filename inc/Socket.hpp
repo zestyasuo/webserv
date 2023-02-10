@@ -22,6 +22,7 @@ class Socket
 	void			   listen(void);
 	Socket(void);
 	Socket(Socket const &copy);
+	Socket &operator=(const Socket &);
 
   public:
 	void poll(void);
