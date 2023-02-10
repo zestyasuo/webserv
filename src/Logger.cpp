@@ -1,9 +1,12 @@
 #include "../inc/Logger.hpp"
 
-const std::string Logger::log_level_names[DEBUG + 1] = {
-	GRN "[INFO]", YLW "[WARNING]", RED "[ERROR]", CYN "[FATAL]", MAG "[DEBUG]"};
+const std::string Logger::log_level_names[DEBUG + 1] = {GRN "[INFO]", YLW "[WARNING]", RED "[ERROR]", CYN "[FATAL]", MAG "[DEBUG]"};
 
-Logger::Logger()
+Logger::Logger() : is_debug(false)
+{
+}
+
+Logger::Logger(bool debug) : is_debug(debug)
 {
 }
 
@@ -15,9 +18,10 @@ void Logger::log(std::string msg, int log_level) const
 {
 	if (log_level < INFO || log_level > DEBUG)
 		return;
+	if (log_level == DEBUG && !is_debug)
+		return;
 
-	std::cout << log_level_names[log_level] << get_timestamp() << RST << "\t"
-			  << msg << "\n";
+	std::cout << log_level_names[log_level] << get_timestamp() << RST << "\t" << msg << "\n";
 }
 
 std::string Logger::make_logstr(std::string const &msg) const
@@ -32,7 +36,7 @@ std::string Logger::make_logstr(std::string const &msg) const
 std::string Logger::get_timestamp(void) const
 {
 	time_t		now = 0;
-	tm *		ltm;
+	tm		   *ltm;
 	char		buf[1024];
 	std::string result;
 

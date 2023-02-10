@@ -11,11 +11,11 @@
             "-fsanitize=address,undefined,leak",
             "-Iinc",
             "-o",
-            "obj/Query.o",
-            "src/Query.cpp"
+            "obj/AHTTPMessage.o",
+            "src/AHTTPMessage.cpp"
         ],
         "directory": "/home/zyasuo/21school/my_server",
-        "file": "src/Query.cpp"
+        "file": "src/AHTTPMessage.cpp"
     },
     {
         "arguments": [
@@ -29,137 +29,11 @@
             "-fsanitize=address,undefined,leak",
             "-Iinc",
             "-o",
-            "obj/utils.o",
-            "src/utils.cpp"
+            "obj/Config.o",
+            "src/Config.cpp"
         ],
         "directory": "/home/zyasuo/21school/my_server",
-        "file": "src/utils.cpp"
-    },
-    {
-        "arguments": [
-            "c++",
-            "-c",
-            "-Wall",
-            "-Wextra",
-            "-Werror",
-            "-std=c++98",
-            "-g",
-            "-fsanitize=address,undefined,leak",
-            "-Iinc",
-            "-o",
-            "obj/Webserv_exception.o",
-            "src/Webserv_exception.cpp"
-        ],
-        "directory": "/home/zyasuo/21school/my_server",
-        "file": "src/Webserv_exception.cpp"
-    },
-    {
-        "arguments": [
-            "c++",
-            "-c",
-            "-Wall",
-            "-Wextra",
-            "-Werror",
-            "-std=c++98",
-            "-g",
-            "-fsanitize=address,undefined,leak",
-            "-Iinc",
-            "-o",
-            "obj/Socket.o",
-            "src/Socket.cpp"
-        ],
-        "directory": "/home/zyasuo/21school/my_server",
-        "file": "src/Socket.cpp"
-    },
-    {
-        "arguments": [
-            "c++",
-            "-c",
-            "-Wall",
-            "-Wextra",
-            "-Werror",
-            "-std=c++98",
-            "-g",
-            "-fsanitize=address,undefined,leak",
-            "-Iinc",
-            "-o",
-            "obj/Router.o",
-            "src/Router.cpp"
-        ],
-        "directory": "/home/zyasuo/21school/my_server",
-        "file": "src/Router.cpp"
-    },
-    {
-        "arguments": [
-            "c++",
-            "-c",
-            "-Wall",
-            "-Wextra",
-            "-Werror",
-            "-std=c++98",
-            "-g",
-            "-fsanitize=address,undefined,leak",
-            "-Iinc",
-            "-o",
-            "obj/Config_proto.o",
-            "src/Config_proto.cpp"
-        ],
-        "directory": "/home/zyasuo/21school/my_server",
-        "file": "src/Config_proto.cpp"
-    },
-    {
-        "arguments": [
-            "c++",
-            "-c",
-            "-Wall",
-            "-Wextra",
-            "-Werror",
-            "-std=c++98",
-            "-g",
-            "-fsanitize=address,undefined,leak",
-            "-Iinc",
-            "-o",
-            "obj/main.o",
-            "src/main.cpp"
-        ],
-        "directory": "/home/zyasuo/21school/my_server",
-        "file": "src/main.cpp"
-    },
-    {
-        "arguments": [
-            "c++",
-            "-c",
-            "-Wall",
-            "-Wextra",
-            "-Werror",
-            "-std=c++98",
-            "-g",
-            "-fsanitize=address,undefined,leak",
-            "-Iinc",
-            "-o",
-            "obj/Logger.o",
-            "src/Logger.cpp"
-        ],
-        "directory": "/home/zyasuo/21school/my_server",
-        "file": "src/Logger.cpp"
-    },
-    {
-        "arguments": [
-            "c++",
-            "-c",
-            "-Wall",
-            "-Wextra",
-            "-Werror",
-            "-std=c++98",
-            "-g",
-            "-fsanitize=address,undefined,leak",
-            "-Iinc",
-            "-o",
-            "obj/HTTPRequest.o",
-            "src/HTTPRequest.cpp"
-        ],
-        "directory": "/home/zyasuo/21school/my_server",
-        "file": "src/HTTPRequest.cpp"
+        "file": "src/Config.cpp"
     },
     {
         "arguments": [
@@ -191,6 +65,96 @@
             "-fsanitize=address,undefined,leak",
             "-Iinc",
             "-o",
+            "obj/Logger.o",
+            "src/Logger.cpp"
+        ],
+        "directory": "/home/zyasuo/21school/my_server",
+        "file": "src/Logger.cpp"
+    },
+    {
+        "arguments": [
+            "c++",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-std=c++98",
+            "-g",
+            "-fsanitize=address,undefined,leak",
+            "-Iinc",
+            "-o",
+            "obj/main.o",
+            "src/main.cpp"
+        ],
+        "directory": "/home/zyasuo/21school/my_server",
+        "file": "src/main.cpp"
+    },
+    {
+        "arguments": [
+            "c++",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-std=c++98",
+            "-g",
+            "-fsanitize=address,undefined,leak",
+            "-Iinc",
+            "-o",
+            "obj/file_utils.o",
+            "src/file_utils.cpp"
+        ],
+        "directory": "/home/zyasuo/21school/my_server",
+        "file": "src/file_utils.cpp"
+    },
+    {
+        "arguments": [
+            "c++",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-std=c++98",
+            "-g",
+            "-fsanitize=address,undefined,leak",
+            "-Iinc",
+            "-o",
+            "obj/Webserv_exception.o",
+            "src/Webserv_exception.cpp"
+        ],
+        "directory": "/home/zyasuo/21school/my_server",
+        "file": "src/Webserv_exception.cpp"
+    },
+    {
+        "arguments": [
+            "c++",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-std=c++98",
+            "-g",
+            "-fsanitize=address,undefined,leak",
+            "-Iinc",
+            "-o",
+            "obj/Query.o",
+            "src/Query.cpp"
+        ],
+        "directory": "/home/zyasuo/21school/my_server",
+        "file": "src/Query.cpp"
+    },
+    {
+        "arguments": [
+            "c++",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-std=c++98",
+            "-g",
+            "-fsanitize=address,undefined,leak",
+            "-Iinc",
+            "-o",
             "obj/Server.o",
             "src/Server.cpp"
         ],
@@ -209,10 +173,82 @@
             "-fsanitize=address,undefined,leak",
             "-Iinc",
             "-o",
-            "obj/AHTTPMessage.o",
-            "src/AHTTPMessage.cpp"
+            "obj/html.o",
+            "src/html.cpp"
         ],
         "directory": "/home/zyasuo/21school/my_server",
-        "file": "src/AHTTPMessage.cpp"
+        "file": "src/html.cpp"
+    },
+    {
+        "arguments": [
+            "c++",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-std=c++98",
+            "-g",
+            "-fsanitize=address,undefined,leak",
+            "-Iinc",
+            "-o",
+            "obj/Router.o",
+            "src/Router.cpp"
+        ],
+        "directory": "/home/zyasuo/21school/my_server",
+        "file": "src/Router.cpp"
+    },
+    {
+        "arguments": [
+            "c++",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-std=c++98",
+            "-g",
+            "-fsanitize=address,undefined,leak",
+            "-Iinc",
+            "-o",
+            "obj/utils.o",
+            "src/utils.cpp"
+        ],
+        "directory": "/home/zyasuo/21school/my_server",
+        "file": "src/utils.cpp"
+    },
+    {
+        "arguments": [
+            "c++",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-std=c++98",
+            "-g",
+            "-fsanitize=address,undefined,leak",
+            "-Iinc",
+            "-o",
+            "obj/HTTPRequest.o",
+            "src/HTTPRequest.cpp"
+        ],
+        "directory": "/home/zyasuo/21school/my_server",
+        "file": "src/HTTPRequest.cpp"
+    },
+    {
+        "arguments": [
+            "c++",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-std=c++98",
+            "-g",
+            "-fsanitize=address,undefined,leak",
+            "-Iinc",
+            "-o",
+            "obj/Socket.o",
+            "src/Socket.cpp"
+        ],
+        "directory": "/home/zyasuo/21school/my_server",
+        "file": "src/Socket.cpp"
     }
 ]

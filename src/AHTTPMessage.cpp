@@ -14,8 +14,7 @@ std::string get_meta_data_array(std::string const &str)
 	return res;
 }
 
-AHTTPMessage::AHTTPMessage(AHTTPMessage const &rhs)
-	: raw_data(rhs.raw_data), meta_data(rhs.meta_data)
+AHTTPMessage::AHTTPMessage(AHTTPMessage const &rhs) : raw_data(rhs.raw_data), meta_data(rhs.meta_data)
 {
 }
 
@@ -23,8 +22,7 @@ AHTTPMessage::AHTTPMessage()
 {
 }
 
-AHTTPMessage::AHTTPMessage(std::string const &raw)
-	: version("undefined"), headers(), raw_data(raw)
+AHTTPMessage::AHTTPMessage(std::string const &raw) : version("undefined"), headers(), raw_data(raw)
 {
 	std::string raw_meta_data = get_meta_data_array(raw);
 	meta_data = split(raw_meta_data, LB);
@@ -38,6 +36,8 @@ std::string AHTTPMessage::parse_body(std::string const &raw) const
 	if (body_pos == std::string::npos)
 		return "";
 	std::string res = raw.substr(body_pos + 4);
+	if (res.length() > 1000000)
+		return "";
 	return (res);
 }
 
@@ -66,8 +66,7 @@ std::string const &AHTTPMessage::get_body(void) const
 	return (body);
 }
 
-std::map< std::string, std::string > const &
-AHTTPMessage::get_headers(void) const
+std::map< std::string, std::string > const &AHTTPMessage::get_headers(void) const
 {
 	return (headers);
 }

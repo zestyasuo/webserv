@@ -28,7 +28,7 @@ OBJ			=	${SRC:${SRC_PATH}/%.cpp=${OBJ_PATH}/%.o}
 
 NAME		=	 webserv
 
-.PHONY: all fclean clean re test r
+.PHONY: all fclean clean re test
 
 all: ${NAME}
 
@@ -60,6 +60,10 @@ clean:
 
 fclean: clean
 	rm -f ${NAME}
+	rm -rf tests/webserv
+
+r	: $(NAME)
+	./$(NAME)
 
 s	: $(NAME) $(SIEGE_BIN)
 	./$(NAME) &
@@ -70,9 +74,6 @@ s	: $(NAME) $(SIEGE_BIN)
 	@echo "\n\n"
 	cat siege.log
 	rm siege.log
-
-r	: $(NAME)
-	./$(NAME)
 
 re : fclean all
 
