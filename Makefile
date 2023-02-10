@@ -79,7 +79,7 @@ re : fclean all
 
 .PHONY: conf_test
 
-conf_test: $(SRC_PATH)/Config_proto.cpp
+conf_test: $(SRC_PATH)/ConfigStream.cpp
 	@${CC} ${CFLAGS} -DCONF_TEST -o $@ $^ -I${INC_PATH}
 	@./$@
 	@$(RM) $@
