@@ -41,11 +41,15 @@ struct s_config
 	std::map< int, std::string >		error_pages;
 	std::map< int, std::string >		status_texts;
 	int									implemented_methods;
-	map< std::string, std::string >		envp;		  // parsed char **envp
-	std::map< std::string, s_location > locations;	  // location [std::string] {s_location}
-	std::vector< int >					ports;		  // listen
-	std::string							name;		  // server_name
+	map< std::string, std::string >		envp;		// parsed char **envp
+	std::map< std::string, s_location > locations;	// location [std::string] {s_location}
+	std::map< std::string, std::string > cgi;		// extension:cgi_path	{"php", "/usr/bin/php"}
+	std::vector< int >					ports;		// listen
+	std::string							name;		// server_name
 	std::string							root;
 };
+
+std::string get_path_ext(const string &fname);
+void process_cgi_loc(s_config &config);
 
 #endif

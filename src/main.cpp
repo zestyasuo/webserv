@@ -55,6 +55,16 @@ t_conf create_test_config(std::string const &server_name, int port)
 	test_location2.index_files.push_back("index1.html");
 	test_location2.is_upload_allowed = true;
 
+	s_location	loc_php;
+	loc_php.path = "*.php";
+	loc_php.root = "/usr/bin/php";
+	test_config.locations.insert(std::make_pair(loc_php.path, loc_php));
+
+	s_location	loc_py;
+	loc_py.path = "*.py";
+	loc_py.root = "/usr/bin/python3";
+	test_config.locations.insert(std::make_pair(loc_py.path, loc_py));
+
 	// test_config.root = "/home/zyasuo/21school/my_server/www/serv_a";
 	test_config.root = std::string(webserv_root_dir) + "/www/serv_a";
 	test_config.locations.insert(std::make_pair(test_location.path, test_location));
@@ -63,6 +73,8 @@ t_conf create_test_config(std::string const &server_name, int port)
 	test_config.ports.push_back(port);
 	if (!server_name.empty())
 		test_config.name = server_name;
+
+	process_cgi_loc(test_config);
 	return test_config;
 }
 

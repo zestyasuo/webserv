@@ -4,6 +4,7 @@
 #include "Server.hpp"
 #include <vector>
 #include <string>
+#include <cstring>
 #include <dirent.h>
 
 using std::vector;

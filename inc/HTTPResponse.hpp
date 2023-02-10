@@ -42,6 +42,8 @@ class HTTPResponse : public AHTTPMessage
 	int									 check_method(s_location const &);
 	void								 ready_up(void);
 	void								 delete_file(std::string const &);
+	bool								is_cgi(std::string const &fname);
+	std::vector<char>					cgi_exec(const string &fname, const string &query_str);
 	HTTPResponse(void);
 
   public:

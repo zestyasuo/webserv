@@ -28,15 +28,20 @@ std::string map_to_str(std::map< std::string, std::string > const &m)
 	return res;
 }
 
-vector< char > cgi_exec(const string &fname, const string &query_str)
+vector< char > HTTPResponse::cgi_exec(const string &fname, const string &query_str)
 {
 	int			   fd[2];
 	int			   cgi_pid;
 	vector< char > cgi_data;
 	char		   cgi_buf[BUF_SIZE];
+	std::string		ext;
+
+	ext = get_path_ext(fname);
 
 	//	string cgi_path = "/usr/bin/python3";
-	string cgi_path = "/bin/php8.1";
+//	string cgi_path = "/bin/php8.1";
+
+	const string cgi_path = config.cgi.at(ext);
 
 	pipe(fd);
 	cgi_pid = fork();
@@ -90,11 +95,16 @@ int open_fstream(const string &fname, std::ifstream &ifs)
 	return 0;
 }
 
-bool is_cgi(std::string const &fname)
+bool HTTPResponse::is_cgi(std::string const &fname)
 {
-	if (fname != "")
-		return false;
-	return false;
+	std::string ext;
+
+	ext = get_path_ext(fname);
+	return (config.cgi.count(ext));
+
+//	if (fname != "")
+//		return false;
+//	return false;
 }
 
 /// @brief looks for a location struct specified by config.
@@ -304,8 +314,14 @@ void HTTPResponse::get_file_info(std::string const &fname)
 	if (is_cgi(fname))
 	{	 //	CGI
 		// HTTPRespone::exec_cgi();
-		status_code = 501;	  // заглушка
-		std::cout << "exec cgi requered\n";
+		content_type = "text/html";
+
+		std::vector<char> cgi_data (cgi_exec(fname, ""));
+
+		payload.insert(payload.begin(), cgi_data.begin(), cgi_data.end());
+		status_code = 200;
+//		status_code = 501;	  // заглушка
+//		std::cout << "exec cgi requered\n";
 	}
 	else
 	{

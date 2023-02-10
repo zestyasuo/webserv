@@ -11,7 +11,6 @@ Query::Query() : socket(), fd(), request(), ready()
 
 Query::Query(struct pollfd *p) : socket(p), fd(accept(socket->fd, NULL, NULL)), raw_data(""), request(0), ready(false)
 {
-	fd = accept(socket->fd, NULL, NULL);
 	if (fd < 0)
 		throw Webserv_exception("accept failed", FATAL);
 	unblock_fd(fd);
