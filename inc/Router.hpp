@@ -15,9 +15,9 @@
 class Router
 {
   private:
-	std::vector< s_config >	  configs;	  // parsed server configs
-	std::vector< Query * >	  queries;
-	std::map< int, Socket * > open_sockets;
+	std::vector< s_config >						  configs;	  // parsed server configs
+	std::vector< Query * >						  queries;
+	std::map< int, Socket * >					  open_sockets;
 	std::map< Socket *, std::vector< Server * > > servers;
 	struct pollfd								  fds[1024];
 	Router(Router const &copy);

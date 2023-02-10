@@ -1,0 +1,3 @@
+dyld: Library not loaded: /Users/mcustard/ws/tests/homebrew/opt/openssl@3/lib/libssl.3.dylib
+  Referenced from: /Users/mcustard/ws/./siege/osx/bin/siege
+  Reason: image not found

@@ -4,3 +4,4 @@ obj/
 tests/webserv
 .DS_Store
 *.log
+.cache

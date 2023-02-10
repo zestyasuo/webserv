@@ -70,7 +70,6 @@ void Router::poll(void)
 		{
 			if (fds[i].revents & POLLIN)
 			{
-				std::cout << "connected\n";
 				Query *query = new Query(&fds[i]);
 				queries.push_back(query);
 			}
@@ -79,8 +78,6 @@ void Router::poll(void)
 	catch (const Webserv_exception &e)
 	{
 		// logger.log(e.what(), e.get_error_code());
-		std::cout << "pizdaaaa\n";
-		exit(1);
 	}
 }
 
@@ -166,5 +163,4 @@ void Router::serve(void)
 	poll();
 	collect();
 	respond();
-	usleep(100);
 }

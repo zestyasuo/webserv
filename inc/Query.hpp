@@ -2,11 +2,11 @@
 #define Query_HPP
 #include "HTTPRequest.hpp"
 #include "HTTPResponse.hpp"
-#include "Webserv_exception.hpp"
-#include "utils.hpp"
+#include <cstddef>
 #include <iostream>
 #include <sys/socket.h>
 #include <unistd.h>
+#define BUFF_SIZE 1024
 
 class Query
 {
@@ -14,20 +14,19 @@ class Query
 	struct pollfd *socket;
 	int			   fd;
 	std::string	   raw_data;
-	HTTPRequest *  request;
+	HTTPRequest	  *request;
 	HTTPResponse   response;
 	Query(void);
 	Query(Query const &copy);
 	bool ready;
 
   public:
-	bool			   sent;
 	int				   get_socket(void) const;
 	bool			   is_ready(void) const;
 	void			   form_request(void);
 	HTTPRequest const *get_request(void) const;
 	int				   recieve(void);
-	int				   send(std::string const &) const;
+	size_t			   send(std::string const &) const;
 	Query(struct pollfd *);
 	short getRevents(void) const;
 	~Query(void);

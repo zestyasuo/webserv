@@ -8,15 +8,16 @@ void list_dir_test()
 {
 	vector<dirent> dir_listing;
 
-	dir_listing = list_dir(".");
-	std::sort(dir_listing.begin(), dir_listing.end(),
-		[](auto a, auto b)
-		{
-			return strcmp(a.d_name, b.d_name);
-		});
+	dir_listing = list_dir(".", true);
+	// std::sort(dir_listing.begin(), dir_listing.end(),
+	// 	[](auto a, auto b)
+	// 	{
+	// 		return strcmp(a.d_name, b.d_name) < 0;
+	// 	});
 
 	for (auto const& dir_ent : dir_listing)
 	{
+		//	d_type - not reliable field. Extra tests needed (Linux)
 		if (dir_ent.d_type & DT_DIR)
 			std::cout << "[DIR] ";
 		if (dir_ent.d_type & DT_REG)

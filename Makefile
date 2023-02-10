@@ -30,7 +30,7 @@ OBJ			=	${SRC:${SRC_PATH}/%.cpp=${OBJ_PATH}/%.o}
 
 NAME		=	 webserv
 
-.PHONY: all fclean clean re test r
+.PHONY: all fclean clean re test
 
 all: ${NAME}
 
@@ -51,6 +51,10 @@ clean:
 
 fclean: clean
 	rm -f ${NAME}
+	rm -rf tests/webserv
+
+r	: $(NAME)
+	./$(NAME)
 
 s	: $(NAME)
 	./$(NAME) > serv.log & sleep 1 && $(SIEGE_PATH) $(SIEGE_ARGS) > siege.log ; pkill webserv

@@ -8,10 +8,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #define BACKLOG 50
-#define SSTR(x)                                                                \
-	static_cast< std::ostringstream & >(                                       \
-		(std::ostringstream() << std::dec << x))                               \
-		.str()
+#define SSTR(x) static_cast< std::ostringstream & >((std::ostringstream() << std::dec << x)).str()
 
 class Socket
 {
