@@ -66,7 +66,7 @@ s	: $(NAME)
 #	pkill webserv
 	@sleep 1
 	@echo "\n\n"
-	@cat siege.log
-#	@rm siege.log
+	cat siege.log
+	rm siege.log
 
 re : fclean all

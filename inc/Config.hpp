@@ -14,7 +14,8 @@ enum e_method
 {
 	em_get = 1,
 	em_post = 1 << 1,
-	em_delete = 1 << 2
+	em_delete = 1 << 2,
+	em_put = 1 << 3
 };
 
 struct s_location
@@ -51,5 +52,6 @@ struct s_config
 
 std::string get_path_ext(const string &fname);
 void process_cgi_loc(s_config &config);
+void split_query(std::string const &fname, std::string &full_path, std::string &query_str);
 
 #endif

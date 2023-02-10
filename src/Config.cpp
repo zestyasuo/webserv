@@ -1,4 +1,5 @@
 #include "../inc/Config.hpp"
+#include <iostream>
 
 std::string get_path_ext(const string &fname)
 {
@@ -6,9 +7,24 @@ std::string get_path_ext(const string &fname)
 	std::string ext;
 
 	pos = fname.rfind(".");
+	size_t	pos_end = fname.find("?", pos);
+
 	if (pos != std::string::npos)
-		ext = fname.substr(pos + 1, fname.length() - pos - 1);
+		ext = fname.substr(pos + 1, pos_end - pos - 1);
+		// ext = fname.substr(pos + 1, fname.length() - pos - 1);
+	// std::cout << "\t" << ext;
 	return ext;
+}
+
+void split_query(std::string const &fname, std::string &full_path, std::string &query_str)
+{
+	size_t query_pos = fname.find('?');
+	full_path = fname;
+	if (query_pos != std::string::npos)
+	{
+		query_str = fname.substr(query_pos + 1, fname.length() - query_pos);
+		full_path.erase(full_path.find('?'));
+	}
 }
 
 //	store all extension based locations (*.php, *.py, ...)
