@@ -18,14 +18,14 @@ class HTTPResponse : public AHTTPMessage
 	typedef std::map< int, std::string > int_to_string_map_t;
 
   private:
-	std::string							 version;
-	int									 status_code;
-	std::string							 status_text;
-	std::string							 content_type;
-	std::string							 payload;
-	std::string							 request_full_path;
-	std::string							 request_file_ext;
-	std::string							 cgi_query_str;
+	std::string version;
+	int			status_code;
+	std::string status_text;
+	std::string content_type;
+	std::string payload;
+	std::string request_full_path;
+	std::string request_file_ext;
+	std::string cgi_query_str;
 
 	HTTPRequest const					*request;
 	t_conf const						 config;
@@ -46,8 +46,9 @@ class HTTPResponse : public AHTTPMessage
 	int									 check_method(s_location const &);
 	void								 ready_up(void);
 	void								 delete_file(std::string const &);
-	bool								is_cgi();
-	std::vector< char >					cgi_exec();
+	void								 hadndle_post(std::string const &);
+	bool								 is_cgi();
+	std::vector< char >					 cgi_exec();
 
 	HTTPResponse(void);
 

@@ -83,6 +83,8 @@ int get_method_mask(std::string const &str)
 		mask |= em_post;
 	else if (str == "DELETE")
 		mask |= em_delete;
+	else if (str == "PUT")
+		mask |= em_put;
 
 	return mask;
 }
@@ -247,6 +249,7 @@ int HTTPResponse::check_method(s_location const &loc)
 
 	if ((mask & config.implemented_methods) == 0)
 	{
+		std::cout << "Method not implemented\n";
 		status_code = 501;
 		return 1;
 	}
@@ -274,24 +277,25 @@ void HTTPResponse::process_target(std::string const &fname_raw, s_location const
 	struct stat st = {};
 	std::string method = request->get_method();
 
-	// std::cout << fname << "\n";
+	std::cout << fname << "\n";
 
 	if (stat(fname.c_str(), &st) != 0)
 	{
-		// if (get_method_mask(method) & em_put)
-		// {
-		// 	std::cout << "HER HERE HERE post method\n";
-		// 	// create_file_and_write_contents(fname, request->get_body());
-		// }
-		// else
-		// {
+		if (get_method_mask(method) & em_put && loc.is_upload_allowed)
+		{
+			std::cout << "HER HERE HERE post method\n";
+			// std::cout << request->get_body() << "end of body\n";
+			create_file_and_write_contents(fname, request->get_raw_data());
+		}
+		else
+		{
 			std::cout << "Not found in stat  " << fname << "\n";
 			status_code = 404;
-		// }
+		}
 		return;
 	}
 
-	if (st.st_mode & S_IFDIR)
+	if (st.st_mode & S_IFDIR && get_method_mask(method) & em_get)
 	{
 		// std::cout << "DIR TRY\n";
 		// std::cout << fname << std::endl;
@@ -308,11 +312,20 @@ void HTTPResponse::process_target(std::string const &fname_raw, s_location const
 	}
 	else
 	{
-		if (get_method_mask(method) & em_get)
+		if (get_method_mask(method) & (em_get | em_post))
 			get_file_info(fname);
 		else if (get_method_mask(method) & em_delete)
 			delete_file(fname);
+		// else if (get_method_mask(method) & em_post)
+			// hadndle_post(fname);
 	}
+}
+
+void	HTTPResponse::hadndle_post(std::string const &fname)
+{
+	status_code = 200;
+	content_type = CTYPE_TEXT_HTML;
+	std::cout << "post method " <<fname << "\n";
 }
 
 void	HTTPResponse::create_file_and_write_contents(std::string const &fname, std::string const &content)
