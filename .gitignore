@@ -2,3 +2,5 @@ webserv
 obj/
 .idea
 tests/webserv
+.DS_Store
+*.log

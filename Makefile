@@ -2,19 +2,23 @@ UNAME_S := $(shell uname -s)
 SAN_FLAGS = address,undefined
 ifeq ($(UNAME_S), Linux)
 	SAN_FLAGS := $(SAN_FLAGS),leak
+	SIEGE_PATH	=	siege
 endif
-# ifeq ($(UNAME_S), Darwin)
-	
-# endif
+
+ifeq ($(UNAME_S), Darwin)
+	SIEGE_PATH	=	./siege/osx/bin/siege
+endif
+
+SIEGE_ARGS	=	http://localhost:8080 -b \
+				--time=5S \
+				--rc=siegerc \
+				--concurrent=50
 
 CC			=	c++
 CFLAGS		=	-Wall -Wextra -Werror -std=c++98 -g -fsanitize=$(SAN_FLAGS)
 SRC_PATH	=	src
 OBJ_PATH	=	obj
 INC_PATH	=	inc
-
-SIEGE_PATH	=	siege/osx/bin/siege
-SIEGE_ARGS	=	http://localhost:8080 -b --time=3S
 
 SRC			=	$(wildcard ${SRC_PATH}/*.cpp)
 
@@ -49,14 +53,17 @@ fclean: clean
 	rm -f ${NAME}
 
 s	: $(NAME)
-	./$(NAME) &
-	sleep 1
-	./$(SIEGE_PATH) $(SIEGE_ARGS) &> siege.log
+	./$(NAME) > serv.log & sleep 1 && $(SIEGE_PATH) $(SIEGE_ARGS) > siege.log ; pkill webserv
+#	./$(NAME) > /dev/null & sleep 1 ; $(SIEGE_PATH) $(SIEGE_ARGS) > siege.log ; pkill webserv
+#	./$(NAME) &	sleep 1 && $(SIEGE_PATH) $(SIEGE_ARGS) > siege.log && pkill webserv
+# 	./$(NAME)&	echo test > siege.log ; echo kill
+#	sleep 1
 #	$(shell bash -c "./$(NAME) &> /dev/null & ./$(SIEGE_PATH) $(SIEGE_ARGS) > siege.log; pkill webserv")
-	pkill webserv
+#	pkill webserv
+	@sleep 1
 	@echo "\n\n"
-	cat siege.log
-	rm siege.log
+	@cat siege.log
+#	@rm siege.log
 
 r	: $(NAME)
 	./$(NAME)
