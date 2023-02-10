@@ -16,7 +16,7 @@ t_conf create_test_config(std::string const &server_name, int port)
 	std::map< int, std::string > errors;
 	std::map< int, std::string > statuses;
 
-	errors.insert(std::make_pair(200, ""));
+	// errors.insert(std::make_pair(200, ""));
 	errors.insert(std::make_pair(501, "<html><h3>501 - not implemented!</h3></html>"));
 	errors.insert(std::make_pair(404, "<html><h3>404 - not found!</h3></html>"));
 	errors.insert(std::make_pair(405, "<html><h3>405 - method not allowed!</h3></html>"));
@@ -27,6 +27,7 @@ t_conf create_test_config(std::string const &server_name, int port)
 	statuses.insert(std::make_pair(404, "Not Found"));
 	statuses.insert(std::make_pair(405, "Method Not Allowed"));
 	statuses.insert(std::make_pair(500, "Internal Server Error"));
+	statuses.insert(std::make_pair(301, "Moved Permanently"));
 
 	s_config   test_config;
 	s_location test_location;
@@ -51,7 +52,7 @@ t_conf create_test_config(std::string const &server_name, int port)
 	// test_location2.root = "/home/zyasuo/21school/my_server/www/serv_b";
 	test_location2.methods |= em_get | em_post | em_delete;
 	test_location2.autoindex = true;
-	test_location2.rewrite = "";
+	test_location2.rewrite = "shit";
 	test_location2.index_files.push_back("index1.html");
 	test_location2.is_upload_allowed = true;
 

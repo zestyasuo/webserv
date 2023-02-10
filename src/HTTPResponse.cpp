@@ -100,13 +100,15 @@ bool is_cgi(std::string const &fname)
 /// @brief looks for a location struct specified by config.
 /// @param target needed location
 /// @param locations full list of locations from config
-/// @return specified location or throws std::out_of_range
+/// @return specified location or defualt location
 s_location const &get_location(std::string const &target, std::map< std::string, s_location > const &locations)
 {
 	std::string to_find = "";
 
+	std::cout << target << "\n";
 	if (target.find_last_of("/") != target.npos)
 		to_find = target.substr(0, target.find_last_of("/"));
+	std::cout << "to find: " << to_find << "\n";
 	// std::cout << "to_find: " << to_find << "\n";
 	s_location const &loc = locations.count(to_find) ? locations.at(to_find) : locations.at("/");
 	return loc;
@@ -152,7 +154,7 @@ HTTPResponse::~HTTPResponse()
 /// @param req parsed request
 /// @param conf parsed config
 HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf)
-	: status_code(0), status_text(""), request(req), config(conf), error_pages(config.error_pages)
+	: status_code(0), status_text(""), request(req), config(conf), error_pages(config.error_pages), status_texts(config.status_texts)
 {
 	if (!req)
 		return;
@@ -163,6 +165,14 @@ HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf)
 
 	version = req->get_version();
 	loc = get_location(request->get_target(), config.locations);
+	if (!loc.rewrite.empty())
+	{
+		status_code = 301;
+		add_header("Location", loc.rewrite);
+		content_type = CTYPE_TEXT_HTML;
+		ready_up();
+		return;
+	}
 	// std::cout << "path: " << loc.path << "\n";
 	if (check_method(loc))
 	{
@@ -241,7 +251,7 @@ void HTTPResponse::process_target(std::string const &fname_raw, s_location const
 
 	if (st.st_mode & S_IFDIR)
 	{
-		std::cout << "DIR TRY\n";
+		// std::cout << "DIR TRY\n";
 		// std::cout << fname << std::endl;
 		if (try_index_page(fname, loc) != 0)
 		{
