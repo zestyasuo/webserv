@@ -4,6 +4,7 @@
 #include "Config.hpp"
 #include <fstream>
 #include <string>
+#include <vector>
 // #include "../inc/Config.hpp"
 
 #define CRLF "\r\n"
@@ -97,20 +98,36 @@ bool is_cgi(std::string const &fname)
 	return false;
 }
 
+std::vector<std::string> make_possible_loc_list(std::string const &target)
+{
+	std::string	to_find = "/";
+	std::vector<std::string> res;
+	std::vector<std::string> split_target = split(target, "/");
+
+	for (std::vector<std::string>::iterator it = split_target.begin(); it != split_target.end(); it++)
+	{
+		to_find += *it;
+		res.push_back(to_find);
+		to_find += "/";
+	}
+	return res;
+}
+
 /// @brief looks for a location struct specified by config.
 /// @param target needed location
 /// @param locations full list of locations from config
 /// @return specified location or defualt location
-s_location const &get_location(std::string const &target, std::map< std::string, s_location > const &locations)
+s_location const get_location(std::string const &target, std::map< std::string, s_location > const &locations)
 {
 	std::string to_find = "";
+	std::vector<std::string> possible_locations = make_possible_loc_list(target);
+	s_location loc = locations.at("/");
 
-	std::cout << target << "\n";
-	if (target.find_last_of("/") != target.npos)
-		to_find = target.substr(0, target.find_last_of("/"));
-	std::cout << "to find: " << to_find << "\n";
-	// std::cout << "to_find: " << to_find << "\n";
-	s_location const &loc = locations.count(to_find) ? locations.at(to_find) : locations.at("/");
+	for (std::vector<std::string>::reverse_iterator it = possible_locations.rbegin(); it != possible_locations.rend(); it++)
+	{
+		if (locations.count(*it))
+			loc = locations.at(*it);
+	}
 	return loc;
 }
 
