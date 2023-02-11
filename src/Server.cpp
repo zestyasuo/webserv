@@ -21,21 +21,14 @@ bool Server::respond(Query *query)
 {
 	if ((query)->get_request())
 	{
-		// if (query->getRevents() & POLLOUT)
-		// {
-			HTTPResponse *response = new HTTPResponse(query->get_request(), config);
-			query->send(response->to_string());
-			logger.log("message sent from " + config.name, INFO);
-			delete response;
-			return true;
-		// }
-		// else
-		// {
-		// 	logger.log("eeeeeeeeeeeeeeeh", DEBUG);
-		// 	return false;
-		// }
-		// logger.log("message : \n" + response->to_string(), DEBUG);
+		if (!query->get_response())
+			query->form_response(config);
+		std::cout << query->get_response()->to_string() << std::endl;
+		query->send();
+		logger.log("message sent from " + config.name, INFO);
+		return true;
 	}
+	logger.log("didnt send", ERROR);
 	return false;
 }
 

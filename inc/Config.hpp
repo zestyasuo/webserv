@@ -14,7 +14,8 @@ enum e_method
 {
 	em_get = 1,
 	em_post = 1 << 1,
-	em_delete = 1 << 2
+	em_delete = 1 << 2,
+	em_put = 1 << 3
 };
 
 struct s_location
@@ -44,14 +45,19 @@ struct s_config
 	std::map< int, std::string >		error_pages;
 	std::map< int, std::string >		status_texts;
 	int									implemented_methods;
-	map< std::string, std::string >		envp;		  // parsed char **envp
-	std::map< std::string, s_location > locations;	  // location [std::string] {s_location}
-	std::vector< int >					ports;		  // listen
-	std::string							name;		  // server_name
+	map< std::string, std::string >		envp;		// parsed char **envp
+	std::map< std::string, s_location > locations;	// location [std::string] {s_location}
+	std::map< std::string, std::string > cgi;		// extension:cgi_path	{"php", "/usr/bin/php"}
+	std::vector< int >					ports;		// listen
+	std::string							name;		// server_name
 	std::string							root;
 
 	s_config();
 	~s_config();
 };
+
+std::string get_path_ext(const string &fname);
+void process_cgi_loc(s_config &config);
+void split_query(std::string const &fname, std::string &full_path, std::string &query_str);
 
 #endif

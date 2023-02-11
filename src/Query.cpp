@@ -1,15 +1,20 @@
 #include "../inc/Query.hpp"
+#include "HTTPRequest.hpp"
+#include "HTTPResponse.hpp"
 #include <cstddef>
+#include <cstdio>
 #include <iostream>
 #include <poll.h>
+#include <string>
 #include <sys/poll.h>
 #include <vector>
 
-Query::Query() : socket(), fd(), request(), ready()
+Query::Query() : socket(), fd(), response(), request(), ready()
 {
 }
 
-Query::Query(struct pollfd *p) : socket(p), fd(accept(socket->fd, NULL, NULL)), raw_data(""), request(0), ready(false)
+Query::Query(struct pollfd *p)
+	: socket(p), fd(accept(socket->fd, NULL, NULL)), raw_data(""), response(0), request(0), ready(false)
 {
 	if (fd < 0)
 		throw Webserv_exception("accept failed", FATAL);
@@ -51,33 +56,53 @@ int Query::get_socket(void) const
 }
 
 // int	Query::send(std::string const &message) const
-size_t Query::send(std::string const &message) const
+size_t Query::send() const
 {
-	char const *bytes = (message.c_str());
-	ssize_t		code = 0;
-	// if ((socket->revents & POLLOUT) == POLLOUT)
-	code = ::send(fd, bytes, message.length(), 0);
-	if (code < 0)
+	size_t	i = 0;
+	size_t buf_size = BUFF_SIZE;
+	std::string resp = response->to_string();
+	const char *buf = resp.c_str();
+	size_t to_send = response->to_string().size();
+	std::cout << to_send << " full size\n";
+	while (i < to_send)
 	{
-		throw Webserv_exception("send failed", ERROR);
+		const ssize_t l = ::send(fd, buf + i, std::min(buf_size, to_send - i), 0);
+		std::cout << std::min(buf_size, to_send - i) << "  left\n";
+		if (l < 0)
+			throw std::exception();
+		i += l;
 	}
-	// socket->events = POLLIN;
-	return message.length();
+	std::cout << i << std::endl;
+	return i;
 }
 
-Query::Query(Query const &copy) : socket(copy.socket), fd(copy.fd), raw_data(copy.raw_data), request(copy.request), ready(copy.ready)
+Query::Query(Query const &copy)
+	: socket(copy.socket), fd(copy.fd), raw_data(copy.raw_data), response(copy.response), request(copy.request),
+	  ready(copy.ready)
 {
 }
 
 Query::~Query()
 {
 	delete request;
+	delete response;
 	close(fd);
 };
 
 HTTPRequest const *Query::get_request(void) const
 {
 	return (request);
+}
+
+HTTPResponse const *Query::get_response(void) const
+{
+	return (response);
+}
+
+void Query::form_response(t_conf const &config)
+{
+	if (request && !response)
+		response = new HTTPResponse(request, config);
 }
 
 void Query::form_request(void)

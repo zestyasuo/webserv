@@ -1,4 +1,5 @@
 #include "../inc/Router.hpp"
+#include "Socket.hpp"
 #include "log_levels.hpp"
 
 Router::Router(std::vector< s_config > const &conf) : configs(conf), logger(true)
