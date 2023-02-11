@@ -6,7 +6,7 @@
 		"request": "launch",
 		// "preLaunchTask": "make project",
 		"program": "${workspaceRoot}/webserv",
-		"args": [],
+		"args": ["test.conf"],
 		"cwd": "${workspaceFolder}",
 	}
 	]

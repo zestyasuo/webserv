@@ -1,9 +1,11 @@
 #include "../inc/Config.hpp"
+#include "ConfigStream.hpp"
 #include "Router.hpp"
 #include "utils.hpp"
 #include <Logger.hpp>
 #include <Server.hpp>
 #include <exception>
+#include <istream>
 #include <limits.h>
 #include <unistd.h>
 
@@ -87,6 +89,12 @@ int main(int argc, char **argv, char **envp)
 	// 	std::cout << "Usage: ./webserv config_file_path\n";
 	// 	return 1;
 	// }
+	// std::filebuf config_buf;
+	// if (!config_buf.open(argv[1],std::ios::in))
+	// 	throw std::exception();
+	// std::istream is(&config_buf);
+	// ConfigStream cs(is, envp);
+	// std::vector< t_conf > configs = cs.getConfigList();
 	std::vector< t_conf > configs;
 	configs.push_back(create_test_config("serv_a", 8090));
 	configs.push_back(create_test_config("serv_b", 8090));

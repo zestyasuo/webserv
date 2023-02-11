@@ -61,7 +61,10 @@ void Socket::bind()
 	address.sin_port = htons(port);
 
 	if (::bind(sfd, (struct sockaddr *)&address, sizeof(address)) < 0)
+	{
+		std::cout << port << std::endl;
 		throw Webserv_exception("Socket binding failed", FATAL);
+	}
 }
 
 void Socket::poll(void)
