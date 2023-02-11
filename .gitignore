@@ -4,4 +4,4 @@ obj/
 tests/webserv
 .cache
 *.DS_Store
-sieg 
+siege
