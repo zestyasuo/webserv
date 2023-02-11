@@ -66,7 +66,7 @@ t_conf create_test_config(std::string const &server_name, int port)
 	s_location	loc_py;
 	loc_py.path = "*.py";
 	// loc_py.root = "/usr/bin/python3";	//	Ubuntu
-	loc_py.root = "/usr/local/bin/python3";
+	loc_py.root = "/usr/bin/python3";
 	test_config.locations.insert(std::make_pair(loc_py.path, loc_py));
 
 	// test_config.root = "/home/zyasuo/21school/my_server/www/serv_a";
