@@ -12,8 +12,6 @@ class ConfigStream {
 	std::string token;
 	map< std::string, std::string > env;
 
-	// ConfigStream(const ConfigStream &other);
-	// ConfigStream &operator=(const ConfigStream &other);
 	t_conf parse_server();
 	public:
 		const std::string &next_tok();

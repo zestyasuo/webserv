@@ -156,14 +156,14 @@ std::string get_server_name(ConfigStream &cs)
     return get_string_derictive(cs);
 }
 
-size_t get_body_size_limit(ConfigStream &cs)
+ssize_t get_body_size_limit(ConfigStream &cs)
 {
     if (cs.cur_tok() != "body_size_limit")
         throw std::logic_error("IMPOSSIBLE: expected: body_size_limit got: " + cs.cur_tok());
     
     if (!is_number(cs.next_tok()))
             throw std::invalid_argument("Expected numeric token, got: " + cs.cur_tok());
-    size_t val;
+    ssize_t val;
     std::istringstream(cs.cur_tok()) >> val;
     if (cs.next_tok() != ";")
         throw std::invalid_argument("Unexpected token: " + cs.cur_tok());
@@ -227,9 +227,7 @@ s_location get_location(ConfigStream &cs, const std::string &s_root)
 {
     if (cs.cur_tok() != "location")
             throw std::invalid_argument("Unexpected token: " + cs.cur_tok());
-    s_location loc;
-    loc.root = s_root;
-    loc.path = cs.next_tok();
+    s_location loc(s_root, cs.next_tok());
     if (cs.next_tok() != "{")
         throw std::invalid_argument("Unexpected token: " + cs.cur_tok());
     for (cs.next_tok(); cs && cs.cur_tok() != "}"; cs.next_tok())
@@ -246,7 +244,7 @@ s_location get_location(ConfigStream &cs, const std::string &s_root)
             loc.is_upload_allowed = get_upload(cs);
         else if (cs.cur_tok() == "upload_path")
             loc.upload_path = get_upload_path(cs);
-        else if (cs.cur_tok() == "bpdy_size_limit")
+        else if (cs.cur_tok() == "body_size_limit")
             loc.body_size_limit = get_body_size_limit(cs);
     }
     if (cs.cur_tok() != "}")
@@ -281,15 +279,19 @@ t_conf ConfigStream::parse_server()
         throw std::invalid_argument("Unexpected token: " + token);
     if (cfg.ports.empty())
         throw std::invalid_argument("Server port must be specified!");
-    if (cfg.locations.empty())
-        throw std::invalid_argument("Server must have at least one location context!");
+    if (cfg.root.empty())
+        throw std::invalid_argument("Server root must be specified!");
+    if (!cfg.locations.count("/"))
+        cfg.locations["/"]=s_location(cfg.root);
+        
+
     return cfg;
 }
 
 
 std::vector<t_conf> ConfigStream::getConfigList()
 {
-    if (token.empty())
+    if (token.empty() )
         this->next_tok();
 
     std::vector<t_conf> cfgl;

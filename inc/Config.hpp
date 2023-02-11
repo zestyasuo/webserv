@@ -32,8 +32,11 @@ struct s_location
 	bool								 is_upload_allowed;	   // upload [on / off]
 	std::string							 upload_path;		   // upload_path ""
 	map< string, string >				 extra_props;		   // reserved for unknown purposes
-	size_t								 body_size_limit;	   // body_size_limit, bytes;
+	ssize_t								 body_size_limit;	   // body_size_limit, bytes;
 															   // error - path
+
+	s_location(const std::string &root = "", const std::string &path = "/");
+	~s_location();
 };
 
 struct s_config
@@ -46,6 +49,9 @@ struct s_config
 	std::vector< int >					ports;		  // listen
 	std::string							name;		  // server_name
 	std::string							root;
+
+	s_config();
+	~s_config();
 };
 
 #endif
