@@ -1,4 +1,5 @@
 #include "../inc/utils.hpp"
+#include <utility>
 
 void unblock_fd(int sfd)
 {
@@ -43,4 +44,23 @@ std::vector< std::string > split(std::string const &str, std::string const &del)
 		res.push_back(copy);
 
 	return res;
+}
+
+std::string					get_status_message_by_code(int const code)
+{
+
+	static std::map< int, std::string > statuses;
+
+	if (statuses.empty()){
+		statuses.insert(std::make_pair(200, "OK"));
+		statuses.insert(std::make_pair(501, "Not Implemented"));
+		statuses.insert(std::make_pair(404, "Not Found"));
+		statuses.insert(std::make_pair(405, "Method Not Allowed"));
+		statuses.insert(std::make_pair(500, "Internal Server Error"));
+		statuses.insert(std::make_pair(301, "Moved Permanently"));
+	}
+
+	if (statuses.count(code))
+		return statuses.at(code);
+	return "Undefined error";
 }

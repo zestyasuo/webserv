@@ -6,11 +6,13 @@
 #include <fcntl.h>
 #include <iostream>
 #include <map>
+#include <string>
 #include <vector>
 
 void					   unblock_fd(int fd);
 std::vector< std::string > split(std::string const &str, std::string const &del);
 std::string				   get_floctime(void);
+std::string					get_status_message_by_code(int const code);
 
 template < class UnaryPredicate > std::vector< std::string > split_if(std::string const &str, UnaryPredicate p)
 {

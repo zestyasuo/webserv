@@ -2,6 +2,7 @@
 #include "../inc/Server.hpp"
 #include "../inc/file_utils.hpp"
 #include "Config.hpp"
+#include "utils.hpp"
 #include <fstream>
 #include <string>
 #include <vector>
@@ -411,8 +412,7 @@ void HTTPResponse::ready_up(void)
 
 	if (error_pages.count(status_code))
 		html = error_pages.at(status_code);
-	if (status_texts.count(status_code))
-		status_text = status_texts.at(status_code);
+	status_text = get_status_message_by_code(status_code);
 	payload.insert(0, html);
 	add_header("Date", get_floctime());
 	add_header("Content-Type", content_type);

@@ -16,7 +16,6 @@ t_conf create_test_config(std::string const &server_name, int port)
 	char webserv_root_dir[PATH_MAX];
 	getcwd(webserv_root_dir, PATH_MAX);
 	std::map< int, std::string > errors;
-	std::map< int, std::string > statuses;
 
 	// errors.insert(std::make_pair(200, ""));
 	errors.insert(std::make_pair(501, "<html><h3>501 - not implemented!</h3></html>"));
@@ -24,6 +23,7 @@ t_conf create_test_config(std::string const &server_name, int port)
 	errors.insert(std::make_pair(405, "<html><h3>405 - method not allowed!</h3></html>"));
 	errors.insert(std::make_pair(500, "<html><h3>500 - Internal Server Error!</h3></html>"));
 
+	std::map< int, std::string > statuses;
 	statuses.insert(std::make_pair(200, "OK"));
 	statuses.insert(std::make_pair(501, "Not Implemented"));
 	statuses.insert(std::make_pair(404, "Not Found"));
@@ -84,20 +84,20 @@ t_conf create_test_config(std::string const &server_name, int port)
 
 int main(int argc, char **argv, char **envp)
 {
-	// if (argc != 2)
-	// {
-	// 	std::cout << "Usage: ./webserv config_file_path\n";
-	// 	return 1;
-	// }
-	// std::filebuf config_buf;
-	// if (!config_buf.open(argv[1],std::ios::in))
-	// 	throw std::exception();
-	// std::istream is(&config_buf);
-	// ConfigStream cs(is, envp);
-	// std::vector< t_conf > configs = cs.getConfigList();
-	std::vector< t_conf > configs;
-	configs.push_back(create_test_config("serv_a", 8090));
-	configs.push_back(create_test_config("serv_b", 8090));
+	if (argc != 2)
+	{
+		std::cout << "Usage: ./webserv config_file_path\n";
+		return 1;
+	}
+	std::filebuf config_buf;
+	if (!config_buf.open(argv[1],std::ios::in))
+		throw std::exception();
+	std::istream is(&config_buf);
+	ConfigStream cs(is, envp);
+	std::vector< t_conf > configs = cs.getConfigList();
+	// std::vector< t_conf > configs;
+	// configs.push_back(create_test_config("serv_a", 8090));
+	// configs.push_back(create_test_config("serv_b", 8090));
 	Router router(configs);
 
 	(void)argc;
