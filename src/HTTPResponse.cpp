@@ -196,7 +196,6 @@ HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf)
 		status_code = 301;
 		add_header("Location", loc.rewrite);
 		content_type = CTYPE_TEXT_HTML;
-		std::cout << "redirected\n";
 		ready_up();
 		return;
 	}
@@ -219,10 +218,10 @@ HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf)
 	split_query(fname, request_full_path, cgi_query_str);
 	decode_html_enities(request_full_path);
 
-	std::cout << "request_full_path : '" << request_full_path << "'\n";
-	std::cout << "target: " << target << "\n";
-	std::cout << "cgi_query_str : '" << cgi_query_str << "'\n";
-	std::cout << "request_file_ext : '" << request_file_ext << "'\n";
+	// std::cout << "request_full_path : '" << request_full_path << "'\n";
+	// std::cout << "target: " << target << "\n";
+	// std::cout << "cgi_query_str : '" << cgi_query_str << "'\n";
+	// std::cout << "request_file_ext : '" << request_file_ext << "'\n";
 
 	process_target(request_full_path, loc);
 	// add_header("Location", "/");
@@ -250,7 +249,7 @@ int HTTPResponse::check_method(s_location const &loc)
 
 	if ((mask & config.implemented_methods) == 0)
 	{
-		std::cout << "Method not implemented\n";
+		// std::cout << "Method not implemented\n";
 		status_code = 501;
 		return 1;
 	}
@@ -273,8 +272,6 @@ void HTTPResponse::process_target(std::string const &fname_raw, s_location const
 {
 	string fname(fname_raw);
 	decode_html_enities(fname);
-	std::cout << fname << std::endl;
-
 	struct stat st = {};
 	std::string method = request->get_method();
 
@@ -284,8 +281,6 @@ void HTTPResponse::process_target(std::string const &fname_raw, s_location const
 	{
 		if (get_method_mask(method) & em_put && loc.is_upload_allowed)
 		{
-			std::cout << "HER HERE HERE post method\n";
-			// std::cout << request->get_body() << "end of body\n";
 			create_file_and_write_contents(fname, request->get_raw_data());
 		}
 		else
@@ -364,14 +359,14 @@ void HTTPResponse::get_file_info(std::string const &fname)
 		// todo: is redirect
 		// todo: is method put
 		status_code = 404;
-		std::cout << "Not found in opening file " << fname << "\n";
+		// std::cout << "Not found in opening file " << fname << "\n";
 		return;
 	}
 	// if (fname.compare(fname.size() - 3, 3, ".py") == 0)
 	if (is_cgi())
 	{	 //	CGI
 		// HTTPRespone::exec_cgi();
-		std::cout << "I am cgi!\n";
+		std::cout << "I am cgi " << request_file_ext << "\n";
 		content_type = "text/html";
 
 		std::vector<char> cgi_data (cgi_exec());
@@ -383,7 +378,6 @@ void HTTPResponse::get_file_info(std::string const &fname)
 	}
 	else
 	{
-		std::cout << "read file!\n";
 		status_code = 200;
 		read_file(ifs);
 		// ???; process partial put -> 400 BAD REQUEST

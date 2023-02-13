@@ -23,7 +23,6 @@ bool Server::respond(Query *query)
 	{
 		if (!query->get_response())
 			query->form_response(config);
-		std::cout << query->get_response()->to_string() << std::endl;
 		query->send();
 		logger.log("message sent from " + config.name, INFO);
 		return true;

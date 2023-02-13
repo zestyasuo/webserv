@@ -1,4 +1,6 @@
 #include "../inc/file_utils.hpp"
+#include "Webserv_exception.hpp"
+#include <cerrno>
 
 bool dirent_cmp(const dirent &a, const dirent &b)
 {
@@ -12,7 +14,7 @@ std::vector< dirent > list_dir(const std::string &path, bool alsort = true)
 
 	DIR *dir = opendir(path.c_str());
 	if (dir == NULL)
-		throw std::exception();
+		throw Webserv_exception("Dir cannot be opened", ERROR);
 	while ((dir_ent = readdir(dir)) != NULL)
 		result.push_back(*dir_ent);
 	closedir(dir);

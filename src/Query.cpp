@@ -1,6 +1,7 @@
 #include "../inc/Query.hpp"
 #include "HTTPRequest.hpp"
 #include "HTTPResponse.hpp"
+#include "Webserv_exception.hpp"
 #include <cstddef>
 #include <cstdio>
 #include <iostream>
@@ -63,16 +64,14 @@ size_t Query::send() const
 	std::string resp = response->to_string();
 	const char *buf = resp.c_str();
 	size_t to_send = response->to_string().size();
-	std::cout << to_send << " full size\n";
 	while (i < to_send)
 	{
 		const ssize_t l = ::send(fd, buf + i, std::min(buf_size, to_send - i), 0);
-		std::cout << std::min(buf_size, to_send - i) << "  left\n";
+		// std::cout << std::min(buf_size, to_send - i) << "  left\n";
 		if (l < 0)
-			throw std::exception();
+			throw Webserv_exception("send failed", ERROR);
 		i += l;
 	}
-	std::cout << i << std::endl;
 	return i;
 }
 
