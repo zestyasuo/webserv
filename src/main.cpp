@@ -8,6 +8,7 @@
 #include <istream>
 #include <limits.h>
 #include <unistd.h>
+#include <vector>
 
 // t_conf g_conf;
 
@@ -95,6 +96,8 @@ int main(int argc, char **argv, char **envp)
 	std::istream is(&config_buf);
 	ConfigStream cs(is, envp);
 	std::vector< t_conf > configs = cs.getConfigList();
+	for (std::vector<t_conf>::iterator it = configs.begin(); it != configs.end(); it++)
+		process_cgi_loc(*it);
 	// std::vector< t_conf > configs;
 	// configs.push_back(create_test_config("serv_a", 8090));
 	// configs.push_back(create_test_config("serv_b", 8090));
