@@ -5,3 +5,5 @@ tests/webserv
 .cache
 *.DS_Store
 siege
+ubuntu_cgi_tester
+ubuntu_tester

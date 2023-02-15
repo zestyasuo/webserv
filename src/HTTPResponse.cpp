@@ -78,7 +78,8 @@ int get_method_mask(std::string const &str)
 {
 	int mask = 0;
 
-	if (str == "GET")
+	// head method plug (tester says "bad status code")
+	if (str == "GET" || str == "HEAD")
 		mask |= em_get;
 	else if (str == "POST")
 		mask |= em_post;
@@ -291,7 +292,8 @@ void HTTPResponse::process_target(std::string const &fname_raw, s_location const
 		return;
 	}
 
-	if (st.st_mode & S_IFDIR && get_method_mask(method) & em_get)
+	//potential_error double check
+	if (st.st_mode & S_IFDIR && get_method_mask(method) & (em_get | em_post))
 	{
 		// std::cout << "DIR TRY\n";
 		// std::cout << fname << std::endl;
@@ -393,6 +395,7 @@ void HTTPResponse::read_file(std::ifstream &ifs)
 	size_t resp_headers_size = payload.size();
 	ifs.seekg(0, std::ios::end);
 	ssize_t fsize = ifs.tellg();
+	std::cout << payload.size() << " + " << fsize << std::endl;
 	payload.resize(payload.size() + fsize);
 	ifs.seekg(0);
 	ifs.read(&payload[resp_headers_size], fsize);
@@ -426,6 +429,7 @@ std::string HTTPResponse::to_string() const
 	// query_string = fname.substr(fname.find('?') + 1, fname.length());
 	// fname.erase(fname.find('?'));
 	// }
+	std::cout << payload;
 	return payload;
 }
 
