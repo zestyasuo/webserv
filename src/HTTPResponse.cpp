@@ -2,6 +2,7 @@
 #include "../inc/Server.hpp"
 #include "../inc/file_utils.hpp"
 #include "Config.hpp"
+#include "log_levels.hpp"
 #include "utils.hpp"
 #include <fstream>
 #include <string>
@@ -66,7 +67,7 @@ int get_method_mask(std::string const &str)
 	int mask = 0;
 
 	// head method plug (tester says "bad status code")
-	if (str == "GET" || str == "HEAD")
+	if (str == "GET")
 		mask |= em_get;
 	else if (str == "POST")
 		mask |= em_post;
@@ -74,6 +75,8 @@ int get_method_mask(std::string const &str)
 		mask |= em_delete;
 	else if (str == "PUT")
 		mask |= em_put;
+	else if (str == "HEAD")
+		mask |= em_head;
 
 	return mask;
 }
@@ -155,7 +158,7 @@ HTTPResponse::HTTPResponse(void) : status_code(), request(), config(), logger()
 }
 
 HTTPResponse::HTTPResponse(HTTPResponse const &copy)
-	: AHTTPMessage(copy), version(copy.version), status_code(copy.status_code), content_type(copy.content_type), payload(copy.payload),
+	: AHTTPMessage(copy), version(copy.version), status_code(copy.status_code), content_type(copy.content_type), body(copy.body),
 	  request(copy.request), config(copy.config), logger(copy.logger)
 {
 }
@@ -276,20 +279,20 @@ void HTTPResponse::process_target(std::string const &fname_raw, s_location const
 	}
 
 	//potential_error cause em_post and em_get behave the same, double check
-	if (st.st_mode & S_IFDIR && get_method_mask(method) & (em_get | em_post))
+	if (st.st_mode & S_IFDIR && get_method_mask(method) & (em_get | em_head | em_post))
 	{
 		// std::cout << "DIR TRY\n";
 		if (try_index_page(fname, loc) != 0)
 		{
 			content_type = CTYPE_TEXT_HTML;
 			status_code = 200;
-			payload += dir_list_formatted(fname, this->request, true);
-			wrap_html_body(payload);
+			body += dir_list_formatted(fname, this->request, true);
+			wrap_html_body(body);
 		}
 	}
 	else
 	{
-		if (get_method_mask(method) & (em_get | em_post))
+		if (get_method_mask(method) & (em_get | em_head | em_post))
 			get_file_info(fname);
 		else if (get_method_mask(method) & em_delete)
 			delete_file(fname);
@@ -348,7 +351,7 @@ void HTTPResponse::get_file_info(std::string const &fname)
 
 		std::vector<char> cgi_data (cgi_exec());
 
-		payload.insert(payload.begin(), cgi_data.begin(), cgi_data.end());
+		body.insert(body.begin(), cgi_data.begin(), cgi_data.end());
 		status_code = 200;
 	}
 	else
@@ -365,47 +368,54 @@ void HTTPResponse::get_file_info(std::string const &fname)
 /// @param ifs file stream
 void HTTPResponse::read_file(std::ifstream &ifs)
 {
-	size_t resp_headers_size = payload.size();
+	size_t resp_headers_size = body.size();
 	ifs.seekg(0, std::ios::end);
 	ssize_t fsize = ifs.tellg();
-	payload.resize(payload.size() + fsize);
+	body.resize(body.size() + fsize);
 	ifs.seekg(0);
-	ifs.read(&payload[resp_headers_size], fsize);
+	ifs.read(&body[resp_headers_size], fsize);
+}
+
+void	HTTPResponse::add_body(void)
+{
+	std::string html;
+
+	if (error_pages.count(status_code))
+		html = error_pages.at(status_code);
+	body.insert(0, html);
+	payload += body;
+}
+
+void	HTTPResponse::add_meta_data(void)
+{
+	std::string status_line;
+
+	status_text = get_status_message_by_code(status_code);
+	status_line = version + " " + SSTR(status_code) + " " + status_text + LB;
+	add_header("Date", get_floctime());
+	add_header("Content-Type", content_type);
+	std::string headers_str = map_to_str(headers);
+	meta_data += status_line + headers_str;
+
+	payload += meta_data;
 }
 
 /// @brief prepare response for writing and sending
 /// @param  nothing
 void HTTPResponse::ready_up(void)
 {
-	std::string html;
-
-	if (error_pages.count(status_code))
-		html = error_pages.at(status_code);
-	status_text = get_status_message_by_code(status_code);
-	payload.insert(0, html);
-	add_header("Date", get_floctime());
-	add_header("Content-Type", content_type);
-	std::string headers_str = map_to_str(headers);
-	payload.insert(0, headers_str + LB);
-	insert_status_line();
+	add_meta_data();
+	if ((get_method_mask(request->get_method() ) & em_head) != em_head)
+		add_body();
 }
 
 /// @brief HTTPResponse to_string
 /// @return HTTPResponse string representaion
 std::string HTTPResponse::to_string() const
 {
-	// logger.log(payload, DEBUG);
+	logger.log(payload, DEBUG);
+	logger.log("method; " + request->get_method(),DEBUG);
 	return payload;
-}
-
-/// @brief inserts status line
-/// @param none
-void HTTPResponse::insert_status_line(void)
-{
-	std::string status_line;
-
-	status_line = version + " " + SSTR(status_code) + " " + status_text + LB;
-	payload.insert(0, status_line);
 }
 
 /// @brief operator for stream

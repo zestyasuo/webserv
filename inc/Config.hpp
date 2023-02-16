@@ -16,7 +16,8 @@ enum e_method
 	em_get = 1,
 	em_post = 1 << 1,
 	em_delete = 1 << 2,
-	em_put = 1 << 3
+	em_put = 1 << 3,
+	em_head = 1 << 4
 };
 
 struct s_location

@@ -76,5 +76,6 @@ std::string map_to_str(std::map< std::string, std::string > const &m)
 	{
 		res += (*it).first + ": " + (*it).second + LB;
 	}
+	res += LB;
 	return res;
 }

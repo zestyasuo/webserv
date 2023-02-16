@@ -15,7 +15,7 @@ s_location::s_location(const std::string &root, const std::string &path)
 s_location::~s_location() {}
 
 s_config::s_config()
-: implemented_methods(em_get | em_post | em_delete)
+: implemented_methods(em_get | em_post | em_delete | em_put | em_head)
 {}
 
 std::string get_path_ext(const string &fname)

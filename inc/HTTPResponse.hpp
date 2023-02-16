@@ -24,7 +24,9 @@ class HTTPResponse : public AHTTPMessage
 	int			status_code;
 	std::string status_text;
 	std::string content_type;
+	std::string body;
 	std::string payload;
+	std::string meta_data;
 	std::string request_full_path;
 	std::string request_file_ext;
 	std::string cgi_query_str;
@@ -36,7 +38,8 @@ class HTTPResponse : public AHTTPMessage
 	std::string							 parse_version(std::vector< std::string > const &) const;
 	std::map< std::string, std::string > parse_headers(std::vector< std::string > const &) const;
 	void								 add_header(std::string const &, std::string const &);
-	void								 insert_status_line(void);
+	void								 add_body(void);
+	void								 add_meta_data(void);
 	bool								 isMethodAllowed(s_location const &);
 	void								 get_file_info(std::string const &);
 	void								 read_file(std::ifstream &);
