@@ -12,10 +12,14 @@ class Logger
 	static const std::string log_level_names[DEBUG + 1];
 	std::string				 make_logstr(std::string const &msg) const;
 	bool					 is_debug;
+	std::string				name;
+	bool	is_active;
 
   public:
+	void	deactivate(void);
 	std::string get_timestamp(void) const;
 	Logger(void);
+	Logger(bool, std::string const &);
 	Logger(bool);
 	~Logger(void);
 	void log(std::string, int) const;

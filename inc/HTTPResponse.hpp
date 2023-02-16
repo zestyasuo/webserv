@@ -3,6 +3,7 @@
 #include "AHTTPMessage.hpp"
 #include "Config.hpp"
 #include "HTTPRequest.hpp"
+#include "Logger.hpp"
 #include "utils.hpp"
 #include <cstdio>
 #include <fstream>
@@ -52,6 +53,7 @@ class HTTPResponse : public AHTTPMessage
 
 	HTTPResponse(void);
 
+	Logger	const logger;
   public:
 	explicit HTTPResponse(const HTTPRequest *, t_conf const &);
 	HTTPResponse(HTTPResponse const &copy);

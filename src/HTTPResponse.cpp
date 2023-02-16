@@ -163,13 +163,13 @@ int HTTPResponse::try_index_page(std::string const &fname, s_location const &loc
 
 // constructors
 
-HTTPResponse::HTTPResponse(void) : status_code(), request(), config()
+HTTPResponse::HTTPResponse(void) : status_code(), request(), config(), logger()
 {
 }
 
 HTTPResponse::HTTPResponse(HTTPResponse const &copy)
 	: AHTTPMessage(copy), version(copy.version), status_code(copy.status_code), content_type(copy.content_type), payload(copy.payload),
-	  request(copy.request), config(copy.config)
+	  request(copy.request), config(copy.config), logger(copy.logger)
 {
 }
 
@@ -181,7 +181,7 @@ HTTPResponse::~HTTPResponse()
 /// @param req parsed request
 /// @param conf parsed config
 HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf)
-	: status_code(0), status_text(""), request(req), config(conf), error_pages(config.error_pages), status_texts(config.status_texts)
+	: status_code(0), status_text(""), request(req), config(conf), error_pages(config.error_pages), status_texts(config.status_texts), logger(true, "Response")
 {
 	if (!req)
 		return;
@@ -219,26 +219,19 @@ HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf)
 	decode_html_enities(request_full_path);
 
 	// std::cout << "request_full_path : '" << request_full_path << "'\n";
-	std::cout << "target: " << target << "\n";
+	logger.log("target: " + SSTR(target), DEBUG);
 	// std::cout << "cgi_query_str : '" << cgi_query_str << "'\n";
 	// std::cout << "request_file_ext : '" << request_file_ext << "'\n";
 
 	process_target(request_full_path, loc);
-	// add_header("Location", "/");
 	ready_up();
 }
 
 // not needed yet, name reserved
 std::string HTTPResponse::parse_target(std::string const &target, std::string const &loc_path)
 {
-	// size_t		slash = target.find(loc_path);
 	std::string copy = target + loc_path;
 
-	// copy.erase(slash, loc_path.length());
-	// if (copy.at(copy.length() - 1) == '/')
-	// copy.erase(copy.length() - 1);
-	// std::string res = target.substr(slash);
-	// std::cout << copy << "\n";
 	return copy;
 }
 
@@ -289,20 +282,16 @@ void HTTPResponse::process_target(std::string const &fname_raw, s_location const
 		return;
 	}
 
-	//potential_error double check
+	//potential_error cause em_post and em_get behave the same, double check
 	if (st.st_mode & S_IFDIR && get_method_mask(method) & (em_get | em_post))
 	{
 		// std::cout << "DIR TRY\n";
-		// std::cout << fname << std::endl;
 		if (try_index_page(fname, loc) != 0)
 		{
-			// status_code = 501;
 			content_type = CTYPE_TEXT_HTML;
 			status_code = 200;
-			// this->request->get_target()
 			payload += dir_list_formatted(fname, this->request, true);
 			wrap_html_body(payload);
-			// std::cout << "dir listing requered;\n";
 		}
 	}
 	else
@@ -355,16 +344,12 @@ void HTTPResponse::get_file_info(std::string const &fname)
 
 	if (open_fstream(fname, ifs) != 0)
 	{
-		// todo: is redirect
-		// todo: is method put
 		status_code = 404;
 		// std::cout << "Not found in opening file " << fname << "\n";
 		return;
 	}
-	// if (fname.compare(fname.size() - 3, 3, ".py") == 0)
 	if (is_cgi())
-	{	 //	CGI
-		// HTTPRespone::exec_cgi();
+	{
 		std::cout << "I am cgi " << request_file_ext << "\n";
 		content_type = "text/html";
 
@@ -372,8 +357,6 @@ void HTTPResponse::get_file_info(std::string const &fname)
 
 		payload.insert(payload.begin(), cgi_data.begin(), cgi_data.end());
 		status_code = 200;
-//		status_code = 501;	  // заглушка
-//		std::cout << "exec cgi requered\n";
 	}
 	else
 	{
@@ -392,7 +375,6 @@ void HTTPResponse::read_file(std::ifstream &ifs)
 	size_t resp_headers_size = payload.size();
 	ifs.seekg(0, std::ios::end);
 	ssize_t fsize = ifs.tellg();
-	std::cout << payload.size() << " + " << fsize << std::endl;
 	payload.resize(payload.size() + fsize);
 	ifs.seekg(0);
 	ifs.read(&payload[resp_headers_size], fsize);
@@ -419,14 +401,6 @@ void HTTPResponse::ready_up(void)
 /// @return HTTPResponse string representaion
 std::string HTTPResponse::to_string() const
 {
-	// fname.append(request->get_target());
-	// size_t query_pos = fname.find('?');
-	// if (query_pos != fname.npos)
-	// {
-	// query_string = fname.substr(fname.find('?') + 1, fname.length());
-	// fname.erase(fname.find('?'));
-	// }
-	// std::cout << payload;
 	return payload;
 }
 
@@ -437,9 +411,6 @@ void HTTPResponse::insert_status_line(void)
 	std::string status_line;
 
 	status_line = version + " " + SSTR(status_code) + " " + status_text + CRLF;
-	// if (!content_type.empty())
-	// 	status_line += "content-type:" + content_type + CRLF;
-	// status_line += CRLF;
 	payload.insert(0, status_line);
 }
 

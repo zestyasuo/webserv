@@ -2,11 +2,15 @@
 
 const std::string Logger::log_level_names[DEBUG + 1] = {GRN "[INFO]", YLW "[WARNING]", RED "[ERROR]", CYN "[FATAL]", MAG "[DEBUG]"};
 
-Logger::Logger() : is_debug(false)
+Logger::Logger() : is_debug(false), name("InPlace logger"), is_active(true)
 {
 }
 
-Logger::Logger(bool debug) : is_debug(debug)
+Logger::Logger(bool debug, std::string const &n) : is_debug(debug), name(n), is_active(true)
+{
+}
+
+Logger::Logger(bool debug) : is_debug(debug), name("debug logger"), is_active(true)
 {
 }
 
@@ -16,12 +20,20 @@ Logger::~Logger()
 
 void Logger::log(std::string msg, int log_level) const
 {
+	if (!is_active)
+		return ;
 	if (log_level < INFO || log_level > DEBUG)
 		return;
 	if (log_level == DEBUG && !is_debug)
 		return;
 
-	std::cout << log_level_names[log_level] << get_timestamp() << RST << "\t" << msg << "\n";
+	std::cout << log_level_names[log_level] << get_timestamp() << " ${" + name << "}" <<  RST << " " << msg << "\n";
+}
+
+void	Logger::deactivate()
+{
+	if (is_active)
+		is_active = false;
 }
 
 std::string Logger::make_logstr(std::string const &msg) const

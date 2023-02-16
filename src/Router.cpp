@@ -3,7 +3,7 @@
 #include "Webserv_exception.hpp"
 #include "log_levels.hpp"
 
-Router::Router(std::vector< s_config > const &conf) : configs(conf), logger(true)
+Router::Router(std::vector< s_config > const &conf) : configs(conf), logger(true, "Router")
 {
 	// open requested sockets
 	for (std::vector< s_config >::iterator it = configs.begin(); it != configs.end(); it++)

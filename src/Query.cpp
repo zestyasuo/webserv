@@ -1,6 +1,7 @@
 #include "../inc/Query.hpp"
 #include "HTTPRequest.hpp"
 #include "HTTPResponse.hpp"
+#include "Logger.hpp"
 #include "Webserv_exception.hpp"
 #include <cstddef>
 #include <cstdio>
