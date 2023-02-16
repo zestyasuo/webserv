@@ -1,55 +1,68 @@
 <!DOCTYPE html>
 <html>
 	<!-- <head>
-		<link rel="icon" href="data:,">
+    <link rel="icon" href="data:,">
 	</head> -->
-    <body>
-    <center>
-        <h3>Server A <b>index</b></h3>
-		<p>
+<body>
+<center>
+    <h3>Server A <b>index</b></h3>
+    <p>
 
-		</p>
-        <img src="./ggl.png">
-    </center>
+    </p>
+    <img src="./ggl.png">
+</center>
 
-    <table style="border-width:1px;border-style:solid;width:100%;height:1000px">
-        <tr>
-            <td>
-                <h3>Simpe GET form</h3>
-                <form action="/simple.php" method ="GET">
-                    <label for="fname">First name:</label><br>
-                    <input type="text" id="fname" name="fname" value="mcustard"><br>
-                    <label for="lname">Last name:</label><br>
-                    <input type="text" id="lname" name="lname" value="zyasuo">
-                    <input type="submit" value="Submit">
-                  </form>
+<table style="border-width:1px;border-style:solid;width:100%;height:1000px">
+    <tr>
+        <td>
+            <h3>Simpe GET form</h3>
+            <form action="/simple.php" method="GET">
+                <label for="fname">First name:</label><br>
+                <input type="text" id="fname" name="fname" value="mcustard"><br>
+                <label for="lname">Last name:</label><br>
+                <input type="text" id="lname" name="lname" value="zyasuo">
+                <input type="submit" value="Submit">
+            </form>
 
-                  <br/>
-                  <h3>Simpe POST form</h3>
-                  <form action="/simple.php" method ="POST">
-                      <label for="fname">First name:</label><br>
-                      <input type="text" id="fname" name="fname" value="mcustard"><br>
-                      <label for="lname">Last name:</label><br>
-                      <input type="text" id="lname" name="lname" value="zyasuo">
-                      <input type="submit" value="Submit">
-                    </form>
-            </td>
-            <td>
-                <a href="dir">DIR</a>
-            </td>
-        </tr>
-        <tr>
-            <td width="50%" valign="top">
-                <h3>PHP</h3>
-                <iframe width="100%" height="50%" src="simple.php"></iframe>
-                <!-- <iframe width="100%" height="50%" src="http://localhost:8090/simple.php?fname=mcustard&lname=zyasuo"></iframe> -->
-            </td>
-            <td width="50%" valign="top">
-                <h3>Python</h3>
-                <iframe width="100%" height="50%" src="simple.py"></iframe>
-                <!-- <iframe width="100%" height="50%" src="http://localhost:8090"></iframe> -->
-            </td>
-        </tr>
-    </table>
-    </body>
+            <br/>
+            <h3>Simpe POST form</h3>
+            <form action="/simple.php" method="POST">
+                <label for="fname">First name:</label><br>
+                <input type="text" id="fname" name="fname" value="mcustard"><br>
+                <label for="lname">Last name:</label><br>
+                <input type="text" id="lname" name="lname" value="zyasuo">
+                <input type="submit" value="Submit">
+            </form>
+            <br/>
+
+            <h3>File submit form</h3>
+<!--            <form method="post" enctype="multipart/form-data" action="/simple.php">-->
+            <form method="post" enctype="multipart/form-data" action="/simple.php">
+                <label for="file">Choose file to upload</label>
+                <input type="file" id="file" name="file" multiple>
+                    <button>Submit</button>
+            </form>
+
+
+        </td>
+        <td>
+            <a href="dir">DIR</a>
+        </td>
+    </tr>
+    <tr>
+        <td width="50%" valign="top">
+            <h3>PHP</h3>
+            <iframe width="100%" height="50%" src="simple.php"></iframe>
+            <!-- <iframe width="100%" height="50%" src="http://localhost:8090/simple.php?fname=mcustard&lname=zyasuo"></iframe> -->
+        </td>
+        <td width="50%" valign="top">
+            <h3>Python</h3>
+            <iframe width="100%" height="50%" src="simple.py"></iframe>
+            <!-- <iframe width="100%" height="50%" src="http://localhost:8090"></iframe> -->
+        </td>
+    </tr>
+</table>
+</body>
 </html>
+
+

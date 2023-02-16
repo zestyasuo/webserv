@@ -205,7 +205,7 @@ HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf)
 	root = loc.root.empty() ? config.root : loc.root;
 	// std::cout << "root: " << root << std::endl;
 	std::string target = request->get_target();
-
+	target.erase(target.find(loc.path), loc.path.length());
 	fname = root + (target.c_str()[0] == '/' ? "" : "/") + target;
 	// fname = root + "/" + request_full_path;
 	
@@ -413,8 +413,8 @@ void HTTPResponse::ready_up(void)
 /// @return HTTPResponse string representaion
 std::string HTTPResponse::to_string() const
 {
-	logger.log(payload, DEBUG);
-	logger.log("method; " + request->get_method(),DEBUG);
+	// logger.log(payload, DEBUG);
+	// logger.log("method; " + request->get_method(),DEBUG);
 	return payload;
 }
 
