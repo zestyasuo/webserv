@@ -189,6 +189,7 @@ HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf)
 	std::string resp;
 	std::string fname;
 	std::string root;
+	content_type = CTYPE_TEXT_HTML;
 
 	version = req->get_version();
 	loc = get_location(request->get_target(), config.locations);
@@ -196,7 +197,6 @@ HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf)
 	{
 		status_code = 301;
 		add_header("Location", loc.rewrite);
-		content_type = CTYPE_TEXT_HTML;
 		ready_up();
 		return;
 	}
@@ -204,7 +204,6 @@ HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf)
 	if (check_method(loc))
 	{
 		ready_up();
-
 		return;
 	}
 	root = loc.root.empty() ? config.root : loc.root;
@@ -220,7 +219,7 @@ HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf)
 	decode_html_enities(request_full_path);
 
 	// std::cout << "request_full_path : '" << request_full_path << "'\n";
-	// std::cout << "target: " << target << "\n";
+	std::cout << "target: " << target << "\n";
 	// std::cout << "cgi_query_str : '" << cgi_query_str << "'\n";
 	// std::cout << "request_file_ext : '" << request_file_ext << "'\n";
 
@@ -250,7 +249,6 @@ int HTTPResponse::check_method(s_location const &loc)
 
 	if ((mask & config.implemented_methods) == 0)
 	{
-		// std::cout << "Method not implemented\n";
 		status_code = 501;
 		return 1;
 	}
@@ -275,14 +273,13 @@ void HTTPResponse::process_target(std::string const &fname_raw, s_location const
 	decode_html_enities(fname);
 	struct stat st = {};
 	std::string method = request->get_method();
-
-	// std::cout << fname << "\n";
+	std::string	filename = fname.substr(fname.find_last_of("/"));
 
 	if (stat(fname.c_str(), &st) != 0)
 	{
-		if (get_method_mask(method) & em_put && loc.is_upload_allowed)
+		if ((get_method_mask(method) & em_put) == em_put && loc.is_upload_allowed)
 		{
-			create_file_and_write_contents(fname, request->get_raw_data());
+			create_file_and_write_contents(loc.upload_path + filename, request->get_body());
 		}
 		else
 		{
@@ -429,7 +426,7 @@ std::string HTTPResponse::to_string() const
 	// query_string = fname.substr(fname.find('?') + 1, fname.length());
 	// fname.erase(fname.find('?'));
 	// }
-	std::cout << payload;
+	// std::cout << payload;
 	return payload;
 }
 

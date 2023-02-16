@@ -215,6 +215,8 @@ int get_methods(ConfigStream &cs)
             methods |= em_post;
         else if (cs.cur_tok() == "DELETE" && (methods & em_delete) == 0)
             methods |= em_delete;
+		else if (cs.cur_tok() == "PUT" && (methods & em_put) == 0)
+			methods |= em_put;
         else
             throw std::invalid_argument("Unexpected token: " + cs.cur_tok());
     }
@@ -259,7 +261,7 @@ t_conf ConfigStream::parse_server()
             throw std::invalid_argument("Unexpected token: " + token);
     t_conf cfg;
     cfg.envp = env;
-    cfg.implemented_methods = em_get | em_post | em_delete;
+    cfg.implemented_methods = em_get | em_post | em_delete | em_put;
     for (this->next_tok(); !is.eof() && token != "}"; this->next_tok())
     {
         if (token == "root")
