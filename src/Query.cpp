@@ -3,12 +3,14 @@
 #include "HTTPResponse.hpp"
 #include "Logger.hpp"
 #include "Webserv_exception.hpp"
+#include "utils.hpp"
 #include <cstddef>
 #include <cstdio>
 #include <iostream>
 #include <poll.h>
 #include <string>
 #include <sys/poll.h>
+#include <sys/types.h>
 #include <vector>
 
 Query::Query() : socket(), fd(), response(), request(), ready()
@@ -23,20 +25,18 @@ Query::Query(struct pollfd *p)
 	unblock_fd(fd);
 }
 
-size_t Query::recieve(void)
+size_t Query::recv(void)
 {
 	char	  buf[BUFF_SIZE] = {0};
 	size_t	  recieved_bytes = 0;
 	ssize_t	  i = 0;
 	const int bytes_to_recieve = sizeof(buf) - 1;
 
-	// std::cout << "read\n";
 	while (recieved_bytes != bytes_to_recieve)
 	{
 		i = ::recv(fd, buf + recieved_bytes, bytes_to_recieve - recieved_bytes, 0);
 		if (i <= 0)
 		{
-			// socket->events = POLLOUT;
 			ready = true;
 			break;
 		}
@@ -45,6 +45,30 @@ size_t Query::recieve(void)
 	raw_data += std::string(buf);
 	socket->revents = 0;
 	return recieved_bytes;
+}
+
+size_t	Query::recieve()
+{
+	static int flag = 0;
+	if (!flag)
+	{
+		HTTPRequest tmp(recieve_headers());
+		content_length = tmp.get_content_length();
+		flag++;
+	}
+
+	return recv();
+}
+
+std::string	Query::recieve_headers(void)
+{
+	while (raw_data.find(LB LB) == std::string::npos)
+	{
+		recv();
+		if (ready)
+			break;
+	}
+	return (raw_data.substr(0, raw_data.find(LB LB) + 4));
 }
 
 bool Query::is_ready(void) const
@@ -107,9 +131,11 @@ void Query::form_response(t_conf const &config)
 
 void Query::form_request(void)
 {
-	ready = raw_data.empty();
 	if (!raw_data.empty())
-		request = new HTTPRequest(raw_data);
+	{
+		HTTPRequest *tmp = new HTTPRequest(raw_data);
+		request = tmp;
+	}
 }
 
 short Query::getRevents(void) const

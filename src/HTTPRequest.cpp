@@ -1,11 +1,13 @@
 #include "../inc/HTTPRequest.hpp"
+#include "Query.hpp"
+#include <cstddef>
 #include <cstdlib>
 
 HTTPRequest::HTTPRequest() : valid(), content_length(-1)
 {
 }
 
-HTTPRequest::HTTPRequest(std::string const &raw) : AHTTPMessage(raw), valid(false), target(""), method(""), content_length(-1)
+HTTPRequest::HTTPRequest(std::string const &raw) : AHTTPMessage(raw), valid(true), target(""), method(""), content_length(-1)
 {
 	std::vector< std::string > meta_data = get_meta_data();
 	if (meta_data.empty())
@@ -26,10 +28,11 @@ HTTPRequest::HTTPRequest(std::string const &raw) : AHTTPMessage(raw), valid(fals
 
 void HTTPRequest::validate(void)
 {
-	valid = true;
+	if (content_length > 0 && size_t(content_length) != body.length())
+		valid = false;
 }
 
-HTTPRequest::HTTPRequest(HTTPRequest const &rhs) : AHTTPMessage(rhs), valid(), target(rhs.target), method(rhs.method)
+HTTPRequest::HTTPRequest(HTTPRequest const &rhs) : AHTTPMessage(rhs), valid(), target(rhs.target), method(rhs.method), content_length(rhs.content_length)
 {
 	version = rhs.version;
 	body = rhs.body;
@@ -107,6 +110,11 @@ std::string HTTPRequest::parse_version(std::vector< std::string > const &status_
 std::string const &HTTPRequest::get_method(void) const
 {
 	return method;
+}
+
+ssize_t HTTPRequest::get_content_length() const
+{
+	return content_length;
 }
 
 std::string const &HTTPRequest::get_target(void) const

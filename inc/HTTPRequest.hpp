@@ -23,6 +23,7 @@ class HTTPRequest : public AHTTPMessage
 	bool			   is_valid(void) const;
 	std::string const &get_target() const;
 	std::string const &get_method() const;
+	ssize_t			   get_content_length(void) const;
 	HTTPRequest(void);
 	HTTPRequest(std::string const &raw);
 	HTTPRequest(HTTPRequest const &);

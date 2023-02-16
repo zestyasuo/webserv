@@ -6,7 +6,9 @@
 #include <cstddef>
 #include <iostream>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <unistd.h>
+#include "../inc/utils.hpp"
 #define BUFF_SIZE 1024
 
 class Query
@@ -20,6 +22,7 @@ class Query
 	Query(void);
 	Query(Query const &copy);
 	bool ready;
+	ssize_t	content_length;
 
   public:
 	int					get_socket(void) const;
@@ -28,7 +31,10 @@ class Query
 	void				form_response(t_conf const &);
 	HTTPRequest const  *get_request(void) const;
 	HTTPResponse const *get_response(void) const;
+	size_t				recv(void);
 	size_t				recieve(void);
+	std::string				recieve_headers(void);
+	void				recieve_body(void);
 	size_t				send() const;
 	Query(struct pollfd *);
 	short getRevents(void) const;

@@ -12,6 +12,7 @@
 #include <sys/wait.h>	 //	S_IFDIR
 #include <vector>
 
+#define CGI_BUFF_SIZE 4096
 #define CTYPE_TEXT_HTML "text/html"
 
 class HTTPResponse : public AHTTPMessage

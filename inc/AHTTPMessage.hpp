@@ -5,7 +5,6 @@
 #include <iostream>
 #include <map>
 #include <vector>
-#define LB "\r\n"
 
 class AHTTPMessage
 {

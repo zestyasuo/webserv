@@ -8,34 +8,21 @@
 #include <vector>
 // #include "../inc/Config.hpp"
 
-#define CRLF "\r\n"
 
 using std::string;
 using std::vector;
 
-#define BUF_SIZE 4096
 
 // utils
 
-/// @brief Creates HTTP message compatable string with headers
-/// @param m - map of headers
-/// @return http message compatable headers
-std::string map_to_str(std::map< std::string, std::string > const &m)
-{
-	std::string res;
-	for (std::map< std::string, std::string >::const_iterator it = m.begin(); it != m.end(); it++)
-	{
-		res += (*it).first + ": " + (*it).second + CRLF;
-	}
-	return res;
-}
+
 
 vector< char > HTTPResponse::cgi_exec()
 {
 	int			   fd[2];
 	int			   cgi_pid = 0;
 	vector< char > cgi_data;
-	char		   cgi_buf[BUF_SIZE];
+	char		   cgi_buf[CGI_BUFF_SIZE];
 	
 	// std::cout << "\tFNAME: " << fname << "\n";
 
@@ -61,11 +48,11 @@ vector< char > HTTPResponse::cgi_exec()
 	wait(&cgi_pid);
 
 	size_t bytes_read = 0;
-	bytes_read = read(fd[0], cgi_buf, BUF_SIZE);
+	bytes_read = read(fd[0], cgi_buf, CGI_BUFF_SIZE);
 	while (bytes_read > 0)
 	{
 		cgi_data.insert(cgi_data.end(), cgi_buf, cgi_buf + bytes_read);
-		bytes_read = read(fd[0], cgi_buf, BUF_SIZE);
+		bytes_read = read(fd[0], cgi_buf, CGI_BUFF_SIZE);
 	}
 	close(fd[0]);
 	return cgi_data;
@@ -183,15 +170,21 @@ HTTPResponse::~HTTPResponse()
 HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf)
 	: status_code(0), status_text(""), request(req), config(conf), error_pages(config.error_pages), status_texts(config.status_texts), logger(true, "Response")
 {
-	if (!req)
+	if (!request)
 		return;
+	content_type = CTYPE_TEXT_HTML;
 	s_location	loc;
 	std::string resp;
 	std::string fname;
 	std::string root;
-	content_type = CTYPE_TEXT_HTML;
 
 	version = req->get_version();
+	if (!request->is_valid())
+	{
+		status_code = 400;
+		ready_up();
+		return;
+	}
 	loc = get_location(request->get_target(), config.locations);
 	if (!loc.rewrite.empty())
 	{
@@ -393,7 +386,7 @@ void HTTPResponse::ready_up(void)
 	add_header("Date", get_floctime());
 	add_header("Content-Type", content_type);
 	std::string headers_str = map_to_str(headers);
-	payload.insert(0, headers_str + CRLF);
+	payload.insert(0, headers_str + LB);
 	insert_status_line();
 }
 
@@ -401,6 +394,7 @@ void HTTPResponse::ready_up(void)
 /// @return HTTPResponse string representaion
 std::string HTTPResponse::to_string() const
 {
+	// logger.log(payload, DEBUG);
 	return payload;
 }
 
@@ -410,7 +404,7 @@ void HTTPResponse::insert_status_line(void)
 {
 	std::string status_line;
 
-	status_line = version + " " + SSTR(status_code) + " " + status_text + CRLF;
+	status_line = version + " " + SSTR(status_code) + " " + status_text + LB;
 	payload.insert(0, status_line);
 }
 

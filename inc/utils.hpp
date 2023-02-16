@@ -8,6 +8,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#define LB "\r\n"
 
 void					   unblock_fd(int fd);
 std::vector< std::string > split(std::string const &str, std::string const &del);
@@ -39,5 +40,6 @@ template < class UnaryPredicate > std::vector< std::string > split_if(std::strin
 
 	return res;
 }
+std::string map_to_str(std::map< std::string, std::string > const &m);
 
 #endif

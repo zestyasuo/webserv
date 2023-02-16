@@ -58,9 +58,23 @@ std::string					get_status_message_by_code(int const code)
 		statuses.insert(std::make_pair(405, "Method Not Allowed"));
 		statuses.insert(std::make_pair(500, "Internal Server Error"));
 		statuses.insert(std::make_pair(301, "Moved Permanently"));
+		statuses.insert(std::make_pair(400, "Bad Request"));
 	}
 
 	if (statuses.count(code))
 		return statuses.at(code);
 	return "Undefined error";
+}
+
+/// @brief Creates HTTP message compatable string with headers
+/// @param m - map of headers
+/// @return http message compatable headers
+std::string map_to_str(std::map< std::string, std::string > const &m)
+{
+	std::string res;
+	for (std::map< std::string, std::string >::const_iterator it = m.begin(); it != m.end(); it++)
+	{
+		res += (*it).first + ": " + (*it).second + LB;
+	}
+	return res;
 }
