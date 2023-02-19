@@ -18,8 +18,8 @@ Query::Query() : fd(), response(), request(), ready()
 {
 }
 
-Query::Query(int f)
-	: fd(f), raw_data(""), response(0), request(0), ready(false)
+Query::Query(Socket *sock, int f)
+	: socket(sock), fd(f), raw_data(""), response(0), request(0), ready(false)
 {
 }
 
@@ -73,9 +73,9 @@ bool Query::is_ready(void) const
 	return ready;
 }
 
-int Query::get_socket(void) const
+Socket *Query::get_socket(void) const
 {
-	return fd;
+	return socket;
 }
 
 size_t Query::send() const

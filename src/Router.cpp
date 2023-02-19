@@ -68,7 +68,7 @@ void Router::poll(void)
 		tmp.fd = fd;
 		tmp.events = POLLIN | POLLOUT;
 		fds_vec.push_back(tmp);
-		queries.push_back(new Query(fds_vec.back().fd));
+		queries.push_back(new Query(it->second, fds_vec.back().fd));
 		logger.log("connection accepted", INFO);
 	}
 	pollfd *fds = fds_vec.data();
@@ -119,11 +119,11 @@ void Router::respond(Query *to)
 {
 	if (to->get_request())
 	{
-		// std::string host =
-		// to->get_request()->get_headers().count("Host") ? (*it)->get_request()->get_headers().at("Host") : "";
-		// Socket *from_socket = get_socket_by_fd(to->get_socket());
-		// Server *respond_from = find_server_bound_to_socket_by_name(host, from_socket);
-		servers.at(open_sockets.at(8090))[0]->respond(to);
+		std::string host =
+		to->get_request()->get_headers().count("Host") ? to->get_request()->get_headers().at("Host") : "";
+		Socket *from_socket = to->get_socket();
+		Server *respond_from = find_server_bound_to_socket_by_name(host, from_socket);
+		respond_from->respond(to);
 	}
 }
 
