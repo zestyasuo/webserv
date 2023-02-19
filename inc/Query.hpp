@@ -15,8 +15,9 @@
 class Query
 {
   private:
-	Socket		 *socket;
+	
 	int			  fd;
+	int			socket;
 	std::string	  raw_data;
 	HTTPResponse *response;
 	HTTPRequest	 *request;
@@ -24,8 +25,10 @@ class Query
 	Query(Query const &copy);
 	bool	ready;
 	ssize_t content_length;
+
   public:
-	Socket			   *get_socket(void) const;
+	int					get_socket(void) const;
+	int					get_fd(void) const;
 	bool				is_ready(void) const;
 	void				form_request(void);
 	void				form_response(t_conf const &);
@@ -36,7 +39,7 @@ class Query
 	std::string			recieve_headers(void);
 	void				recieve_body(void);
 	size_t				send() const;
-	Query(Socket *, int);
+	Query(int, int);
 	~Query(void);
 };
 

@@ -5,6 +5,7 @@
 #include "Query.hpp"
 #include "Server.hpp"
 #include "Socket.hpp"
+#include "SocketContainer.hpp"
 #include "Webserv_exception.hpp"
 #include "log_levels.hpp"
 #include <iostream>
@@ -15,13 +16,14 @@
 class Router
 {
   private:
-	std::vector< s_config >						  configs;	  // parsed server configs
-	std::vector< Query * >						  queries;
-	std::map< int, Socket * >					  open_sockets;
+	std::vector< s_config > configs;	// parsed server configs
+	// std::vector< Query * >						  queries;
+	std::map< int, Socket * >					  listeners;
 	std::map< Socket *, std::vector< Server * > > servers;
-	std::vector< pollfd >						  fds_vec;
-	Logger										  logger;
-	ssize_t									socket_count;
+	// std::vector< pollfd >						  fds_vec;
+	SocketContainer sockets;
+	Logger			logger;
+	ssize_t			socket_count;
 	Router(Router const &copy);
 	Router(void);
 	Router &operator=(Router const &rhs);
