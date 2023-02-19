@@ -19,13 +19,14 @@ class Router
 	std::vector< Query * >						  queries;
 	std::map< int, Socket * >					  open_sockets;
 	std::map< Socket *, std::vector< Server * > > servers;
-	std::vector<pollfd>						fds_vec;
+	std::vector< pollfd >						  fds_vec;
 	Logger										  logger;
+	ssize_t									socket_count;
 	Router(Router const &copy);
 	Router(void);
 	Router &operator=(Router const &rhs);
 	void	poll(void);
-	ssize_t	collect(Query *);
+	ssize_t collect(Query *);
 	void	respond(Query *);
 	bool	process(Query *, pollfd &);
 	// utils

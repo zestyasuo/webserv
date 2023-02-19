@@ -24,7 +24,6 @@ class Query
 	Query(Query const &copy);
 	bool	ready;
 	ssize_t content_length;
-
   public:
 	Socket			   *get_socket(void) const;
 	bool				is_ready(void) const;

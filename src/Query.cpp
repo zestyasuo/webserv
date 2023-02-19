@@ -14,7 +14,7 @@
 #include <sys/types.h>
 #include <vector>
 
-Query::Query() : fd(), response(), request(), ready()
+Query::Query() : fd(), response(0), request(0), ready()
 {
 }
 
@@ -127,9 +127,8 @@ void Query::form_response(t_conf const &config)
 
 void Query::form_request(void)
 {
-	if (!raw_data.empty() && !request)
-	{
-		HTTPRequest *tmp = new HTTPRequest(raw_data);
-		request = tmp;
-	}
+	// if (!raw_data.empty() && !request)
+	// std::clog << raw_data << "\n";
+	if (!request)
+		request = new HTTPRequest(raw_data);
 }
