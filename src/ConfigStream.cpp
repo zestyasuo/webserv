@@ -323,10 +323,10 @@ int main(int argc, char **argv, char **envp)
     // "	autoindex on;,,\n"
   	// "}\n";
 
-    // std::cout << ss << std::endl;
+    // std::clog << ss << std::endl;
     
     do {
-        std::cout << cs.next_tok() << std::endl;
+        std::clog << cs.next_tok() << std::endl;
     } while(ss.good() && !ss.eof());
 
     return 0;

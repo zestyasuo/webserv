@@ -16,6 +16,7 @@
 #include <vector>
 #define CONNECTIONS_COUNT 256
 #define TIMEOUT 1
+#define FOREVER -1
 #include "html.hpp"
 #define SSTR(x) static_cast< std::ostringstream & >((std::ostringstream() << std::dec << x)).str()
 

@@ -29,7 +29,7 @@ std::string get_path_ext(const string &fname)
 	if (pos != std::string::npos)
 		ext = fname.substr(pos + 1, pos_end - pos - 1);
 		// ext = fname.substr(pos + 1, fname.length() - pos - 1);
-	// std::cout << "\t" << ext;
+	// std::clog << "\t" << ext;
 	return ext;
 }
 

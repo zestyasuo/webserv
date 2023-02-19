@@ -14,7 +14,6 @@
 class Query
 {
   private:
-	struct pollfd *socket;
 	int			   fd;
 	std::string	   raw_data;
 	HTTPResponse  *response;
@@ -31,13 +30,12 @@ class Query
 	void				form_response(t_conf const &);
 	HTTPRequest const  *get_request(void) const;
 	HTTPResponse const *get_response(void) const;
-	size_t				recv(void);
-	size_t				recieve(void);
+	ssize_t				recv(void);
+	ssize_t				recieve(void);
 	std::string				recieve_headers(void);
 	void				recieve_body(void);
 	size_t				send() const;
-	Query(struct pollfd *);
-	short getRevents(void) const;
+	Query(int);
 	~Query(void);
 };
 

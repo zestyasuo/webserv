@@ -19,16 +19,16 @@ void list_dir_test()
 	{
 		//	d_type - not reliable field. Extra tests needed (Linux)
 		if (dir_ent.d_type & DT_DIR)
-			std::cout << "[DIR] ";
+			std::clog << "[DIR] ";
 		if (dir_ent.d_type & DT_REG)
-			std::cout << "[   ] ";
-		std::cout << dir_ent.d_name << std::endl;
+			std::clog << "[   ] ";
+		std::clog << dir_ent.d_name << std::endl;
 	}
 }
 
 int main()
 {
-	std::cout << std::endl << "\tlist_dir_test" << std::endl << std::endl;
+	std::clog << std::endl << "\tlist_dir_test" << std::endl << std::endl;
 	list_dir_test();
 
 	return 0;

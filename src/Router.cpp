@@ -1,11 +1,19 @@
 #include "../inc/Router.hpp"
+#include "Query.hpp"
+#include "Server.hpp"
 #include "Socket.hpp"
 #include "Webserv_exception.hpp"
 #include "log_levels.hpp"
+#include "utils.hpp"
+#include <sys/poll.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <vector>
 
 Router::Router(std::vector< s_config > const &conf) : configs(conf), logger(true, "Router")
 {
 	// open requested sockets
+
 	for (std::vector< s_config >::iterator it = configs.begin(); it != configs.end(); it++)
 	{
 		for (std::vector< int >::iterator port_it = (*it).ports.begin(); port_it != (*it).ports.end(); port_it++)
@@ -13,8 +21,8 @@ Router::Router(std::vector< s_config > const &conf) : configs(conf), logger(true
 			if (!open_sockets.count(*port_it))
 			{
 				open_sockets.insert(std::make_pair< int, Socket * >(*port_it, new Socket(*port_it)));
-				fds[open_sockets.size() - 1].fd = open_sockets[*port_it]->get_fd();
-				fds[open_sockets.size() - 1].events = POLLIN | POLLOUT;
+				// fds[open_sockets.size() - 1].fd = open_sockets[*port_it]->get_fd();
+				// fds[open_sockets.size() - 1].events = POLLIN | POLLOUT;
 				logger.log("Serving port " + SSTR(*port_it), DEBUG);
 			}
 		}
@@ -49,60 +57,73 @@ Router::~Router()
 
 void Router::poll(void)
 {
-	if (::poll(fds, open_sockets.size(), TIMEOUT) < 0)
+
+	for (std::map< int, Socket * >::iterator it = open_sockets.begin(); it != open_sockets.end(); it++)
+	{
+		int fd = ::accept((*it).second->get_fd(), NULL, NULL);
+		if (fd < 0)
+			continue;
+		unblock_fd(fd);
+		pollfd tmp = {};
+		tmp.fd = fd;
+		tmp.events = POLLIN | POLLOUT;
+		fds_vec.push_back(tmp);
+		queries.push_back(new Query(fds_vec.back().fd));
+		logger.log("connection accepted", INFO);
+	}
+	pollfd *fds = fds_vec.data();
+	if (::poll(fds, fds_vec.size(), 0) < 0)
 		throw Webserv_exception("poll failied", ERROR);
-	for (size_t i = 0; i < open_sockets.size(); i++)
+	for (
+		struct {
+			size_t							i;
+			std::vector< pollfd >::iterator poll_it;
+			std::vector<Query *>::iterator query_it;
+		} loop = {0, fds_vec.begin(), queries.begin()};
+		loop.poll_it != fds_vec.end();)
 	{
-		if (fds[i].revents & POLLIN)
+		logger.log(SSTR(fds_vec.size()) + " ? " + SSTR(queries.size()), FATAL);
+		if ((*loop.poll_it).revents == 0)
 		{
-			Query *query = new Query(&fds[i]);
-			queries.push_back(query);
+			loop.poll_it++;
+			loop.i++;
+			loop.query_it++;
+			logger.log("skip befo process", DEBUG);
+			continue;
 		}
-		if (fds[i].revents & POLLOUT)
-			logger.log("write available for " + SSTR(i), DEBUG);
-	}
-}
-
-void Router::collect(void)
-{
-	for (std::vector< Query * >::iterator it = queries.begin(); it != queries.end(); it++)
-	{
-		(*it)->recieve();
-		if ((*it)->is_ready())
-			(*it)->form_request();
-	}
-}
-
-void Router::respond(void)
-{
-	for (std::vector< Query * >::iterator it = queries.begin(); it != queries.end();)
-	{
-		if (queries.empty())
-			break;
-		if ((*it)->get_request())
+		if (!process(*loop.query_it, *loop.poll_it))
 		{
-			std::string host =
-				(*it)->get_request()->get_headers().count("Host") ? (*it)->get_request()->get_headers().at("Host") : "";
-			Socket *from_socket = get_socket_by_fd((*it)->get_socket());
-			Server *respond_from = find_server_bound_to_socket_by_name(host, from_socket);
-			if (!respond_from)
-			{
-				delete *it;
-				it = queries.erase(it);
-				continue;	 // error but it's quite impossible in this context idk
-			}
-			if (!respond_from->respond((*it)))
-			{
-				it++;
-				logger.log("did not respond", DEBUG);
-				continue;
-			}
-			delete *it;
-			it = queries.erase(it);
-			logger.log("deleted query", DEBUG);
+			delete *loop.query_it;
+			loop.poll_it = fds_vec.erase(loop.poll_it);
+			loop.query_it = queries.erase(loop.query_it);
 		}
 		else
-			it++;
+		{
+			logger.log("skip after process", DEBUG);
+			loop.query_it++;
+			loop.poll_it++;
+			loop.i++;
+		}
+	}
+}
+
+ssize_t Router::collect(Query *from)
+{
+	ssize_t status = from->recieve();
+	if (from->is_ready())
+		from->form_request();
+	return status;
+}
+
+void Router::respond(Query *to)
+{
+	if (to->get_request())
+	{
+		// std::string host =
+		// to->get_request()->get_headers().count("Host") ? (*it)->get_request()->get_headers().at("Host") : "";
+		// Socket *from_socket = get_socket_by_fd(to->get_socket());
+		// Server *respond_from = find_server_bound_to_socket_by_name(host, from_socket);
+		servers.at(open_sockets.at(8090))[0]->respond(to);
 	}
 }
 
@@ -134,13 +155,32 @@ Socket *Router::get_socket_by_fd(int const fd) const
 	return NULL;
 }
 
+bool Router::process(Query *query, pollfd &p)
+{
+	logger.log("process", INFO);
+	if (p.revents & POLLHUP || p.revents & POLLERR)
+		return false;
+	else if (p.revents & POLLIN)
+	{
+		logger.log("collecting", INFO);
+		if (collect(query) <= 0)
+			return false;
+		return true;
+	}
+	else if (p.revents & POLLOUT)
+	{
+		logger.log("responding", INFO);
+		respond(query);
+		return false;
+	}
+	return true;
+}
+
 void Router::serve(void)
 {
-	try 
+	try
 	{
 		poll();
-		collect();
-		respond();
 	}
 	catch (Webserv_exception &e)
 	{

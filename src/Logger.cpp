@@ -27,7 +27,7 @@ void Logger::log(std::string msg, int log_level) const
 	if (log_level == DEBUG && !is_debug)
 		return;
 
-	std::cout << log_level_names[log_level] << get_timestamp() << " ${" + name << "}" <<  RST << " " << msg << "\n";
+	std::clog << log_level_names[log_level] << get_timestamp() << " ${" + name << "}" <<  RST << " " << msg << "\n";
 }
 
 void	Logger::deactivate()

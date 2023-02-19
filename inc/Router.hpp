@@ -19,14 +19,15 @@ class Router
 	std::vector< Query * >						  queries;
 	std::map< int, Socket * >					  open_sockets;
 	std::map< Socket *, std::vector< Server * > > servers;
-	struct pollfd								  fds[1024];
+	std::vector<pollfd>						fds_vec;
 	Logger										  logger;
 	Router(Router const &copy);
 	Router(void);
 	Router &operator=(Router const &rhs);
 	void	poll(void);
-	void	collect(void);
-	void	respond(void);
+	ssize_t	collect(Query *);
+	void	respond(Query *);
+	bool	process(Query *, pollfd &);
 	// utils
 	Socket *get_socket_by_fd(int const) const;
 	Server *find_server_bound_to_socket_by_name(std::string const &, Socket *);

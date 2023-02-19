@@ -62,7 +62,7 @@ void Socket::bind()
 
 	if (::bind(sfd, (struct sockaddr *)&address, sizeof(address)) < 0)
 	{
-		std::cout << port << std::endl;
+		std::clog << port << std::endl;
 		throw Webserv_exception("Socket binding failed", FATAL);
 	}
 }

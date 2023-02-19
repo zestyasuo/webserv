@@ -25,7 +25,7 @@ vector< char > HTTPResponse::cgi_exec()
 	vector< char > cgi_data;
 	char		   cgi_buf[CGI_BUFF_SIZE];
 	
-	// std::cout << "\tFNAME: " << fname << "\n";
+	// std::clog << "\tFNAME: " << fname << "\n";
 
 	//	string cgi_path = "/usr/bin/python3";
 //	string cgi_path = "/bin/php8.1";
@@ -196,14 +196,14 @@ HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf)
 		ready_up();
 		return;
 	}
-	// std::cout << "path: " << loc.path << "\n";
+	// std::clog << "path: " << loc.path << "\n";
 	if (check_method(loc))
 	{
 		ready_up();
 		return;
 	}
 	root = loc.root.empty() ? config.root : loc.root;
-	// std::cout << "root: " << root << std::endl;
+	// std::clog << "root: " << root << std::endl;
 	std::string target = request->get_target();
 	target.erase(target.find(loc.path), loc.path.length());
 	fname = root + (target.c_str()[0] == '/' ? "" : "/") + target;
@@ -214,10 +214,10 @@ HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf)
 	split_query(fname, request_full_path, cgi_query_str);
 	decode_html_enities(request_full_path);
 
-	// std::cout << "request_full_path : '" << request_full_path << "'\n";
+	// std::clog << "request_full_path : '" << request_full_path << "'\n";
 	logger.log("target: " + SSTR(target), DEBUG);
-	// std::cout << "cgi_query_str : '" << cgi_query_str << "'\n";
-	// std::cout << "request_file_ext : '" << request_file_ext << "'\n";
+	// std::clog << "cgi_query_str : '" << cgi_query_str << "'\n";
+	// std::clog << "request_file_ext : '" << request_file_ext << "'\n";
 
 	process_target(request_full_path, loc);
 	ready_up();
@@ -272,7 +272,7 @@ void HTTPResponse::process_target(std::string const &fname_raw, s_location const
 		}
 		else
 		{
-			std::cout << "Not found in stat  " << fname << "\n";
+			std::clog << "Not found in stat  " << fname << "\n";
 			status_code = 404;
 		}
 		return;
@@ -281,7 +281,7 @@ void HTTPResponse::process_target(std::string const &fname_raw, s_location const
 	//potential_error cause em_post and em_get behave the same, double check
 	if (st.st_mode & S_IFDIR && get_method_mask(method) & (em_get | em_head | em_post))
 	{
-		// std::cout << "DIR TRY\n";
+		// std::clog << "DIR TRY\n";
 		if (try_index_page(fname, loc) != 0)
 		{
 			content_type = CTYPE_TEXT_HTML;
@@ -305,7 +305,7 @@ void	HTTPResponse::hadndle_post(std::string const &fname)
 {
 	status_code = 200;
 	content_type = CTYPE_TEXT_HTML;
-	std::cout << "post method " <<fname << "\n";
+	std::clog << "post method " <<fname << "\n";
 }
 
 void	HTTPResponse::create_file_and_write_contents(std::string const &fname, std::string const &content)
@@ -341,12 +341,12 @@ void HTTPResponse::get_file_info(std::string const &fname)
 	if (open_fstream(fname, ifs) != 0)
 	{
 		status_code = 404;
-		// std::cout << "Not found in opening file " << fname << "\n";
+		// std::clog << "Not found in opening file " << fname << "\n";
 		return;
 	}
 	if (is_cgi())
 	{
-		std::cout << "I am cgi " << request_file_ext << "\n";
+		std::clog << "I am cgi " << request_file_ext << "\n";
 		content_type = "text/html";
 
 		std::vector<char> cgi_data (cgi_exec());

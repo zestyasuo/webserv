@@ -87,7 +87,7 @@ int main(int argc, char **argv, char **envp)
 {
 	if (argc != 2)
 	{
-		std::cout << "Usage: ./webserv config_file_path\n";
+		std::clog << "Usage: ./webserv config_file_path\n";
 		return 1;
 	}
 	std::filebuf config_buf;

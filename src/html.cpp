@@ -27,5 +27,5 @@ void decode_html_enities(string &str)
 	while (str.find("%20") != str.npos)
 		str.replace(str.find("%20"), 3, " ");
 
-	// std::cout << str;
+	// std::clog << str;
 }
