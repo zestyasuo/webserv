@@ -9,14 +9,10 @@
 #include <vector>
 // #include "../inc/Config.hpp"
 
-
 using std::string;
 using std::vector;
 
-
 // utils
-
-
 
 vector< char > HTTPResponse::cgi_exec()
 {
@@ -24,26 +20,41 @@ vector< char > HTTPResponse::cgi_exec()
 	int			   cgi_pid = 0;
 	vector< char > cgi_data;
 	char		   cgi_buf[CGI_BUFF_SIZE];
-	
-	// std::clog << "\tFNAME: " << fname << "\n";
-
-	//	string cgi_path = "/usr/bin/python3";
-//	string cgi_path = "/bin/php8.1";
 
 	const string cgi_path = config.cgi.at(request_file_ext);
 
+	int pipe_post[2];
+
 	pipe(fd);
+
+	std::cout << "Method: " << request->get_method() << std::endl;
+	if (request->get_method() == "POST")
+	{
+		pipe(pipe_post);
+		std::cout << "Pipe: " << pipe_post[0] << " " << pipe_post[1] << std::endl;
+	}
+
 	cgi_pid = fork();
 	if (cgi_pid == 0)
 	{
 		close(fd[0]);
 		dup2(fd[1], 1);
-		//		execl(cgi_path.c_str(), NULL, fname.c_str());
+		if (request->get_method() == "POST")
+		{
+			close(pipe_post[1]);
+			dup2(pipe_post[0], 0);
+		}
 		char *envp[] = {(char *)"TEST=Value", (char *)"VAR=val", (char *)cgi_query_str.c_str(), 0};
-		//		extern t_conf g_conf;
 
 		execle(cgi_path.c_str(), "", request_full_path.c_str(), NULL, envp);
 		exit(0);
+	}
+
+	if (request->get_method() == "POST")
+	{
+		write(pipe_post[1], request->get_body().c_str(), request->get_body().size());
+		close(pipe_post[0]);
+		close(pipe_post[1]);
 	}
 	close(fd[1]);
 	wait(&cgi_pid);
@@ -56,6 +67,7 @@ vector< char > HTTPResponse::cgi_exec()
 		bytes_read = read(fd[0], cgi_buf, CGI_BUFF_SIZE);
 	}
 	close(fd[0]);
+
 	return cgi_data;
 }
 
@@ -93,18 +105,18 @@ bool HTTPResponse::is_cgi()
 {
 	return (config.cgi.count(request_file_ext));
 
-//	if (fname != "")
-//		return false;
-//	return false;
+	//	if (fname != "")
+	//		return false;
+	//	return false;
 }
 
-std::vector<std::string> make_possible_loc_list(std::string const &target)
+std::vector< std::string > make_possible_loc_list(std::string const &target)
 {
-	std::string	to_find = "/";
-	std::vector<std::string> res;
-	std::vector<std::string> split_target = split(target, "/");
+	std::string				   to_find = "/";
+	std::vector< std::string > res;
+	std::vector< std::string > split_target = split(target, "/");
 
-	for (std::vector<std::string>::iterator it = split_target.begin(); it != split_target.end(); it++)
+	for (std::vector< std::string >::iterator it = split_target.begin(); it != split_target.end(); it++)
 	{
 		to_find += *it;
 		res.push_back(to_find);
@@ -119,11 +131,12 @@ std::vector<std::string> make_possible_loc_list(std::string const &target)
 /// @return specified location or defualt location
 s_location const get_location(std::string const &target, std::map< std::string, s_location > const &locations)
 {
-	std::string to_find = "";
-	std::vector<std::string> possible_locations = make_possible_loc_list(target);
-	s_location loc = locations.at("/");
+	std::string				   to_find = "";
+	std::vector< std::string > possible_locations = make_possible_loc_list(target);
+	s_location				   loc = locations.at("/");
 
-	for (std::vector<std::string>::reverse_iterator it = possible_locations.rbegin(); it != possible_locations.rend(); it++)
+	for (std::vector< std::string >::reverse_iterator it = possible_locations.rbegin(); it != possible_locations.rend();
+		 it++)
 	{
 		if (locations.count(*it))
 			loc = locations.at(*it);
@@ -158,8 +171,8 @@ HTTPResponse::HTTPResponse(void) : status_code(), request(), config(), logger()
 }
 
 HTTPResponse::HTTPResponse(HTTPResponse const &copy)
-	: AHTTPMessage(copy), version(copy.version), status_code(copy.status_code), content_type(copy.content_type), body(copy.body),
-	  request(copy.request), config(copy.config), logger(copy.logger)
+	: AHTTPMessage(copy), version(copy.version), status_code(copy.status_code), content_type(copy.content_type),
+	  body(copy.body), request(copy.request), config(copy.config), logger(copy.logger)
 {
 }
 
@@ -171,7 +184,8 @@ HTTPResponse::~HTTPResponse()
 /// @param req parsed request
 /// @param conf parsed config
 HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf)
-	: status_code(0), status_text(""), request(req), config(conf), error_pages(config.error_pages), status_texts(config.status_texts), logger(true, "Response")
+	: status_code(0), status_text(""), request(req), config(conf), error_pages(config.error_pages),
+	  status_texts(config.status_texts), logger(true, "Response")
 {
 	if (!request)
 		return;
@@ -208,7 +222,7 @@ HTTPResponse::HTTPResponse(const HTTPRequest *req, t_conf const &conf)
 	target.erase(target.find(loc.path), loc.path.length());
 	fname = root + (target.c_str()[0] == '/' ? "" : "/") + target;
 	// fname = root + "/" + request_full_path;
-	
+
 	request_file_ext = get_path_ext(fname);
 
 	split_query(fname, request_full_path, cgi_query_str);
@@ -262,7 +276,7 @@ void HTTPResponse::process_target(std::string const &fname_raw, s_location const
 	decode_html_enities(fname);
 	struct stat st = {};
 	std::string method = request->get_method();
-	std::string	filename = fname.substr(fname.find_last_of("/"));
+	std::string filename = fname.substr(fname.find_last_of("/"));
 
 	if (stat(fname.c_str(), &st) != 0)
 	{
@@ -278,7 +292,7 @@ void HTTPResponse::process_target(std::string const &fname_raw, s_location const
 		return;
 	}
 
-	//potential_error cause em_post and em_get behave the same, double check
+	// potential_error cause em_post and em_get behave the same, double check
 	if (st.st_mode & S_IFDIR && get_method_mask(method) & (em_get | em_head | em_post))
 	{
 		// std::clog << "DIR TRY\n";
@@ -297,18 +311,18 @@ void HTTPResponse::process_target(std::string const &fname_raw, s_location const
 		else if (get_method_mask(method) & em_delete)
 			delete_file(fname);
 		// else if (get_method_mask(method) & em_post)
-			// hadndle_post(fname);
+		// hadndle_post(fname);
 	}
 }
 
-void	HTTPResponse::hadndle_post(std::string const &fname)
+void HTTPResponse::hadndle_post(std::string const &fname)
 {
 	status_code = 200;
 	content_type = CTYPE_TEXT_HTML;
-	std::clog << "post method " <<fname << "\n";
+	std::clog << "post method " << fname << "\n";
 }
 
-void	HTTPResponse::create_file_and_write_contents(std::string const &fname, std::string const &content)
+void HTTPResponse::create_file_and_write_contents(std::string const &fname, std::string const &content)
 {
 	std::ofstream ofs(fname.c_str());
 
@@ -336,7 +350,7 @@ void HTTPResponse::get_file_info(std::string const &fname)
 {
 	std::ifstream ifs;
 	// string query_string;
-	std::string	const method = request->get_method();
+	std::string const method = request->get_method();
 
 	if (open_fstream(fname, ifs) != 0)
 	{
@@ -349,7 +363,7 @@ void HTTPResponse::get_file_info(std::string const &fname)
 		std::clog << "I am cgi " << request_file_ext << "\n";
 		content_type = "text/html";
 
-		std::vector<char> cgi_data (cgi_exec());
+		std::vector< char > cgi_data(cgi_exec());
 
 		body.insert(body.begin(), cgi_data.begin(), cgi_data.end());
 		status_code = 200;
@@ -376,7 +390,7 @@ void HTTPResponse::read_file(std::ifstream &ifs)
 	ifs.read(&body[resp_headers_size], fsize);
 }
 
-void	HTTPResponse::add_body(void)
+void HTTPResponse::add_body(void)
 {
 	std::string html;
 
@@ -386,7 +400,7 @@ void	HTTPResponse::add_body(void)
 	payload += body;
 }
 
-void	HTTPResponse::add_meta_data(void)
+void HTTPResponse::add_meta_data(void)
 {
 	std::string status_line;
 
@@ -405,7 +419,7 @@ void	HTTPResponse::add_meta_data(void)
 void HTTPResponse::ready_up(void)
 {
 	add_meta_data();
-	if ((get_method_mask(request->get_method() ) & em_head) != em_head)
+	if ((get_method_mask(request->get_method()) & em_head) != em_head)
 		add_body();
 }
 
