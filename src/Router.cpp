@@ -10,7 +10,7 @@
 #include <sys/types.h>
 #include <vector>
 
-Router::Router(std::vector< s_config > const &conf) : configs(conf), logger(true, "Router"), socket_count(0)
+Router::Router(std::vector< s_config > const &conf) : configs(conf), logger(true, "Router")
 {
 	// open requested sockets
 
@@ -61,9 +61,7 @@ void Router::poll(void)
 
 	for (size_t i = 0; i < sockets.queries_size();)
 	{
-		logger.log(SSTR(i), ERROR);
 		std::pair<pollfd, Query *> cur = sockets.get_query(i);
-		logger.log(SSTR(cur.first.fd) + " == " + SSTR(cur.second->get_fd()), INFO);
 		if (cur.first.revents == 0)
 		{
 			i++;
@@ -119,10 +117,12 @@ Server *Router::find_server_bound_to_socket_by_name(std::string const &name, Soc
 
 Socket *Router::get_socket_by_fd(int const fd) const
 {
-	std::map<int, Socket *>::const_iterator f = listeners.find(fd);
-	if (listeners.end() == f)
-		return NULL;
-	return f->second;
+	for (std::map< int, Socket * >::const_iterator it = listeners.begin(); it != listeners.end(); it++)
+	{
+		if ((*it).second->get_fd() == fd)
+			return (*it).second;
+	}
+	return NULL;
 }
 
 bool Router::process(Query *query, pollfd &p) // false -- delete

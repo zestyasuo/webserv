@@ -23,7 +23,6 @@ class Router
 	// std::vector< pollfd >						  fds_vec;
 	SocketContainer sockets;
 	Logger			logger;
-	ssize_t			socket_count;
 	Router(Router const &copy);
 	Router(void);
 	Router &operator=(Router const &rhs);

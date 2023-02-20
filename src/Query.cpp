@@ -40,7 +40,7 @@ ssize_t Query::recv(void)
 		}
 		recieved_bytes += i;
 	}
-	raw_data += std::string(buf);
+	raw_data.append(buf, recieved_bytes);
 	return recieved_bytes;
 }
 
