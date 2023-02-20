@@ -19,7 +19,7 @@ class Router
 	std::vector< s_config > configs;	// parsed server configs
 	// std::vector< Query * >						  queries;
 	std::map< int, Socket * >					  listeners;
-	std::map< Socket *, std::vector< Server * > > servers;
+	std::map<int, std::vector< Server * > > servers;
 	// std::vector< pollfd >						  fds_vec;
 	SocketContainer sockets;
 	Logger			logger;

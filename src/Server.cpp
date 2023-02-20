@@ -2,12 +2,12 @@
 #include "log_levels.hpp"
 #include <sys/poll.h>
 
-Server::Server(void) : logger(Logger()), active(true), config()
+Server::Server(void) : logger(Logger()), active(true), config(), fd()
 {
 	logger.log("created server with default logger", INFO);
 }
 
-Server::Server(Logger const &logger, t_conf const &conf) : logger(logger), active(true), config(conf)
+Server::Server(Logger const &logger, t_conf const &conf, int fd) : logger(logger), active(true), config(conf), fd(fd)
 {
 	logger.log("server created", INFO);
 }
@@ -15,6 +15,11 @@ Server::Server(Logger const &logger, t_conf const &conf) : logger(logger), activ
 t_conf const &Server::get_config(void) const
 {
 	return config;
+}
+
+int Server::get_fd(void) const
+{
+	return fd;
 }
 
 bool Server::respond(Query *query)

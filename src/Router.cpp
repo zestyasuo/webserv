@@ -10,7 +10,7 @@
 #include <sys/types.h>
 #include <vector>
 
-Router::Router(std::vector< s_config > const &conf) : configs(conf), logger(true, "Router"), socket_count(0)
+Router::Router(std::vector< s_config > const &conf) : configs(conf), sockets(servers), logger(true, "Router"), socket_count(0)
 {
 	// open requested sockets
 
@@ -31,17 +31,15 @@ Router::Router(std::vector< s_config > const &conf) : configs(conf), logger(true
 	{
 		for (std::vector< int >::iterator port_it = (*it).ports.begin(); port_it != (*it).ports.end(); port_it++)
 		{
-			if (!servers.count(listeners.at(*port_it)))
-				servers.insert(std::make_pair< Socket *, std::vector< Server * > >(listeners.at(*port_it),
-																				   std::vector< Server * >()));
-			servers.at(listeners.at(*port_it)).push_back(new Server(logger, *it));
+			int fd = listeners.at(*port_it)->get_fd();
+			servers[fd].push_back(new Server(logger, *it, fd));
 		}
 	}
 }
 
 Router::~Router()
 {
-	for (std::map< Socket *, std::vector< Server * > >::iterator it = servers.begin(); it != servers.end(); it++)
+	for (std::map< int, std::vector< Server * > >::iterator it = servers.begin(); it != servers.end(); it++)
 	{
 		for (std::vector< Server * >::iterator serv_it = (*it).second.begin(); serv_it != (*it).second.end(); serv_it++)
 			delete *serv_it;
@@ -70,7 +68,7 @@ void Router::poll(void)
 			continue;
 		}
 		logger.log("here", FATAL);
-		if (!process(cur.second, cur.first))
+		if (cur.second->process(cur.first.revents))
 		{
 			sockets.erase_query(i);
 			logger.log("closed connection", DEBUG);
@@ -79,78 +77,78 @@ void Router::poll(void)
 	}
 }
 
-Server *Router::find_server_bound_to_socket_by_name(std::string const &name, Socket *from_socket)
-{
-	if (!from_socket)
-		return NULL;
-	if (!servers.count(from_socket))
-		return NULL;
+// Server *Router::find_server_bound_to_socket_by_name(std::string const &name, Socket *from_socket)
+// {
+// 	if (!from_socket)
+// 		return NULL;
+// 	if (!servers.count(from_socket))
+// 		return NULL;
 
-	std::vector< Server * > socket_servers = servers.at(from_socket);
-	if (name.empty())
-		return socket_servers.front();
-	for (std::vector< Server * >::iterator it = socket_servers.begin(); it != socket_servers.end(); it++)
-	{
-		if ((*it)->get_config().name == name)
-			return *it;
-	}
-	return socket_servers.front();
-}
+// 	std::vector< Server * > socket_servers = servers.at(from_socket);
+// 	if (name.empty())
+// 		return socket_servers.front();
+// 	for (std::vector< Server * >::iterator it = socket_servers.begin(); it != socket_servers.end(); it++)
+// 	{
+// 		if ((*it)->get_config().name == name)
+// 			return *it;
+// 	}
+// 	return socket_servers.front();
+// }
 
-Socket *Router::get_socket_by_fd(int const fd) const
-{
-	for (std::map< int, Socket * >::const_iterator it = listeners.begin(); it != listeners.end(); it++)
-	{
-		if ((*it).second->get_fd() == fd)
-			return (*it).second;
-	}
-	return NULL;
-}
+// Socket *Router::get_socket_by_fd(int const fd) const
+// {
+// 	for (std::map< int, Socket * >::const_iterator it = listeners.begin(); it != listeners.end(); it++)
+// 	{
+// 		if ((*it).second->get_fd() == fd)
+// 			return (*it).second;
+// 	}
+// 	return NULL;
+// }
 
-Server *Router::find_responding_server(Query *query)
-{
+// Server *Router::find_responding_server(Query *query)
+// {
 
-	std::string host = query->get_request()->get_headers().count("Host") ? query->get_request()->get_headers().at("Host") : "";
-	Socket *from_socket = get_socket_by_fd(query->get_socket());
-	return find_server_bound_to_socket_by_name(host, from_socket);
-}
+// 	std::string host = query->get_request()->get_headers().count("Host") ? query->get_request()->get_headers().at("Host") : "";
+// 	Socket *from_socket = get_socket_by_fd(query->get_socket());
+// 	return find_server_bound_to_socket_by_name(host, from_socket);
+// }
 
-bool Router::process(Query *query, pollfd &p)	 // false -- delete
-{
-	static Server *respond_from = 0;
-	if (p.revents & POLLHUP || p.revents & POLLERR)
-		return false;
-	if (p.revents & POLLIN && !query->is_forming())
-	{
-		logger.log("collecting", INFO);
-		query->recieve();
-		if (!respond_from)
-		{
-			logger.log("looking for server", INFO);
-			respond_from = find_responding_server(query);
-		}
-		std::clog << respond_from << "\n";
-		return true;
-	}
-	if (respond_from)
-	{
-		logger.log("forming", INFO);
-		query->form(respond_from->get_config());
-	}
-	if (p.revents & POLLOUT && query->is_ready())
-	{
-		logger.log("responding", INFO);
-		query->send();
-		// respond(query);
-		if (query->is_done())
-		{
-			respond_from = 0;
-			return false;
-		}
-		return true;
-	}
-	return false;
-}
+// bool Router::process(Query *query, pollfd &p)	 // false -- delete
+// {
+// 	static Server *respond_from = 0;
+// 	if (p.revents & POLLHUP || p.revents & POLLERR)
+// 		return false;
+// 	if (p.revents & POLLIN && !query->is_forming())
+// 	{
+// 		logger.log("collecting", INFO);
+// 		query->recieve();
+// 		if (!respond_from)
+// 		{
+// 			logger.log("looking for server", INFO);
+// 			respond_from = find_responding_server(query);
+// 		}
+// 		std::clog << respond_from << "\n";
+// 		return true;
+// 	}
+// 	if (respond_from)
+// 	{
+// 		logger.log("forming", INFO);
+// 		query->form(respond_from->get_config());
+// 	}
+// 	if (p.revents & POLLOUT && query->is_ready())
+// 	{
+// 		logger.log("responding", INFO);
+// 		query->send();
+// 		// respond(query);
+// 		if (query->is_done())
+// 		{
+// 			respond_from = 0;
+// 			return false;
+// 		}
+// 		return true;
+// 	}
+// 	return false;
+// }
 
 void Router::serve(void)
 {
