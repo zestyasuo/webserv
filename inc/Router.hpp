@@ -28,12 +28,11 @@ class Router
 	Router(void);
 	Router &operator=(Router const &rhs);
 	void	poll(void);
-	ssize_t collect(Query *);
-	void	respond(Query *);
 	bool	process(Query *, pollfd &);
 	// utils
 	Socket *get_socket_by_fd(int const) const;
 	Server *find_server_bound_to_socket_by_name(std::string const &, Socket *);
+	Server *find_responding_server(Query *query);
 
   public:
 	void serve(void);

@@ -24,10 +24,13 @@ AHTTPMessage::AHTTPMessage()
 
 AHTTPMessage::AHTTPMessage(std::string const &raw) : version("undefined"), headers(), raw_data(raw)
 {
-	std::string raw_meta_data = get_meta_data_array(raw);
-	meta_data = split(raw_meta_data, LB);
+}
 
-	body = parse_body(raw);
+std::vector< std::string > AHTTPMessage::parse_meta_data(std::string const &raw)
+{
+	std::string raw_meta_data = get_meta_data_array(raw);
+	std::vector <std::string> meta = split(raw_meta_data, LB);
+	return meta;
 }
 
 std::string AHTTPMessage::parse_body(std::string const &raw) const
@@ -36,8 +39,8 @@ std::string AHTTPMessage::parse_body(std::string const &raw) const
 	if (body_pos == std::string::npos)
 		return "";
 	std::string res = raw.substr(body_pos + 4);
-	if (res.length() > 1000000)
-		return "";
+	// if (max_len != 0 && size_t(res.length()) > max_len)
+	// 	return "";
 	return (res);
 }
 

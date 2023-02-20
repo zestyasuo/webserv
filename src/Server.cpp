@@ -19,7 +19,7 @@ t_conf const &Server::get_config(void) const
 
 bool Server::respond(Query *query)
 {
-	query->form_response(config);
+	query->form(config);
 	query->send();
 	logger.log("message sent from " + config.name, INFO);
 	return true;

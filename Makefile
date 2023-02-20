@@ -15,7 +15,7 @@ SIEGE_ARGS	=	http://localhost:8080 -b \
 				--concurrent=50
 
 CC			=	c++
-CFLAGS		=	-Wall -Wextra -Werror -std=c++98 -g #-fsanitize=$(SAN_FLAGS)
+CFLAGS		=	-Wall -Wextra -Werror -std=c++98 -g -fsanitize=$(SAN_FLAGS)
 SRC_PATH	=	src
 OBJ_PATH	=	obj
 INC_PATH	=	inc

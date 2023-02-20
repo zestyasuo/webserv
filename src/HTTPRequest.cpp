@@ -7,13 +7,30 @@ HTTPRequest::HTTPRequest() : valid(), content_length(-1)
 {
 }
 
-HTTPRequest::HTTPRequest(std::string const &raw) : AHTTPMessage(raw), valid(true), target(""), method(""), content_length(-1)
+HTTPRequest::HTTPRequest(std::string const &raw)
+	: AHTTPMessage(raw), valid(false), target(""), method(""), content_length(-1)
 {
-	std::vector< std::string > meta_data = get_meta_data();
+}
+
+void HTTPRequest::append_raw_data(char const *buf, size_t len)
+{
+	raw_data.append(buf, len);
+}
+
+void HTTPRequest::set_meta_data(std::string const &str)
+{
+	std::clog << "HERE : \n " <<  str << '\n';
+	meta_data = parse_meta_data(str);
+}
+
+void HTTPRequest::form()
+{
+	std::vector< std::string > meta_data = this->parse_meta_data(get_raw_data());
 	if (meta_data.empty())
 		return;
 	std::string				   status_line = meta_data[0];
 	std::vector< std::string > status_line_vec = split_if(status_line, ::isspace);
+	body = parse_body(get_raw_data());
 
 	if (status_line_vec.size() != 3)
 		return;
@@ -28,11 +45,15 @@ HTTPRequest::HTTPRequest(std::string const &raw) : AHTTPMessage(raw), valid(true
 
 void HTTPRequest::validate(void)
 {
+	if (raw_data.empty() || meta_data.empty())
+		return;
 	if (content_length > 0 && size_t(content_length) != body.length())
-		valid = false;
+		return;
+	valid = true;
 }
 
-HTTPRequest::HTTPRequest(HTTPRequest const &rhs) : AHTTPMessage(rhs), valid(), target(rhs.target), method(rhs.method), content_length(rhs.content_length)
+HTTPRequest::HTTPRequest(HTTPRequest const &rhs)
+	: AHTTPMessage(rhs), valid(), target(rhs.target), method(rhs.method), content_length(rhs.content_length)
 {
 	version = rhs.version;
 	body = rhs.body;
@@ -53,7 +74,8 @@ std::ostream &operator<<(std::ostream &os, HTTPRequest const &rhs)
 	   << "Version ---" << rhs.get_version()
 	   << "\n"
 		  "\nHeaders ---\n";
-	for (std::map< std::string, std::string >::const_iterator it = rhs.get_headers().begin(); it != rhs.get_headers().end(); it++)
+	for (std::map< std::string, std::string >::const_iterator it = rhs.get_headers().begin();
+		 it != rhs.get_headers().end(); it++)
 	{
 		os << (*it).first << "---" << (*it).second << "\n";
 	}

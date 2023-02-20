@@ -51,7 +51,7 @@ Router::~Router()
 		delete (*it).second;
 
 	// for (std::vector< Query * >::iterator it = queries.begin(); it != queries.end(); it++)
-		// delete *it;
+	// delete *it;
 }
 
 void Router::poll(void)
@@ -62,7 +62,7 @@ void Router::poll(void)
 	for (size_t i = 0; i < sockets.queries_size();)
 	{
 		logger.log(SSTR(i), ERROR);
-		std::pair<pollfd, Query *> cur = sockets.get_query(i);
+		std::pair< pollfd, Query * > cur = sockets.get_query(i);
 		logger.log(SSTR(cur.first.fd) + " == " + SSTR(cur.second->get_fd()), INFO);
 		if (cur.first.revents == 0)
 		{
@@ -77,26 +77,6 @@ void Router::poll(void)
 		}
 		i++;
 	}
-}
-
-ssize_t Router::collect(Query *from)
-{
-	ssize_t status = from->recieve();
-	// if (from->is_ready())
-	// 	from->form_request();
-	return status;
-}
-
-void Router::respond(Query *to)
-{
-	to->form_request();
-	std::string host = to->get_request()->get_headers().count("Host") ? to->get_request()->get_headers().at("Host")
-																	  : "";
-	Socket	   *from_socket = get_socket_by_fd(to->get_socket());
-	if (!from_socket)
-		logger.log("oi oi oi ", FATAL);
-	Server	   *respond_from = find_server_bound_to_socket_by_name(host, from_socket);
-	respond_from->respond(to);
 }
 
 Server *Router::find_server_bound_to_socket_by_name(std::string const &name, Socket *from_socket)
@@ -127,24 +107,49 @@ Socket *Router::get_socket_by_fd(int const fd) const
 	return NULL;
 }
 
-bool Router::process(Query *query, pollfd &p) // false -- delete
+Server *Router::find_responding_server(Query *query)
 {
-	logger.log("process", INFO);
+
+	std::string host = query->get_request()->get_headers().count("Host") ? query->get_request()->get_headers().at("Host") : "";
+	Socket *from_socket = get_socket_by_fd(query->get_socket());
+	return find_server_bound_to_socket_by_name(host, from_socket);
+}
+
+bool Router::process(Query *query, pollfd &p)	 // false -- delete
+{
+	static Server *respond_from = 0;
 	if (p.revents & POLLHUP || p.revents & POLLERR)
 		return false;
-	if (p.revents & POLLIN && !query->is_ready())
+	if (p.revents & POLLIN && !query->is_forming())
 	{
 		logger.log("collecting", INFO);
-		collect(query);
+		query->recieve();
+		if (!respond_from)
+		{
+			logger.log("looking for server", INFO);
+			respond_from = find_responding_server(query);
+		}
+		std::clog << respond_from << "\n";
 		return true;
+	}
+	if (respond_from)
+	{
+		logger.log("forming", INFO);
+		query->form(respond_from->get_config());
 	}
 	if (p.revents & POLLOUT && query->is_ready())
 	{
 		logger.log("responding", INFO);
-		respond(query);
-		return false;
+		query->send();
+		// respond(query);
+		if (query->is_done())
+		{
+			respond_from = 0;
+			return false;
+		}
+		return true;
 	}
-	return true;
+	return false;
 }
 
 void Router::serve(void)
