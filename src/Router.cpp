@@ -119,10 +119,12 @@ Server *Router::find_server_bound_to_socket_by_name(std::string const &name, Soc
 
 Socket *Router::get_socket_by_fd(int const fd) const
 {
-	std::map<int, Socket *>::const_iterator f = listeners.find(fd);
-	if (listeners.end() == f)
-		return NULL;
-	return f->second;
+	for (std::map< int, Socket * >::const_iterator it = listeners.begin(); it != listeners.end(); it++)
+	{
+		if ((*it).second->get_fd() == fd)
+			return (*it).second;
+	}
+	return NULL;
 }
 
 bool Router::process(Query *query, pollfd &p) // false -- delete
