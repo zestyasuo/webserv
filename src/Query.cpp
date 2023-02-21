@@ -14,96 +14,105 @@
 #include <sys/types.h>
 #include <vector>
 
-Query::Query() : fd(), response(0), request(0), ready()
+Query::Query(int f, int s, std::vector< Server * > &servers)
+	: state(headers), fd(f), socket(s), pending_bytes(0), servers(servers), response(0), request(new HTTPRequest()), content_length(-1)
 {
 }
 
-Query::Query(int f, int s)
-	: fd(f), socket(s), raw_data(""), response(0), request(0), ready(false)
-{
-}
+// bool Query::is_ready(void) const
+// {
+// 	return state == sending;
+// }
 
-ssize_t Query::recv(void)
-{
-	char	  buf[BUFF_SIZE] = {0};
-	size_t	  recieved_bytes = 0;
-	ssize_t	  i = 0;
-	const int bytes_to_recieve = sizeof(buf) - 1;
+// bool Query::is_forming(void) const
+// {
+// 	return state == forming;
+// }
 
-	while (recieved_bytes != bytes_to_recieve)
-	{
-		i = ::recv(fd, buf + recieved_bytes, bytes_to_recieve - recieved_bytes, 0);
-		if (i <= 0)
-		{
-			ready = true;
-			break;
-		}
-		recieved_bytes += i;
-	}
-	raw_data.append(buf, recieved_bytes);
-	return recieved_bytes;
-}
-
-ssize_t	Query::recieve()
-{
-	// static int flag = 0;
-	// if (!flag)
-	// {
-	// 	HTTPRequest tmp(recieve_headers());
-	// 	content_length = tmp.get_content_length();
-	// 	flag++;
-	// }
-
-	return recv();
-}
-
-std::string	Query::recieve_headers(void)
-{
-	while (raw_data.find(LB LB) == std::string::npos)
-	{
-		recv();
-		if (ready)
-			break;
-	}
-	return (raw_data.substr(0, raw_data.find(LB LB) + 4));
-}
-
-bool Query::is_ready(void) const
-{
-	return ready;
-}
+// bool Query::is_done(void) const
+// {
+// 	return state == done;
+// }
 
 int Query::get_socket(void) const
 {
 	return socket;
 }
 
-int		Query::get_fd(void) const
+int Query::get_fd(void) const
 {
 	return fd;
 }
 
-size_t Query::send() const
+void Query::recv(void)
 {
-	size_t	i = 0;
-	size_t buf_size = BUFF_SIZE;
-	std::string resp = response->to_string();
-	const char *buf = resp.c_str();
-	size_t to_send = response->to_string().size();
-	while (i < to_send)
+	char	  buf[BUFF_SIZE] = {0};
+	ssize_t	  rbytes = 0;
+
+	if (state == headers)
 	{
-		const ssize_t l = ::send(fd, buf + i, std::min(buf_size, to_send - i), MSG_NOSIGNAL);
-		// std::clog << std::min(buf_size, to_send - i) << "  left\n";
-		if (l < 0)
-			throw Webserv_exception("send failed", ERROR);
-		i += l;
+		while (request->get_raw_data().find(LB LB) == std::string::npos)
+		{
+			rbytes = ::recv(fd, buf, BUFF_SIZE, MSG_NOSIGNAL);
+			if (rbytes <= 0)
+				return;
+			request->append_raw_data(buf, rbytes);
+		}
+
+		const std::string &head = request->get_raw_data().substr(0, request->get_raw_data().find(LB LB) + 4);
+		request->set_meta_data(head);
+		request->parse_headers(request->get_meta_data());
+		std::string host = request->get_headers().count("Host") ? request->get_headers().at("Host") : "";
+		config = (*servers.begin())->get_config();
+		for (std::vector< Server * >::iterator it = servers.begin(); it != servers.end(); it++)
+		{
+			if ((*it)->get_config().name == host)
+			{
+				config = (*it)->get_config();
+				break;
+			}
+		}
+		ssize_t body_len = request->get_content_length();
+		if (body_len > 0)
+		{
+			pending_bytes = (size_t)body_len;
+			state = body;
+		} else {
+			state = forming;
+		}
 	}
-	return i;
+	if (state == body)
+	{
+		while (pending_bytes > 0)
+		{
+			rbytes = ::recv(fd, buf, std::min((size_t)BUFF_SIZE, pending_bytes), MSG_NOSIGNAL);
+			if (rbytes <= 0)
+				return;
+			request->append_raw_data(buf, rbytes);
+			pending_bytes -= rbytes;
+		}
+		state = forming;
+	}
+}
+
+void Query::send()
+{
+	ssize_t	sbytes = 0;
+	ssize_t	len = response->to_string().length();
+
+	while (pending_bytes > 0)
+	{
+		sbytes = ::send(fd, response->to_string().c_str() + len - pending_bytes, pending_bytes, MSG_NOSIGNAL);
+		if (sbytes <= 0)
+			return;
+		pending_bytes -= sbytes;
+	}
+	state = done;
 }
 
 Query::Query(Query const &copy)
-	: fd(copy.fd), raw_data(copy.raw_data), response(copy.response), request(copy.request),
-	  ready(copy.ready), content_length(copy.content_length)
+	: state(copy.state), fd(copy.fd), socket(copy.socket), servers(copy.servers), response(copy.response), request(copy.request),
+	  content_length(copy.content_length)
 {
 }
 
@@ -124,16 +133,27 @@ HTTPResponse const *Query::get_response(void) const
 	return (response);
 }
 
-void Query::form_response(t_conf const &config)
+void Query::form(const t_conf &config)
 {
-	if (request && !response)
-		response = new HTTPResponse(request, config);
+	request->form();
+	response = new HTTPResponse(request, config);
+	pending_bytes = response->to_string().length();
+	state = sending;
 }
 
-void Query::form_request(void)
+bool Query::process(int revents)
 {
-	// if (!raw_data.empty() && !request)
-	// std::clog << raw_data << "\n";
-	if (!request)
-		request = new HTTPRequest(raw_data);
+	if (revents & (POLLIN | POLLERR))
+		return true;
+
+	if ((state == headers || state == body) && (revents & POLLIN))
+		recv();
+	else if (state == forming)
+		form(config);
+	else if (state == sending && (revents & POLLOUT))
+		send();
+	
+	if (state == done)
+		return true;
+	return false;
 }

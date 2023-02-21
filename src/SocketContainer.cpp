@@ -7,7 +7,7 @@
 #include <utility>
 #include <vector>
 
-SocketContainer::SocketContainer() : queries(), fds(), all_sockets(false), socket_count(0)
+SocketContainer::SocketContainer(std::map<int, std::vector< Server * > > &servers) : queries(), fds(), all_sockets(false), socket_count(0), servers(servers)
 {}
 
 SocketContainer::~SocketContainer ()
@@ -23,7 +23,7 @@ void SocketContainer::push_query(int fd, int socket)
 	tmp.fd = fd;
 	tmp.events = POLLIN | POLLOUT;
 	tmp.revents = 0;
-	queries.push_back(new Query(fd, socket));
+	queries.push_back(new Query(fd, socket, servers[socket]));
 	fds.push_back(tmp);
 }
 
@@ -74,7 +74,7 @@ void	SocketContainer::accept()
 			if (fd < 0)
 				throw Webserv_exception("accept failed", ERROR);
 			unblock_fd(fd);
-			push_query(fd, fds.data()[i].fd);
+			push_query(fds.data()[i].fd, fd);
 		}
 	}
 }

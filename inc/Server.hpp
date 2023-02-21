@@ -20,21 +20,25 @@
 #include "html.hpp"
 #define SSTR(x) static_cast< std::ostringstream & >((std::ostringstream() << std::dec << x)).str()
 
+class Query;
+
 class Server
 {
   private:
 	Logger const logger;
 	bool		 active;
 	t_conf		 config;
+	int			 fd;
 	Server(Server const &);
 
   public:
 	bool respond(Query *query);
 	Server(void);
-	Server(Logger const &, t_conf const &);
+	Server(Logger const &, t_conf const &, int);
 	~Server(void);
 	Server		 &operator=(Server const &rhs);
 	t_conf const &get_config(void) const;
+	int			 get_fd(void) const;
 	class TooManyConnectionsException : public Webserv_exception
 	{
 	};
