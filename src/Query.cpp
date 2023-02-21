@@ -143,7 +143,7 @@ void Query::form(const t_conf &config)
 
 bool Query::process(int revents)
 {
-	if (revents & (POLLIN | POLLERR))
+	if (revents & (POLLHUP | POLLERR))
 		return true;
 
 	if ((state == headers || state == body) && (revents & POLLIN))

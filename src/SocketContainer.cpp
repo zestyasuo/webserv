@@ -22,7 +22,7 @@ void SocketContainer::push_query(int socket, int fd)
 	pollfd tmp = {};
 	tmp.fd = fd;
 	tmp.events = POLLIN | POLLOUT;
-	tmp.revents = POLLIN;
+	tmp.revents = 0;
 	queries.push_back(new Query(fd, socket, servers[socket]));
 	fds.push_back(tmp);
 }
